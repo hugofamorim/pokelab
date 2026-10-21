@@ -10,12 +10,18 @@ See [`docs/M0_VALIDATION.md`](docs/M0_VALIDATION.md) for the recorded acceptance
 M1 is in progress. PL-001 (`feat/pl-001-paginated-catalog`) implements the bounded
 reference-list API, shared contracts, persistent page cache, and offline tests.
 See [`docs/PL-001_VALIDATION.md`](docs/PL-001_VALIDATION.md) for checks and review status.
+PL-001 was merged into `main` in [PR #2](https://github.com/hugofamorim/pokelab/pull/2).
 PL-002 (`feat/pl-002-card-summaries`) adds bounded summary batches with real types/artwork,
-per-item availability/freshness and shared detail caching. It is stacked on the still-open
-PL-001 branch; no merge is performed automatically. See
+per-item availability/freshness and shared detail caching. [PR #3](https://github.com/hugofamorim/pokelab/pull/3)
+was merged into the PL-001 branch afterward; [PR #4](https://github.com/hugofamorim/pokelab/pull/4)
+integrates the same validated PL-002 commits into `main`. See
 [`docs/PL-002_VALIDATION.md`](docs/PL-002_VALIDATION.md) for checks and review status.
-M1 as a whole is not complete: browsing UI, search, filters and detail enrichment remain.
-Next issue: PL-003, paginated browsing UI using references and summary batches.
+PL-003 (`feat/pl-003-catalog-ui`) adds the responsive `/pokedex` UI with URL pagination,
+progressive summary batches, failure/retry/empty/stale states and page-preserving detail
+navigation. It is based on PL-002 while integration PR #4 is pending. See
+[`docs/PL-003_VALIDATION.md`](docs/PL-003_VALIDATION.md).
+M1 as a whole is not complete: search, filters and detail enrichment remain.
+Next issue: PL-004, name/ID search with explicit matching semantics and URL state.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)

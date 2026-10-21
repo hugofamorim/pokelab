@@ -7,8 +7,13 @@ import { AppModule } from '../dist/app.module.js';
 import { CONFIG } from '../dist/config.js';
 import { RESOURCE_CACHE } from '../dist/cache.js';
 import { PokeApiAdapter } from '../dist/pokeapi-adapter.js';
-import { ApiErrorFilter } from '../dist/errors.js';
+import { ApiErrorFilter, CatalogError } from '../dist/errors.js';
+import { pokemonSchema, pokemonPageSchema } from '@pokelab/contracts';
 const fixture = require('./fixtures/pikachu.json');
+// Captured normalized facts; the thirteen-entry test catalog is intentionally small.
+const catalog = require('./fixtures/catalog-details.json').map((item) =>
+  pokemonSchema.parse(item),
+);
 async function start() {
   const entries = new Map();
   const adapter = new PokeApiAdapter(
@@ -28,6 +33,43 @@ async function start() {
     },
     async () => {},
   );
+  const getDetail = adapter.get.bind(adapter);
+  adapter.get = async (identifier) =>
+    catalog.find((item) => String(item.id) === identifier) ??
+    getDetail(identifier);
+  const references = [
+    ...catalog.map(({ id, name }) => ({ id, name })),
+    { id: 25, name: 'pikachu' },
+  ];
+  adapter.list = async ({ page, pageSize }) => {
+    if (page === 999 || page === 998)
+      throw new CatalogError(
+        503,
+        'UPSTREAM_UNAVAILABLE',
+        'Fonte indisponível.',
+      );
+    if (page === 997) await new Promise((resolve) => setTimeout(resolve, 1200));
+    const offset = (page - 1) * pageSize;
+    const items = references.slice(offset, offset + pageSize);
+    return pokemonPageSchema.parse({
+      items,
+      page,
+      pageSize,
+      total: references.length,
+      hasNext: offset + items.length < references.length,
+    });
+  };
+  entries.set('pokeapi-v2:normalized-v1:pokemon-page/998/12', {
+    payload: pokemonPageSchema.parse({
+      items: references.slice(0, 12),
+      page: 998,
+      pageSize: 12,
+      total: 11976,
+      hasNext: false,
+    }),
+    fetchedAt: new Date('2026-10-20T12:00:00Z'),
+    expiresAt: new Date(0),
+  });
   const module = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(CONFIG)
     .useValue({

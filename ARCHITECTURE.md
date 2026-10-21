@@ -31,6 +31,17 @@ NestJS catalog adapter -> PokéAPI v2 (read-only upstream). No API key needed. E
 
 ## Cache Components/Next.js
 
+PL-003 adds `/pokedex?page=…` with a fixed 12-entry page size. References are fetched
+server-side inside Suspense; the client immediately renders their real names/IDs, then
+loads summaries in sequential groups of four through the same-origin Next.js
+`/api/catalog/summaries` gateway. Only server modules read `API_URL` or call NestJS;
+the browser never calls PokéAPI or PostgreSQL. Both gateway and browser validate batch
+identity/order against the requested IDs. Requests are uncached at the web layer; NestJS
+owns public data freshness. Navigation cancels browser work, retry targets failed IDs,
+and summary/detail/pagination links disable speculative prefetch. Existing in-flight
+NestJS work may finish after a browser cancellation, under the existing admission bounds.
+`fromPage` on detail links is validated and converted to a constructed internal return URL.
+
 - Avoid runtime `fetch()` calls outside Suspense when `cacheComponents` is on. Separate cached public data from request-scoped private data. Use framework caching deliberately; do not mix private session data in shared cache.
 - Do not add route segment `dynamic = 'force-dynamic'` while Cache Components is enabled. Run `next build` in CI to catch prerender errors.
 
