@@ -1,7 +1,7 @@
 # M0 validation
 
-M0 is in validation. Do not treat this implementation as a completed milestone until
-the local checks, real-data smoke test, browser checks and remote PR checks pass.
+M0 acceptance is verified locally and in Linux CI. The implementation is committed
+and published in PR #1, which remains open for human review.
 
 ## Environment
 
@@ -37,7 +37,7 @@ were preserved.
 - Production browser with real artwork: four screenshots, no JavaScript page errors.
   Desktop/mobile images inspected visually; body/caption readability improved and
   build/browser acceptance repeated successfully afterward.
-- Remote CI source of truth: [PR #1 checks](https://github.com/hugofamorim/pokelab/pull/1/checks). The latest head must pass before M0 acceptance.
+- Linux CI passed for implementation commit `b40e3ee`: [run #4](https://github.com/hugofamorim/pokelab/actions/runs/39660190493). All static checks, 39 tests, build and six browser checks passed; E2E took 7.9 seconds. [PR #1 checks](https://github.com/hugofamorim/pokelab/pull/1/checks) track subsequent commits.
 
 ## Reproduction and artifacts
 
