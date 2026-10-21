@@ -6,10 +6,12 @@ export function PokemonArtwork({
   src,
   name,
   priority = false,
+  sizes = '(max-width: 640px) 75vw, (max-width: 1023px) 45vw, 400px',
 }: {
   src: string | null;
   name: string;
   priority?: boolean;
+  sizes?: string;
 }) {
   const [failed, setFailed] = useState(false);
   return (
@@ -19,7 +21,7 @@ export function PokemonArtwork({
           src={src}
           alt={`Ilustração de ${name}`}
           fill
-          sizes="(max-width: 640px) 75vw, (max-width: 1023px) 45vw, 400px"
+          sizes={sizes}
           priority={priority}
           onError={() => setFailed(true)}
         />

@@ -22,7 +22,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="nav-label">SEU LABORATÓRIO</div>
         <nav aria-label="Navegação principal">
           <Link
-            href="/pokemon/25"
+            href="/pokedex"
+            prefetch={false}
             className="nav-item active"
             aria-current="page"
           >
@@ -53,7 +54,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span className="small-label">FEITO PARA EXPLORAR</span>
         </div>
         <div className="sidebar-footer">
-          <span className="status-dot" /> Fundação · M0
+          <span className="status-dot" /> Explore · Descubra · Conheça
         </div>
       </aside>
       <div className="workspace">
@@ -98,7 +99,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </footer>
       </div>
       <nav className="mobile-nav" aria-label="Navegação móvel">
-        <Link href="/pokemon/25" aria-current="page">
+        <Link href="/pokedex" prefetch={false} aria-current="page">
           <BookOpen size={20} />
           Explorar
         </Link>

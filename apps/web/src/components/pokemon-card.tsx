@@ -3,9 +3,23 @@ import type { PokemonSummary } from '@pokelab/contracts';
 import { ArrowUpRight } from 'lucide-react';
 import { PokemonArtwork } from './pokemon-artwork';
 import { TypeBadge } from './type-badge';
-export function PokemonCard({ pokemon }: { pokemon: PokemonSummary }) {
+import type { CSSProperties } from 'react';
+import { POKEMON_TYPE_TOKENS } from '../lib/type-tokens';
+export function PokemonCard({
+  pokemon,
+  fromPage,
+}: {
+  pokemon: PokemonSummary;
+  fromPage?: number;
+}) {
+  const accent = POKEMON_TYPE_TOKENS[pokemon.types[0] ?? 'normal'];
   return (
-    <Link className="pokemon-card" href={`/pokemon/${pokemon.id}`}>
+    <Link
+      className="pokemon-card"
+      style={{ '--type-soft': accent.soft } as CSSProperties}
+      href={`/pokemon/${pokemon.id}${fromPage ? `?fromPage=${fromPage}` : ''}`}
+      prefetch={false}
+    >
       <div>
         <span className="eyebrow">
           Nº {String(pokemon.id).padStart(4, '0')}
@@ -17,7 +31,11 @@ export function PokemonCard({ pokemon }: { pokemon: PokemonSummary }) {
           ))}
         </div>
       </div>
-      <PokemonArtwork src={pokemon.artwork} name={pokemon.name} />
+      <PokemonArtwork
+        src={pokemon.artwork}
+        name={pokemon.name}
+        sizes="(max-width: 639px) 38vw, 180px"
+      />
       <ArrowUpRight aria-hidden="true" />
     </Link>
   );
