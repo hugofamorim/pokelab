@@ -7,7 +7,7 @@ export async function getPokemon(identifier: string): Promise<PokemonResult> {
   const id = identifierSchema.safeParse(identifier);
   if (!id.success) return { kind: 'invalid' };
   try {
-    const api = z.url().parse(process.env.API_URL ?? 'http://localhost:3001');
+    const api = z.url().parse(process.env.API_URL ?? 'http://127.0.0.1:3001');
     const response = await fetch(new URL(`/v1/pokemon/${id.data}`, api), {
       cache: 'no-store',
       signal: AbortSignal.timeout(15000),

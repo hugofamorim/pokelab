@@ -10,7 +10,7 @@ Requirements: Node **24.20.0**, pnpm **12.6.0**, Docker with Compose. Exact depe
 pnpm install --frozen-lockfile
 docker compose up -d --wait
 # Copy .env.example to apps/api/.env.
-# Create apps/web/.env.local with API_URL=http://localhost:3001.
+# Create apps/web/.env.local with API_URL=http://127.0.0.1:3001.
 pnpm db:generate
 pnpm db:migrate
 pnpm build

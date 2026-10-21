@@ -37,7 +37,7 @@ were preserved.
 - Production browser with real artwork: four screenshots, no JavaScript page errors.
   Desktop/mobile images inspected visually; body/caption readability improved and
   build/browser acceptance repeated successfully afterward.
-- Remote PR and CI: pending publication and observed remote checks.
+- Remote CI source of truth: [PR #1 checks](https://github.com/hugofamorim/pokelab/pull/1/checks). The latest head must pass before M0 acceptance.
 
 ## Reproduction and artifacts
 
@@ -58,4 +58,4 @@ Ignored screenshots: `artifacts/detail-{375,768,1280,1600}.png` (offline states)
   legal clearance of third-party artwork is implied by local checks.
 - Jest's ESM VM mode prints Node's experimental-feature warning; checks remain enabled.
 
-This file is updated with observed final command results during delivery.
+The first remote run stalled in browser checks and was stopped. The browser harness now uses explicit IPv4 loopback, direct Next startup, per-test reporting and a three-minute global timeout; all six local browser tests passed again. Remote results are tracked on the PR.

@@ -4,7 +4,7 @@ Never claim a milestone done until acceptance tests pass, reviewable changes are
 
 ## Current execution
 
-M0 / PL-000 is implemented on `feat/pl-000-foundation` and undergoing validation.
+M0 / PL-000 is implemented on `feat/pl-000-foundation`, with local acceptance verified. Review: [PR #1](https://github.com/hugofamorim/pokelab/pull/1); [latest CI checks](https://github.com/hugofamorim/pokelab/pull/1/checks) are the remote acceptance gate.
 The first run was interrupted by a machine shutdown. See
 [`docs/M0_VALIDATION.md`](docs/M0_VALIDATION.md) for observed checks and pending gates.
 M1–M5 have not started. Next issue after M0: PL-001, bounded paginated catalog API.
