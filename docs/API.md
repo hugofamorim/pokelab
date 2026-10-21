@@ -1,7 +1,57 @@
-# Public API — M0
+# Public API — M0 and PL-001
 
 Development origin: `http://localhost:3001`. OpenAPI UI: `/docs`, JSON: `/docs-json`.
-Only `GET /v1/pokemon/:idOrName` is implemented. It is public and read-only.
+`GET /v1/pokemon` and `GET /v1/pokemon/:idOrName` are public and read-only.
+
+## Paginated entry references — PL-001
+
+`GET /v1/pokemon?page=1&pageSize=20` returns:
+
+```ts
+{
+  items: {
+    id: number;
+    name: string;
+  }
+  [];
+  page: number;
+  pageSize: number;
+  total: number;
+  hasNext: boolean;
+  meta: {
+    source: 'pokeapi-v2';
+    fetchedAt: string;
+    stale: boolean;
+  }
+}
+```
+
+- Defaults: page 1, page size 20. Bounds: page 1–1000, page size 1–50;
+  maximum offset 49,950. Only canonical positive integer query strings are accepted.
+- Unknown fields (including `search`, `type`, `generation`, `offset`, `limit`) and
+  repeated/array fields return 400 `INVALID_PAGINATION`. Search and filters remain
+  separate M1 tasks; they are never silently ignored.
+- One attempt calls the constructed `/api/v2/pokemon/?limit=…&offset=…` path.
+  Entry reference URLs must match the exact Pokémon resource origin/path and a
+  supported numeric ID. Reference, next and previous URLs are never followed.
+- Entries are Pokémon/form-specific references, not species. No artwork, types,
+  species or detail requests are invented or inferred for a list item. Card-summary
+  enrichment is the next issue, with its own request budget.
+- `total` comes from the validated upstream count, not a pinned Pokémon/species total.
+  `hasNext` is computed from offset, returned length and total. A page beyond the
+  total returns 200 with an empty `items` array and `hasNext: false`.
+- Responses require the expected number of entries for their count/page, with unique
+  IDs/names. A truncated, duplicate, oversized or otherwise inconsistent page yields
+  502 `INVALID_UPSTREAM`. A missing upstream listing is treated as 503 availability
+  failure, rather than a missing individual Pokémon.
+- Pages use the same persistent TTL and stale-if-error policy as details, in a
+  distinct `pokeapi-v2:normalized-v1:pokemon-page/{page}/{pageSize}` cache namespace.
+  Cache payloads are revalidated and must match the requested pagination.
+- Equivalent default/explicit queries share in-flight work. List and detail requests
+  share the same four-slot admission limit. A cache hit makes no upstream request;
+  an uncached page makes one attempt, plus at most one transient retry. No detail fan-out.
+
+## Individual Pokémon detail — M0
 
 The identifier is trimmed and lowercased: positive integer IDs up to six digits or
 lowercase hyphen-separated names, maximum 64 characters. Invalid paths and arbitrary

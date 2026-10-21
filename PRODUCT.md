@@ -1,6 +1,6 @@
 # PokéLab — Trainer Studio | Product Specification
 
-Status: product specification v1.0. M0 foundation implemented; M1–M5 planned. Validation and review status: ROADMAP.md. Language of product UI: Brazilian Portuguese default, English-ready. Repository: `hugofamorim/pokelab` (proposed).
+Status: product specification v1.0. M0 foundation implemented; M1 in progress (PL-001 paginated references API); M2–M5 planned. Validation and review status: ROADMAP.md. Language of product UI: Brazilian Portuguese default, English-ready. Repository: `hugofamorim/pokelab`.
 
 ## Vision
 

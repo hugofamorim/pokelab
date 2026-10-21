@@ -4,10 +4,14 @@ Never claim a milestone done until acceptance tests pass, reviewable changes are
 
 ## Current execution
 
-M0 / PL-000 is implemented on `feat/pl-000-foundation`, with acceptance verified locally and in Linux CI. Review: [PR #1](https://github.com/hugofamorim/pokelab/pull/1); [latest CI checks](https://github.com/hugofamorim/pokelab/pull/1/checks) are the remote acceptance gate.
-The first run was interrupted by a machine shutdown. See
-[`docs/M0_VALIDATION.md`](docs/M0_VALIDATION.md) for observed checks and pending gates.
-M1–M5 have not started. Next issue after M0: PL-001, bounded paginated catalog API.
+M0 / PL-000 passed local and Linux CI acceptance and was merged in [PR #1](https://github.com/hugofamorim/pokelab/pull/1).
+See [`docs/M0_VALIDATION.md`](docs/M0_VALIDATION.md) for the recorded acceptance evidence.
+
+M1 is in progress. PL-001 (`feat/pl-001-paginated-catalog`) implements the bounded
+reference-list API, shared contracts, persistent page cache, and offline tests.
+See [`docs/PL-001_VALIDATION.md`](docs/PL-001_VALIDATION.md) for checks and review status.
+M1 as a whole is not complete: card summaries, browsing UI, search and filters remain.
+Next issue: PL-002, bounded card-summary enrichment. M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)
 

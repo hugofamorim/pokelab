@@ -1,6 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { identifierSchema, pokemonSchema } from '@pokelab/contracts';
-import type { PokemonResponse } from '@pokelab/contracts';
+import type { z } from 'zod';
+import {
+  identifierSchema,
+  pokemonSchema,
+  pokemonListQuerySchema,
+  pokemonPageSchema,
+} from '@pokelab/contracts';
+import type {
+  PokemonResponse,
+  PokemonPageResponse,
+  SourceMetadata,
+} from '@pokelab/contracts';
 import { CONFIG } from './config.js';
 import type { Config } from './config.js';
 import { RESOURCE_CACHE } from './cache.js';
@@ -10,13 +20,18 @@ import { CatalogError } from './errors.js';
 
 @Injectable()
 export class CatalogService {
-  private readonly pending = new Map<string, Promise<PokemonResponse>>();
+  private readonly pendingDetails = new Map<string, Promise<PokemonResponse>>();
+  private readonly pendingPages = new Map<
+    string,
+    Promise<PokemonPageResponse>
+  >();
   private active = 0;
   constructor(
     @Inject(RESOURCE_CACHE) private readonly cache: ResourceCache,
     @Inject(PokeApiAdapter) private readonly adapter: PokeApiAdapter,
     @Inject(CONFIG) private readonly config: Config,
   ) {}
+
   async get(input: string): Promise<PokemonResponse> {
     const parsed = identifierSchema.safeParse(input);
     if (!parsed.success)
@@ -26,9 +41,42 @@ export class CatalogService {
         'Use um nome ou ID de Pokémon válido.',
       );
     const identifier = parsed.data;
-    const existing = this.pending.get(identifier);
+    const key = `pokeapi-v2:normalized-v1:pokemon/${identifier}`;
+    return this.admit(this.pendingDetails, key, () =>
+      this.load(key, pokemonSchema, () => this.adapter.get(identifier)),
+    );
+  }
+
+  async list(input: unknown): Promise<PokemonPageResponse> {
+    const parsed = pokemonListQuerySchema.safeParse(input);
+    if (!parsed.success)
+      throw new CatalogError(
+        400,
+        'INVALID_PAGINATION',
+        'Use page de 1 a 1000 e pageSize de 1 a 50. Outros filtros ainda não são suportados.',
+      );
+    const query = parsed.data;
+    const key = `pokeapi-v2:normalized-v1:pokemon-page/${query.page}/${query.pageSize}`;
+    return this.admit(this.pendingPages, key, async () => {
+      const schema = pokemonPageSchema.refine(
+        (value) =>
+          value.page === query.page && value.pageSize === query.pageSize,
+      );
+      const result = await this.load(key, schema, () =>
+        this.adapter.list(query),
+      );
+      return { ...result.data, meta: result.meta };
+    });
+  }
+
+  private admit<T>(
+    pending: Map<string, Promise<T>>,
+    key: string,
+    operation: () => Promise<T>,
+  ): Promise<T> {
+    const existing = pending.get(key);
     if (existing) return existing;
-    // Bound the entire request, including DB lookups; duplicate requests share work.
+    // One admission limit covers both list and detail requests, including cache reads.
     if (this.active >= 4)
       throw new CatalogError(
         503,
@@ -36,15 +84,19 @@ export class CatalogService {
         'Muitas consultas em andamento. Tente novamente em instantes.',
       );
     this.active++;
-    const task = this.load(identifier).finally(() => {
+    const task = operation().finally(() => {
       this.active--;
-      this.pending.delete(identifier);
+      pending.delete(key);
     });
-    this.pending.set(identifier, task);
+    pending.set(key, task);
     return task;
   }
-  private async load(identifier: string): Promise<PokemonResponse> {
-    const key = `pokeapi-v2:normalized-v1:pokemon/${identifier}`;
+
+  private async load<T>(
+    key: string,
+    schema: z.ZodType<T>,
+    fetchResource: () => Promise<T>,
+  ): Promise<{ data: T; meta: SourceMetadata }> {
     const cached = await this.cache.get(key).catch(() => {
       throw new CatalogError(
         503,
@@ -52,7 +104,7 @@ export class CatalogService {
         'O serviço de dados está temporariamente indisponível.',
       );
     });
-    const payload = pokemonSchema.safeParse(cached?.payload);
+    const payload = schema.safeParse(cached?.payload);
     if (cached && payload.success && cached.expiresAt.getTime() > Date.now())
       return {
         data: payload.data,
@@ -63,7 +115,7 @@ export class CatalogService {
         },
       };
     try {
-      const data = await this.adapter.get(identifier);
+      const data = await fetchResource();
       const fetchedAt = new Date();
       await this.cache.set(key, {
         payload: data,

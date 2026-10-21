@@ -1,12 +1,9 @@
 import { z } from 'zod';
 import { POKEMON_TYPES, STAT_NAMES } from '@pokelab/pokemon-domain';
+import { identifierSchema } from './identifiers.js';
+import { pokemonPageSchema } from './pagination.js';
+export { identifierSchema } from './identifiers.js';
 
-export const identifierSchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .max(64)
-  .regex(/^(?:[1-9]\d{0,5}|[a-z][a-z0-9]*(?:-[a-z0-9]+)*)$/);
 export const artworkSchema = z
   .url()
   .refine((value) => {
@@ -50,13 +47,21 @@ export const pokemonSchema = z.object({
     .array(z.object({ name: identifierSchema, hidden: z.boolean() }))
     .max(4),
 });
+export const sourceMetadataSchema = z.object({
+  source: z.literal('pokeapi-v2'),
+  fetchedAt: z.iso.datetime(),
+  stale: z.boolean(),
+});
+export type SourceMetadata = z.infer<typeof sourceMetadataSchema>;
 export const pokemonResponseSchema = z.object({
   data: pokemonSchema,
-  meta: z.object({
-    source: z.literal('pokeapi-v2'),
-    fetchedAt: z.iso.datetime(),
-    stale: z.boolean(),
-  }),
+  meta: sourceMetadataSchema,
 });
 export type Pokemon = z.infer<typeof pokemonSchema>;
 export type PokemonResponse = z.infer<typeof pokemonResponseSchema>;
+export const pokemonPageResponseSchema = pokemonPageSchema.safeExtend({
+  meta: sourceMetadataSchema,
+});
+export type PokemonPageResponse = z.infer<typeof pokemonPageResponseSchema>;
+
+export * from './pagination.js';
