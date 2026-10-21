@@ -59,6 +59,15 @@ NestJS catalog adapter -> PokéAPI v2 (read-only upstream). No API key needed. E
 
 ### Public catalog
 
+Implemented increments are documented in `docs/API.md`: PL-001 returns reference pages;
+PL-002 offers `/v1/pokemon/summaries?ids=…` for at most 12 explicit entry IDs. Summary
+DTOs are projected from the shared validated detail schema, preserving form/species identity.
+Two workers per batch reuse detail cache and in-flight work; at most two batches run per
+instance. Workers share the existing four admission slots with individual details/pages.
+There is no separate summary cache, eager list enrichment or new infrastructure. Expected
+per-item failures return explicit unavailable results; unexpected failures use the sanitized
+HTTP error envelope. The proposed search/filter API below remains future work.
+
 - GET `/v1/pokemon?search=&type=&generation=&page=&pageSize=` -> `{items, page, pageSize, total?, hasNext}`; bounded pageSize <=50.
 - GET `/v1/pokemon/:idOrName` -> normalized detail, explicit form metadata.
 - GET `/v1/pokemon/:idOrName/evolution` -> normalized evolution chain.

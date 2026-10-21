@@ -10,8 +10,13 @@ See [`docs/M0_VALIDATION.md`](docs/M0_VALIDATION.md) for the recorded acceptance
 M1 is in progress. PL-001 (`feat/pl-001-paginated-catalog`) implements the bounded
 reference-list API, shared contracts, persistent page cache, and offline tests.
 See [`docs/PL-001_VALIDATION.md`](docs/PL-001_VALIDATION.md) for checks and review status.
-M1 as a whole is not complete: card summaries, browsing UI, search and filters remain.
-Next issue: PL-002, bounded card-summary enrichment. M2–M5 have not started.
+PL-002 (`feat/pl-002-card-summaries`) adds bounded summary batches with real types/artwork,
+per-item availability/freshness and shared detail caching. It is stacked on the still-open
+PL-001 branch; no merge is performed automatically. See
+[`docs/PL-002_VALIDATION.md`](docs/PL-002_VALIDATION.md) for checks and review status.
+M1 as a whole is not complete: browsing UI, search, filters and detail enrichment remain.
+Next issue: PL-003, paginated browsing UI using references and summary batches.
+M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)
 
