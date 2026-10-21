@@ -14,14 +14,20 @@ PL-001 was merged into `main` in [PR #2](https://github.com/hugofamorim/pokelab/
 PL-002 (`feat/pl-002-card-summaries`) adds bounded summary batches with real types/artwork,
 per-item availability/freshness and shared detail caching. [PR #3](https://github.com/hugofamorim/pokelab/pull/3)
 was merged into the PL-001 branch afterward; [PR #4](https://github.com/hugofamorim/pokelab/pull/4)
-integrates the same validated PL-002 commits into `main`. See
+subsequently merged the same validated PL-002 commits into `main`. See
 [`docs/PL-002_VALIDATION.md`](docs/PL-002_VALIDATION.md) for checks and review status.
 PL-003 (`feat/pl-003-catalog-ui`) adds the responsive `/pokedex` UI with URL pagination,
 progressive summary batches, failure/retry/empty/stale states and page-preserving detail
-navigation. It is based on PL-002 while integration PR #4 is pending. See
+navigation. PR #5 was merged into the old PL-002 branch after #4 reached `main`;
+[integration PR #6](https://github.com/hugofamorim/pokelab/pull/6) brings PL-003 to `main`. See
 [`docs/PL-003_VALIDATION.md`](docs/PL-003_VALIDATION.md).
-M1 as a whole is not complete: search, filters and detail enrichment remain.
-Next issue: PL-004, name/ID search with explicit matching semantics and URL state.
+PL-004 (`feat/pl-004-name-id-search`) adds exact name/ID lookup with URL state, explicit
+submission, debounced validation, clear/Escape, failure/empty/stale states and search-aware
+detail return/history restoration. It targets `main`, depending on integration PR #6;
+the diff narrows automatically when #6 is merged. See
+[`docs/PL-004_VALIDATION.md`](docs/PL-004_VALIDATION.md).
+M1 as a whole is not complete: type/generation filters and detail enrichment remain.
+Next issue: PL-005, cached type-filter API with bounded pagination and membership validation.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)

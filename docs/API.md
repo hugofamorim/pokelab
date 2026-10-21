@@ -84,8 +84,8 @@ from an ID. Entry IDs can differ from species IDs. `PokemonCard` accepts this DT
 - Defaults: page 1, page size 20. Bounds: page 1–1000, page size 1–50;
   maximum offset 49,950. Only canonical positive integer query strings are accepted.
 - Unknown fields (including `search`, `type`, `generation`, `offset`, `limit`) and
-  repeated/array fields return 400 `INVALID_PAGINATION`. Search and filters remain
-  separate M1 tasks; they are never silently ignored.
+  repeated/array fields return 400 `INVALID_PAGINATION`. List search and type/generation
+  filters remain unsupported; PL-004 web exact lookup uses the separate detail endpoint.
 - One attempt calls the constructed `/api/v2/pokemon/?limit=…&offset=…` path.
   Entry reference URLs must match the exact Pokémon resource origin/path and a
   supported numeric ID. Reference, next and previous URLs are never followed.
@@ -179,3 +179,29 @@ and are cancelled on navigation. NestJS may finish admitted work after disconnec
 No background page prefetch or automatic retry loop; failed IDs can be retried explicitly.
 The server API origin remains private to server modules; no new environment variable,
 public upstream access, dependency or migration is introduced.
+
+## Exact name/ID search — PL-004 web query
+
+`/pokedex?search=pikachu` and `/pokedex?search=25` use one existing
+`GET /v1/pokemon/:idOrName` call. No search parameter is sent to the NestJS listing route,
+no whole-catalog index is downloaded and no summary batch is needed for the single result.
+The existing detail timeout (15 seconds), cache, retry and stale policy remain unchanged.
+
+- Complete PokéAPI entry name or numeric ID only, case-insensitive with outer whitespace
+  trimmed. Up to 64 raw characters; positive IDs 1–999999 without leading zeroes;
+  ASCII canonical names allow internal hyphens. No accent/localized-name aliases,
+  substring/fuzzy matching or automatic suggestions are implemented.
+- Search and page queries are mutually exclusive. Unknown/repeated/array parameters,
+  invalid paths/URLs and oversized terms show an invalid query state before fetching.
+  Empty/whitespace search returns to `/pokedex`. Valid noncanonical case/spacing redirects
+  to the normalized search URL before requesting a Pokémon.
+- One normalized result, explicit not-found for HTTP 404, availability/error state for
+  failed or malformed data, and original stale freshness where available. A schema-valid
+  response for a different requested ID or name is rejected as an availability error.
+- Form submission is explicit (Enter/button); 300 ms validation debounce never fetches.
+  Clear/Escape return to browsing. The HTML form can submit before client hydration.
+  Async results remain streamed inside Suspense; no full JavaScript-free UI claim.
+- `fromSearch` on detail links is bounded/validated, URI-encoded, and reconstructed as
+  an internal catalog URL. Ambiguous or invalid return inputs fall back to page 1;
+  arbitrary caller-supplied return URLs are never followed.
+- No dependency, environment, database migration or production NestJS change.

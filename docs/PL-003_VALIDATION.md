@@ -64,11 +64,11 @@ Existing assets were reused; no generated images or screenshots are committed.
 ## Integration and remaining work
 
 PL-001 PR #2 reached `main` before PL-002 PR #3 was merged into the PL-001 branch.
-[Integration PR #4](https://github.com/hugofamorim/pokelab/pull/4) carries PL-002 into
-`main`; PL-003 targets the PL-002 branch until that integration is merged. Retarget PL-003
-to `main` afterward and rerun checks as needed. No PR is merged automatically.
-[PR #5](https://github.com/hugofamorim/pokelab/pull/5) contains PL-003 and targets the
-PL-002 branch. Linux checks for implementation/documentation head `73b4774` are tracked
+[Integration PR #4](https://github.com/hugofamorim/pokelab/pull/4) subsequently merged
+PL-002 into `main`. [PR #5](https://github.com/hugofamorim/pokelab/pull/5) was then merged
+into the old PL-002 branch, so [integration PR #6](https://github.com/hugofamorim/pokelab/pull/6)
+carries PL-003 into `main`. New PRs target `main` to avoid this retargeting dependency.
+No PR is merged automatically. Linux checks for implementation/documentation head `73b4774` are tracked
 by [CI run #20](https://github.com/hugofamorim/pokelab/actions/runs/39674908030).
 The [branch workflow history](https://github.com/hugofamorim/pokelab/actions/workflows/ci.yml?query=branch%3Afeat%2Fpl-003-catalog-ui)
 tracks subsequent heads; review and integration remain separate from local validation.

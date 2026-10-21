@@ -1,12 +1,14 @@
 # PokéLab — Trainer Studio
 
-An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 now includes paginated catalog browsing. Search/filters, team building, analysis, accounts and cloud saves remain future work.
+An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 now includes paginated browsing and exact name/ID search. Type/generation filters, team building, analysis, accounts and cloud saves remain future work.
 
 **PL-001** provides [paginated entry references](http://127.0.0.1:3001/v1/pokemon?page=1&pageSize=20), with strict query bounds, persistent caching and no detail fan-out.
 
 **PL-002** adds [card summaries](http://127.0.0.1:3001/v1/pokemon/summaries?ids=1,25,10025): up to 12 distinct entry IDs, real types/artwork, explicit form/species identity and per-item availability/freshness. Two workers reuse the detail cache; two admitted batches share the existing four request slots. `PokemonCard` accepts the shared summary DTO.
 
-**PL-003** adds [the Pokédex](http://localhost:3000/pokedex): 12 references per page, progressive types/artwork in sequential four-ID batches, explicit partial failure/retry, empty and stale states, URL pagination and a detail return link that preserves the originating page. Desktop uses a three-column grid at wide widths; tablet uses two columns and mobile uses full-width cards. No search/filter controls are shown before their APIs exist.
+**PL-003** adds [the Pokédex](http://localhost:3000/pokedex): 12 references per page, progressive types/artwork in sequential four-ID batches, explicit partial failure/retry, empty and stale states, URL pagination and a detail return link that preserves the originating page. Desktop uses a three-column grid at wide widths; tablet uses two columns and mobile uses full-width cards.
+
+**PL-004** adds [exact name/ID search](http://localhost:3000/pokedex?search=pikachu). Submit a complete PokéAPI name or ID with Enter/the search button; case and outer whitespace are normalized, and an empty search returns to browsing. Input validation debounces for 300 ms; typing makes no network requests. Results, absence, outages and stale data have explicit states. Clear/Escape, reload, browser history and detail return preserve the URL's committed search. Substring/fuzzy/localized-name matching and type/generation filters remain future work.
 
 ## Run locally
 
@@ -58,7 +60,7 @@ pnpm test:e2e
 
 Jest/Supertest cover the API using a captured PokéAPI fixture. A PostgreSQL integration test verifies persistence across clients. Vitest covers contracts, domain conversions and the web API client. Playwright starts an offline Nest fixture server and the production web app; it checks 375/768/1280/1600px, keyboard navigation, zoom and failure states. Browser artwork requests are blocked in offline tests; real artwork is verified separately. Screenshots go to ignored `artifacts/` and are uploaded by CI.
 
-See [M0 validation](docs/M0_VALIDATION.md), [PL-001 validation](docs/PL-001_VALIDATION.md), [PL-002 validation](docs/PL-002_VALIDATION.md) and [PL-003 validation](docs/PL-003_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
+See [M0 validation](docs/M0_VALIDATION.md), [PL-001 validation](docs/PL-001_VALIDATION.md), [PL-002 validation](docs/PL-002_VALIDATION.md), [PL-003 validation](docs/PL-003_VALIDATION.md) and [PL-004 validation](docs/PL-004_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
 
 ## Configuration
 
@@ -78,7 +80,7 @@ Environment files are ignored; only harmless examples are tracked. API validatio
 - [Domain rules](docs/DOMAIN_RULES.md), [design system](docs/POKELAB_DESIGN_SYSTEM.md), [agent instructions](AGENTS.md)
 - [Initial audit](docs/M0_AUDIT.md), [ADR-001](docs/adr/001-foundation.md), [API/cache policy](docs/API.md)
 
-Next smallest issue: **PL-004 — name/ID search**, with explicit matching semantics and URL state. Type/generation filters and detail enrichment remain separate M1 work. PL-002 was merged into the PL-001 branch after PL-001 reached `main`; [integration PR #4](https://github.com/hugofamorim/pokelab/pull/4) brings the validated summaries into `main`. PL-003 is stacked on PL-002 until that integration is merged. No PR is merged automatically.
+Next smallest issue: **PL-005 — cached type-filter API**, with validated type membership, bounded pagination and explicit combination semantics before adding filter controls. Generation filters and detail enrichment remain separate M1 work. PL-002 reached `main` in PR #4. PL-003 was merged into the old PL-002 branch afterward; [integration PR #6](https://github.com/hugofamorim/pokelab/pull/6) carries the validated catalog into `main`. PL-004 also targets `main`; merging #6 first automatically narrows its diff, without retargeting. No PR is merged automatically.
 
 ## Attribution
 

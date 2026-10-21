@@ -42,6 +42,17 @@ and summary/detail/pagination links disable speculative prefetch. Existing in-fl
 NestJS work may finish after a browser cancellation, under the existing admission bounds.
 `fromPage` on detail links is validated and converted to a constructed internal return URL.
 
+PL-004 adds the separate `/pokedex?search=…` exact-lookup mode. A strict web query parser
+accepts a full canonical name/ID (up to 64 raw characters) or pagination, never both.
+The existing server detail client performs one NestJS request and revalidates returned
+identity before projecting the shared summary. Search is submitted explicitly; 300 ms
+debounce applies only to local validation, not network calls. Case/outer-space normalization
+also redirects on the server, covering HTML submission before hydration. The search form
+has its own stable Suspense boundary outside streamed results, unique label IDs, and
+restores the committed URL term after React Activity or browser history-cache restoration.
+Validated `fromSearch` constructs the internal detail return link. No list search/index,
+bulk fetch, new backend endpoint or direct browser upstream access is introduced.
+
 - Avoid runtime `fetch()` calls outside Suspense when `cacheComponents` is on. Separate cached public data from request-scoped private data. Use framework caching deliberately; do not mix private session data in shared cache.
 - Do not add route segment `dynamic = 'force-dynamic'` while Cache Components is enabled. Run `next build` in CI to catch prerender errors.
 
