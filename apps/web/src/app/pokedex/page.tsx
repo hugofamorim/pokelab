@@ -2,33 +2,45 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, BookOpen, Sparkles } from 'lucide-react';
 import { CatalogGrid } from '../../components/catalog-grid';
-import { catalogHref, parseCatalogPage } from '../../lib/catalog';
+import { catalogHref } from '../../lib/catalog';
 import { getCatalogPage } from '../../lib/catalog-server';
+import { parseCatalogQuery } from '../../lib/catalog-search';
+import {
+  CatalogSearchField,
+  SearchFieldFallback,
+} from '../../components/search-field';
+import { CatalogSearchResult } from '../../components/catalog-search-result';
+import { redirect } from 'next/navigation';
+import { searchHref } from '../../lib/catalog-search';
 
 type Query = Promise<Record<string, string | string[] | undefined>>;
 function CatalogState({
   kind,
   page = 1,
 }: {
-  kind: 'invalid' | 'error' | 'empty';
+  kind: 'invalid' | 'invalidSearch' | 'error' | 'empty';
   page?: number;
 }) {
   return (
     <section className="catalog-state" role="status">
       <BookOpen size={40} aria-hidden="true" />
       <h2>
-        {kind === 'invalid'
-          ? 'Página inválida'
-          : kind === 'empty'
-            ? 'Nenhum Pokémon nesta página'
-            : 'Não conseguimos abrir o catálogo'}
+        {kind === 'invalidSearch'
+          ? 'Busca inválida'
+          : kind === 'invalid'
+            ? 'Página inválida'
+            : kind === 'empty'
+              ? 'Nenhum Pokémon nesta página'
+              : 'Não conseguimos abrir o catálogo'}
       </h2>
       <p>
-        {kind === 'invalid'
-          ? 'Escolha uma página de 1 a 1000.'
-          : kind === 'empty'
-            ? 'Você chegou além das entradas disponíveis. Volte para continuar explorando.'
-            : 'O serviço está indisponível no momento. Aguarde um pouco e tente novamente.'}
+        {kind === 'invalidSearch'
+          ? 'Use um nome completo ou ID com até 64 caracteres, sem filtros ou paginação na mesma consulta.'
+          : kind === 'invalid'
+            ? 'Use uma página de 1 a 1000 ou uma busca por nome completo/ID. Não combine busca e paginação.'
+            : kind === 'empty'
+              ? 'Você chegou além das entradas disponíveis. Volte para continuar explorando.'
+              : 'O serviço está indisponível no momento. Aguarde um pouco e tente novamente.'}
       </p>
       {kind === 'error' && (
         <a className="button button-primary" href={catalogHref(page)}>
@@ -46,8 +58,30 @@ function CatalogState({
   );
 }
 async function Catalog({ searchParams }: { searchParams: Query }) {
-  const page = parseCatalogPage(await searchParams);
-  if (page === null) return <CatalogState kind="invalid" />;
+  const raw = await searchParams;
+  const query = parseCatalogQuery(raw);
+  if (query.kind === 'search' && raw.search !== query.term)
+    redirect(searchHref(query.term));
+  if (query.kind === 'browse' && raw.search !== undefined) redirect('/pokedex');
+  return (
+    <>
+      {query.kind === 'invalid' ? (
+        <CatalogState
+          kind={raw.search === undefined ? 'invalid' : 'invalidSearch'}
+        />
+      ) : query.kind === 'search' ? (
+        <Suspense key={query.term} fallback={<SearchSkeleton />}>
+          <CatalogSearchResult term={query.term} />
+        </Suspense>
+      ) : (
+        <Suspense key={query.page} fallback={<CatalogSkeleton />}>
+          <Browse page={query.page} />
+        </Suspense>
+      )}
+    </>
+  );
+}
+async function Browse({ page }: { page: number }) {
   const result = await getCatalogPage(page);
   if (!result) return <CatalogState kind="error" page={page} />;
   if (!result.items.length) return <CatalogState kind="empty" page={page} />;
@@ -107,6 +141,16 @@ async function Catalog({ searchParams }: { searchParams: Query }) {
     </>
   );
 }
+function SearchSkeleton() {
+  return (
+    <div role="status" aria-label="Buscando Pokémon">
+      <p>Consultando o Pokémon…</p>
+      <div className="catalog-grid" aria-hidden="true">
+        <div className="skeleton catalog-card-skeleton" />
+      </div>
+    </div>
+  );
+}
 function CatalogSkeleton() {
   return (
     <div role="status" aria-label="Carregando catálogo">
@@ -143,6 +187,9 @@ export default function Page({ searchParams }: { searchParams: Query }) {
           <span>✦</span>
         </div>
       </section>
+      <Suspense fallback={<SearchFieldFallback />}>
+        <CatalogSearchField />
+      </Suspense>
       <Suspense fallback={<CatalogSkeleton />}>
         <Catalog searchParams={searchParams} />
       </Suspense>

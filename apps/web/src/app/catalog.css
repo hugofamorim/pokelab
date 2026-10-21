@@ -243,12 +243,109 @@
   font-weight: 700;
   color: var(--pl-body);
 }
+.catalog-search {
+  margin: 0 0 32px;
+  padding: 24px;
+  background: var(--pl-surface);
+  border: 1px solid var(--pl-border);
+  border-radius: var(--pl-radius-lg);
+}
+.catalog-search label {
+  display: block;
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+.search-controls {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px 4px 16px;
+  border: 1px solid #c5cad5;
+  border-radius: var(--pl-radius-sm);
+  background: var(--pl-surface-muted);
+  color: var(--pl-muted);
+}
+.search-input-wrap:focus-within {
+  outline: 3px solid var(--pl-focus);
+  outline-offset: 3px;
+}
+.search-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  color: var(--pl-ink);
+  background: transparent;
+  border: 0;
+  font-size: 16px;
+}
+.search-input-wrap input::placeholder {
+  color: var(--pl-muted);
+  opacity: 1;
+}
+.search-input-wrap input:focus-visible {
+  outline: 0;
+}
+.search-input-wrap input::-webkit-search-cancel-button {
+  display: none;
+}
+.search-clear {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  color: var(--pl-body);
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+}
+.search-clear:hover {
+  background: #e8ebf2;
+}
+.catalog-search p {
+  margin-top: 12px;
+  font-size: 14px;
+}
+.catalog-search .search-error {
+  color: var(--pl-danger);
+}
+.search-browse-link {
+  font-size: 14px;
+  text-decoration: underline;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.search-results {
+  min-height: 360px;
+}
+.search-results .catalog-state h3 {
+  font-size: 22px;
+}
 @media (min-width: 1440px) {
   .catalog-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 @media (max-width: 639px) {
+  .catalog-search {
+    padding: 20px;
+  }
+  .search-controls {
+    flex-direction: column;
+  }
+  .search-controls > .button {
+    width: 100%;
+  }
   .catalog-intro {
     padding: 28px 24px;
     margin-bottom: 28px;
