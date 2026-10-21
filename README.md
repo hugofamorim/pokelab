@@ -2,6 +2,8 @@
 
 An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. Catalog browsing, team building, analysis, accounts and cloud saves remain future milestones.
 
+M1 has begun with **PL-001**: [paginated entry references](http://127.0.0.1:3001/v1/pokemon?page=1&pageSize=20), with strict query bounds, persistent caching and no detail fan-out. This is an API increment; the browsing UI and search/type/generation filters are still pending.
+
 ## Run locally
 
 Requirements: Node **24.20.0**, pnpm **12.6.0**, Docker with Compose. Exact dependencies are committed in `pnpm-lock.yaml`. Ports: web 3000, API 3001, PostgreSQL 5432.
@@ -52,7 +54,7 @@ pnpm test:e2e
 
 Jest/Supertest cover the API using a captured PokéAPI fixture. A PostgreSQL integration test verifies persistence across clients. Vitest covers contracts, domain conversions and the web API client. Playwright starts an offline Nest fixture server and the production web app; it checks 375/768/1280/1600px, keyboard navigation, zoom and failure states. Browser artwork requests are blocked in offline tests; real artwork is verified separately. Screenshots go to ignored `artifacts/` and are uploaded by CI.
 
-See [M0 validation](docs/M0_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
+See [M0 validation](docs/M0_VALIDATION.md) and [PL-001 validation](docs/PL-001_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
 
 ## Configuration
 
@@ -62,7 +64,7 @@ See [M0 validation](docs/M0_VALIDATION.md) for actual results and outstanding ga
 | `PORT`                      | API        | 3001, integer 1–65535                                            |
 | `POKEAPI_TIMEOUT_MS`        | API        | 5000, integer 100–15000                                          |
 | `POKEAPI_CACHE_TTL_SECONDS` | API        | 86400, integer 60–604800                                         |
-| `API_URL`                   | Web server | `http://localhost:3001`, valid URL                               |
+| `API_URL`                   | Web server | `http://127.0.0.1:3001`, valid URL                               |
 
 Environment files are ignored; only harmless examples are tracked. API validation reports invalid variable names without echoing credentials. Database settings and upstream configuration are never exposed to the browser.
 
@@ -72,7 +74,7 @@ Environment files are ignored; only harmless examples are tracked. API validatio
 - [Domain rules](docs/DOMAIN_RULES.md), [design system](docs/POKELAB_DESIGN_SYSTEM.md), [agent instructions](AGENTS.md)
 - [Initial audit](docs/M0_AUDIT.md), [ADR-001](docs/adr/001-foundation.md), [API/cache policy](docs/API.md)
 
-Next smallest issue: **PL-001 — bounded paginated catalog endpoint**, with fixture tests and shared list contracts, before implementing the M1 browsing interface.
+Next smallest issue: **PL-002 — bounded card-summary enrichment**, reusing cached details with explicit concurrency/request budgets, before building the M1 browsing interface.
 
 ## Attribution
 
