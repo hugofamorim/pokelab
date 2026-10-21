@@ -67,7 +67,11 @@ PL-001 PR #2 reached `main` before PL-002 PR #3 was merged into the PL-001 branc
 [Integration PR #4](https://github.com/hugofamorim/pokelab/pull/4) carries PL-002 into
 `main`; PL-003 targets the PL-002 branch until that integration is merged. Retarget PL-003
 to `main` afterward and rerun checks as needed. No PR is merged automatically.
-Remote CI and review status are tracked by the PL-003 PR when published.
+[PR #5](https://github.com/hugofamorim/pokelab/pull/5) contains PL-003 and targets the
+PL-002 branch. Linux checks for implementation/documentation head `73b4774` are tracked
+by [CI run #20](https://github.com/hugofamorim/pokelab/actions/runs/39674908030).
+The [branch workflow history](https://github.com/hugofamorim/pokelab/actions/workflows/ci.yml?query=branch%3Afeat%2Fpl-003-catalog-ui)
+tracks subsequent heads; review and integration remain separate from local validation.
 
 Cold details may remain slow under upstream timeouts; names stay usable while enrichment
 finishes. Per-instance admission is not distributed rate limiting. Abort stops browser
