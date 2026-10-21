@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import type { Pokemon } from '@pokelab/contracts';
+import type { PokemonSummary } from '@pokelab/contracts';
 import { ArrowUpRight } from 'lucide-react';
 import { PokemonArtwork } from './pokemon-artwork';
 import { TypeBadge } from './type-badge';
-export function PokemonCard({ pokemon }: { pokemon: Pokemon }) {
+export function PokemonCard({ pokemon }: { pokemon: PokemonSummary }) {
   return (
     <Link className="pokemon-card" href={`/pokemon/${pokemon.id}`}>
       <div>
