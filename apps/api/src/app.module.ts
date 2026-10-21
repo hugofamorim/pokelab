@@ -1,8 +1,12 @@
-import { Controller, Get, Inject, Module, Param } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Inject, Module, Param, Query } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { SchemaObject } from '@nestjs/swagger';
 import { z } from 'zod';
-import { pokemonResponseSchema } from '@pokelab/contracts';
+import {
+  pokemonResponseSchema,
+  pokemonPageResponseSchema,
+  PAGINATION_LIMITS,
+} from '@pokelab/contracts';
 import { CatalogService } from './catalog.service.js';
 import { CONFIG, configSchema } from './config.js';
 import type { Config } from './config.js';
@@ -15,6 +19,51 @@ export class PokemonController {
   constructor(
     @Inject(CatalogService) private readonly catalog: CatalogService,
   ) {}
+  @Get()
+  @ApiOperation({
+    summary:
+      'Bounded page of Pokémon entry references; no detail fan-out or filters',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    schema: {
+      type: 'integer',
+      minimum: 1,
+      maximum: PAGINATION_LIMITS.maxPage,
+      default: PAGINATION_LIMITS.defaultPage,
+    },
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    schema: {
+      type: 'integer',
+      minimum: 1,
+      maximum: PAGINATION_LIMITS.maxPageSize,
+      default: PAGINATION_LIMITS.defaultPageSize,
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Page or empty page with source freshness',
+    schema: z.toJSONSchema(pokemonPageResponseSchema, {
+      target: 'openapi-3.0',
+    }) as SchemaObject,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid pagination or unsupported query parameter',
+  })
+  @ApiResponse({ status: 502, description: 'Invalid upstream resource page' })
+  @ApiResponse({
+    status: 503,
+    description: 'Upstream, database or admission limit unavailable',
+  })
+  list(@Query() query: unknown) {
+    return this.catalog.list(query);
+  }
+
   @Get(':idOrName')
   @ApiOperation({
     summary: 'Normalized form-specific Pokémon detail from PokéAPI v2',
