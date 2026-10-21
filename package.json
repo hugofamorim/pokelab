@@ -1,0 +1,31 @@
+{
+  "name": "pokelab",
+  "private": true,
+  "packageManager": "pnpm@12.6.0",
+  "engines": {
+    "node": "24.20.0"
+  },
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "eslint .",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "pnpm --filter @pokelab/api db:generate",
+    "db:migrate": "pnpm --filter @pokelab/api db:migrate",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.19.2",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.2",
+    "prettier": "3.9.10",
+    "turbo": "2.11.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.0"
+  }
+}

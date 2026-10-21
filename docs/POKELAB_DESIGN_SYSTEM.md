@@ -21,24 +21,24 @@
 
 Valores propostos a partir das referências (aproximações de projeto, **não extração colorimétrica**):
 
-| Token | Hex | Uso |
-|---|---|---|
-| `--pl-canvas` | `#FFF5BA` | Fundo externo amarelo-creme |
-| `--pl-canvas-accent` | `#FFE66D` | Faixas e halos decorativos |
-| `--pl-brand` | `#FFD43B` | Botão principal, seleção, destaques |
-| `--pl-brand-hover` | `#F5BF22` | Hover do primário |
-| `--pl-brand-deep` | `#F5A623` | Detalhes quentes e ilustração |
-| `--pl-surface` | `#FFFFFF` | Cards e painéis |
-| `--pl-surface-warm` | `#FFFDF3` | Shell e superfícies suaves |
-| `--pl-surface-muted` | `#F6F7FA` | Inputs, controles secundários |
-| `--pl-ink` | `#111B39` | Títulos e informação principal |
-| `--pl-body` | `#46516A` | Texto comum |
-| `--pl-muted` | `#778198` | Metadados e placeholders |
-| `--pl-border` | `#E9EAF0` | Linhas e contornos |
-| `--pl-success` | `#218A59` | Sucesso, operacional |
-| `--pl-warning` | `#B9700A` | Atenção |
-| `--pl-danger` | `#D54446` | Erro/remoção |
-| `--pl-focus` | `#315FBE` | Foco visível |
+| Token                | Hex       | Uso                                 |
+| -------------------- | --------- | ----------------------------------- |
+| `--pl-canvas`        | `#FFF5BA` | Fundo externo amarelo-creme         |
+| `--pl-canvas-accent` | `#FFE66D` | Faixas e halos decorativos          |
+| `--pl-brand`         | `#FFD43B` | Botão principal, seleção, destaques |
+| `--pl-brand-hover`   | `#F5BF22` | Hover do primário                   |
+| `--pl-brand-deep`    | `#F5A623` | Detalhes quentes e ilustração       |
+| `--pl-surface`       | `#FFFFFF` | Cards e painéis                     |
+| `--pl-surface-warm`  | `#FFFDF3` | Shell e superfícies suaves          |
+| `--pl-surface-muted` | `#F6F7FA` | Inputs, controles secundários       |
+| `--pl-ink`           | `#111B39` | Títulos e informação principal      |
+| `--pl-body`          | `#46516A` | Texto comum                         |
+| `--pl-muted`         | `#778198` | Metadados e placeholders            |
+| `--pl-border`        | `#E9EAF0` | Linhas e contornos                  |
+| `--pl-success`       | `#218A59` | Sucesso, operacional                |
+| `--pl-warning`       | `#B9700A` | Atenção                             |
+| `--pl-danger`        | `#D54446` | Erro/remoção                        |
+| `--pl-focus`         | `#315FBE` | Foco visível                        |
 
 **Observação:** amarelo da marca serve para acentos e botões, **não** para parágrafos longos em branco. Use `--pl-ink` em botões amarelos. Estados e contrastes precisam passar WCAG AA nas combinações reais.
 
@@ -46,26 +46,26 @@ Valores propostos a partir das referências (aproximações de projeto, **não e
 
 Usar nos badges e halos com variantes `foreground` (texto), `soft` (fundo leve) e `solid` (marcadores fortes). Os valores abaixo são **tokens visuais**, não propriedades da PokéAPI.
 
-| Tipo | `solid` | `soft` |
-|---|---|---|
-| Normal | `#8E969F` | `#F0F1F3` |
-| Fire | `#F16B3A` | `#FFF0E8` |
-| Water | `#3195E9` | `#E8F5FF` |
+| Tipo     | `solid`   | `soft`    |
+| -------- | --------- | --------- |
+| Normal   | `#8E969F` | `#F0F1F3` |
+| Fire     | `#F16B3A` | `#FFF0E8` |
+| Water    | `#3195E9` | `#E8F5FF` |
 | Electric | `#E6A500` | `#FFF5CD` |
-| Grass | `#35A85D` | `#E6F8E9` |
-| Ice | `#29AEBE` | `#E6FAFC` |
+| Grass    | `#35A85D` | `#E6F8E9` |
+| Ice      | `#29AEBE` | `#E6FAFC` |
 | Fighting | `#C7534E` | `#FCEAE8` |
-| Poison | `#9655CD` | `#F2E9FD` |
-| Ground | `#B88049` | `#F8EDDF` |
-| Flying | `#7589D7` | `#EEF0FF` |
-| Psychic | `#EE638A` | `#FFEBF2` |
-| Bug | `#80A43B` | `#F2F7E5` |
-| Rock | `#AA8747` | `#F6F0E4` |
-| Ghost | `#7959AE` | `#F0EAFA` |
-| Dragon | `#695BD9` | `#EEECFF` |
-| Dark | `#55586A` | `#ECEEF2` |
-| Steel | `#728D9F` | `#EAF1F5` |
-| Fairy | `#D87DB2` | `#FCEAF6` |
+| Poison   | `#9655CD` | `#F2E9FD` |
+| Ground   | `#B88049` | `#F8EDDF` |
+| Flying   | `#7589D7` | `#EEF0FF` |
+| Psychic  | `#EE638A` | `#FFEBF2` |
+| Bug      | `#80A43B` | `#F2F7E5` |
+| Rock     | `#AA8747` | `#F6F0E4` |
+| Ghost    | `#7959AE` | `#F0EAFA` |
+| Dragon   | `#695BD9` | `#EEECFF` |
+| Dark     | `#55586A` | `#ECEEF2` |
+| Steel    | `#728D9F` | `#EAF1F5` |
+| Fairy    | `#D87DB2` | `#FCEAF6` |
 
 **Badges:** por padrão fundo `soft`, texto colorido escuro validado com contraste; alternativa sólido com texto branco/ink somente quando contraste cumprir AA. Badges sempre incluem texto, ícone opcional. Tipos duplos exibem **ambos**.
 
@@ -120,27 +120,27 @@ Usar nos badges e halos com variantes `foreground` (texto), `soft` (fundo leve) 
 
 ## 4. Biblioteca de componentes
 
-| Componente | Variantes / comportamento | Regras |
-|---|---|---|
-| `AppShell` | desktop-sidebar / mobile-nav | Sem reflow abrupto; landmarks `nav`, `main` |
-| `BrandLogo` | full / compact | Sempre manter proporção; fallback textual |
-| `PageHeader` | heading, descrição, ações | Hierarquia h1 única por tela |
-| `SearchField` | idle, focused, loading, error | Debounce 250–350ms, label acessível, Esc limpa |
-| `TypeBadge` | soft / solid, tamanho sm/md | Texto e contraste obrigatório |
-| `TypeFilter` | horizontal/overflow | Multi-seleção só se API suportar lógica explícita |
-| `PokemonCard` | grid / list / featured | Número real, nome, tipos e arte com fallback |
-| `PokemonArtwork` | hero / card / thumbnail | `object-contain`, proporção estável, fallback |
-| `StatBar` | nome, valor, máximo de visualização | Normalização explicitada, `aria-label` com valor |
-| `EvolutionChain` | horizontal / wrapped | Ramos de evolução quando presentes; não inventar linearidade |
-| `TeamSlot` | empty / filled / pending | Máximo de seis; adicionar/remover/substituir |
-| `TeamAnalysisPanel` | loading / ready / incomplete | Exibir cálculos reais e regraset |
-| `CoverageMatrix` | por tipo atacante | Mostrar 0×, ¼×, ½×, 1×, 2×, 4× quando aplicável |
-| `RecommendationCard` | suggestion / no-change | Explicação verificável, sem “IA” fictícia |
-| `Button` | primary / secondary / ghost / danger | Focus visível, loading, disabled |
-| `Dialog/Drawer` | seleção de Pokémon | Foco preso, fechar com Esc, rótulos |
-| `EmptyState` | sem favoritos / equipe vazia | CTA contextual real |
-| `Skeleton / ErrorState` | catálogo, detalhe, time | Retry; nunca spinner eterno |
-| `Toast` | success / warning / error | Não substituir mensagens inline de formulário |
+| Componente              | Variantes / comportamento            | Regras                                                       |
+| ----------------------- | ------------------------------------ | ------------------------------------------------------------ |
+| `AppShell`              | desktop-sidebar / mobile-nav         | Sem reflow abrupto; landmarks `nav`, `main`                  |
+| `BrandLogo`             | full / compact                       | Sempre manter proporção; fallback textual                    |
+| `PageHeader`            | heading, descrição, ações            | Hierarquia h1 única por tela                                 |
+| `SearchField`           | idle, focused, loading, error        | Debounce 250–350ms, label acessível, Esc limpa               |
+| `TypeBadge`             | soft / solid, tamanho sm/md          | Texto e contraste obrigatório                                |
+| `TypeFilter`            | horizontal/overflow                  | Multi-seleção só se API suportar lógica explícita            |
+| `PokemonCard`           | grid / list / featured               | Número real, nome, tipos e arte com fallback                 |
+| `PokemonArtwork`        | hero / card / thumbnail              | `object-contain`, proporção estável, fallback                |
+| `StatBar`               | nome, valor, máximo de visualização  | Normalização explicitada, `aria-label` com valor             |
+| `EvolutionChain`        | horizontal / wrapped                 | Ramos de evolução quando presentes; não inventar linearidade |
+| `TeamSlot`              | empty / filled / pending             | Máximo de seis; adicionar/remover/substituir                 |
+| `TeamAnalysisPanel`     | loading / ready / incomplete         | Exibir cálculos reais e regraset                             |
+| `CoverageMatrix`        | por tipo atacante                    | Mostrar 0×, ¼×, ½×, 1×, 2×, 4× quando aplicável              |
+| `RecommendationCard`    | suggestion / no-change               | Explicação verificável, sem “IA” fictícia                    |
+| `Button`                | primary / secondary / ghost / danger | Focus visível, loading, disabled                             |
+| `Dialog/Drawer`         | seleção de Pokémon                   | Foco preso, fechar com Esc, rótulos                          |
+| `EmptyState`            | sem favoritos / equipe vazia         | CTA contextual real                                          |
+| `Skeleton / ErrorState` | catálogo, detalhe, time              | Retry; nunca spinner eterno                                  |
+| `Toast`                 | success / warning / error            | Não substituir mensagens inline de formulário                |
 
 ### Regras visuais de cards
 
@@ -216,7 +216,13 @@ Proposta compatível com Tailwind CSS moderno; adaptar à configuração real do
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 ```
 
@@ -243,13 +249,13 @@ Implementar `POKEMON_TYPE_TOKENS` como objeto TS tipado para os 18 tipos; **não
 
 ## 9. Rotas prioritárias e critérios visuais
 
-| Rota (sugestão) | Modelo | Critérios |
-|---|---|---|
-| `/pokedex` | catálogo | pesquisa, chips, cards, paginação, responsividade |
-| `/pokemon/[id]` | detalhe | hero, stat bars reais, evoluções corretas |
-| `/team-builder` | editor | até 6 slots, estado vazio, ações acessíveis |
-| `/analysis` | análise | cálculos reais, tipos, explicações, regraset |
-| `/trainer` | fase M4 | estados autenticado/não autenticado; não criar antes |
+| Rota (sugestão) | Modelo   | Critérios                                            |
+| --------------- | -------- | ---------------------------------------------------- |
+| `/pokedex`      | catálogo | pesquisa, chips, cards, paginação, responsividade    |
+| `/pokemon/[id]` | detalhe  | hero, stat bars reais, evoluções corretas            |
+| `/team-builder` | editor   | até 6 slots, estado vazio, ações acessíveis          |
+| `/analysis`     | análise  | cálculos reais, tipos, explicações, regraset         |
+| `/trainer`      | fase M4  | estados autenticado/não autenticado; não criar antes |
 
 ### DoD visual por página
 
@@ -276,4 +282,4 @@ As referências previamente geradas nesta conversa incluem: `pokélab_guia_poké
 
 ---
 
-**Frase-guia:** *“Uma experiência colecionável e divertida, com a precisão de uma ferramenta de engenharia.”*
+**Frase-guia:** _“Uma experiência colecionável e divertida, com a precisão de uma ferramenta de engenharia.”_

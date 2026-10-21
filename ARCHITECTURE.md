@@ -1,21 +1,24 @@
 # PokéLab — Architecture and Technical Decisions
 
 ## Baseline stack
+
 - Monorepo: pnpm workspaces + Turborepo, Node.js current supported LTS pinned with `.node-version` and `packageManager` field.
 - Web: Next.js App Router, React, TypeScript strict, Tailwind CSS, shadcn/ui, Motion sparingly, React Hook Form + Zod, optional TanStack Query for interactive client caching.
 - API: NestJS, typed REST controllers/DTOs, OpenAPI, modular services and auth guards.
 - Domain: TypeScript package without framework dependencies; pure analysis functions.
 - DB: PostgreSQL + Prisma, migrations committed, DB indexes/uniqueness constraints. Redis optional only if measured load warrants shared cache/queues.
 - Tests: Vitest for domain/web, Jest and Supertest for API, Playwright E2E, deterministic fixtures and mocked PokéAPI.
-- Tooling: Docker Compose for DB, GitHub Actions. Use versions current and mutually compatible *when scaffolding*; pin package versions and lockfile after verified installation.
+- Tooling: Docker Compose for DB, GitHub Actions. Use versions current and mutually compatible _when scaffolding_; pin package versions and lockfile after verified installation.
 
 ## Context diagram
+
 Browser -> Next.js web (SSR + interactive editor) -> NestJS API (catalog adapter, team and auth endpoints) -> PostgreSQL for users, teams, share snapshots and optional upstream-response cache.
 NestJS catalog adapter -> PokéAPI v2 (read-only upstream). No API key needed. External data never treated as trusted.
 `packages/pokemon-domain` consumes normalized DTOs, not raw PokéAPI models.
 `packages/contracts` provides schema/type contracts (Zod or generated OpenAPI client); avoid divergent DTO definitions.
 
 ## Upstream integration
+
 - Only use https://pokeapi.co/api/v2/ endpoints by constructed, allowlisted resource paths; never fetch arbitrary caller-supplied URLs (SSRF defense).
 - Expected resources: `/pokemon/{id-or-name}`, `/pokemon-species/{id-or-name}`, `/evolution-chain/{id}`, `/type/{id-or-name}`, `/move/{id-or-name}`, `/generation/{id}` plus paginated listing.
 - Distinguish `pokemon` (form-specific playable data) from `pokemon-species` (species, flavor, evolution reference); IDs are not always interchangeable.
@@ -27,10 +30,12 @@ NestJS catalog adapter -> PokéAPI v2 (read-only upstream). No API key needed. E
 - Allow graceful stale-if-error for previously cached public data; expose source freshness in metadata and logs.
 
 ## Cache Components/Next.js
+
 - Avoid runtime `fetch()` calls outside Suspense when `cacheComponents` is on. Separate cached public data from request-scoped private data. Use framework caching deliberately; do not mix private session data in shared cache.
 - Do not add route segment `dynamic = 'force-dynamic'` while Cache Components is enabled. Run `next build` in CI to catch prerender errors.
 
 ## Domain module model
+
 - Entities/value objects: `PokemonRef`, `PokemonType`, `Ruleset`, `TeamSlot`, `Team`, `TypeEffectiveness`, `CoverageReport`.
 - Pure `getDefenseMultiplier(attackType, defenderTypes, chart): number`: multiply effectiveness for dual types; immunity multiplies to zero.
 - `analyzeTeam(team, chart): TeamAnalysis`: per-type matrix, team weaknesses/resistances, counts; empty slots excluded.
@@ -39,6 +44,7 @@ NestJS catalog adapter -> PokéAPI v2 (read-only upstream). No API key needed. E
 - Forms/moves/abilities may vary by game version; treat unsupported cases as unknown or exclude rather than invent facts.
 
 ## Database (suggested logical model)
+
 - User: id UUID, displayName, email unique normalized, passwordHash/identity provider ref, createdAt, updatedAt, emailVerifiedAt.
 - Session: id, userId, refreshTokenHash, expiresAt, revokedAt, createdAt; rotate/revoke server-side.
 - Team: id, ownerId, title, description?, ruleset, visibility (`PRIVATE` or `UNLISTED`), createdAt, updatedAt, version.
@@ -50,13 +56,17 @@ NestJS catalog adapter -> PokéAPI v2 (read-only upstream). No API key needed. E
 - Database migrations are reviewed, tested, forward-compatible; separate destructive operations into deliberate migrations.
 
 ## REST contract proposal (versioned under /v1)
+
 ### Public catalog
+
 - GET `/v1/pokemon?search=&type=&generation=&page=&pageSize=` -> `{items, page, pageSize, total?, hasNext}`; bounded pageSize <=50.
 - GET `/v1/pokemon/:idOrName` -> normalized detail, explicit form metadata.
 - GET `/v1/pokemon/:idOrName/evolution` -> normalized evolution chain.
 - GET `/v1/types` -> supported type chart/ruleset list.
 - POST `/v1/analysis/teams` -> validates up to six slots and returns deterministic analysis, with no persistent state for guest.
+
 ### Identity & teams (M4)
+
 - POST `/v1/auth/register`, `/v1/auth/login`, `/v1/auth/refresh`, `/v1/auth/logout`; POST `/v1/auth/forgot-password`, `/v1/auth/reset-password`, `/v1/auth/verify-email`.
 - GET `/v1/me`, GET/POST `/v1/teams`, GET/PATCH/DELETE `/v1/teams/:id`, POST `/v1/teams/:id/duplicate`.
 - POST `/v1/teams/:id/share`, DELETE `/v1/teams/:id/share/:shareId`; GET `/v1/shared-teams/:shareId` (sanitized snapshot).
@@ -65,6 +75,7 @@ NestJS catalog adapter -> PokéAPI v2 (read-only upstream). No API key needed. E
 - Document endpoint status codes, auth requirements, request/response schemas, pagination and constraints via OpenAPI.
 
 ## Auth/security for M4
+
 - Password hashing: Argon2id (or equally reviewed alternative), rate limit auth endpoints, generic reset response, validated short-lived reset/verify tokens stored hashed.
 - HttpOnly Secure SameSite cookie strategy where appropriate; CSRF protection for cookie-authenticated mutations; CORS allowlist; refresh rotation + reuse detection.
 - Never use localStorage for auth tokens. User-generated text is escaped. Validate URL payload, lengths and enumerations.
@@ -72,4 +83,5 @@ NestJS catalog adapter -> PokéAPI v2 (read-only upstream). No API key needed. E
 - Security headers, audit for sensitive account events, secret scanning and dependency scanning in CI.
 
 ## Architecture decision records to author
+
 ADR-001 Monorepo and independent NestJS API; ADR-002 guest-first and auth deferral; ADR-003 PokéAPI adapter and caching policy; ADR-004 ruleset pinning and scope limits; ADR-005 private-team authorization and share snapshots; ADR-006 error-handling and observability.
