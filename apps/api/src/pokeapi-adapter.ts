@@ -5,11 +5,15 @@ import {
   pokemonSchema,
   pokemonPaginationSchema,
   pokemonPageSchema,
+  pokemonTypeSchema,
+  pokemonTypeIndexSchema,
+  TYPE_FILTER_LIMITS,
 } from '@pokelab/contracts';
 import type {
   Pokemon,
   PokemonPagination,
   PokemonPage,
+  PokemonTypeIndex,
 } from '@pokelab/contracts';
 import { POKEMON_TYPES, STAT_NAMES, toMetric } from '@pokelab/pokemon-domain';
 import { CatalogError } from './errors.js';
@@ -156,10 +160,112 @@ export class PokeApiAdapter {
     return normalized.data;
   }
 
+  async typeIndex(input: string): Promise<PokemonTypeIndex> {
+    const type = pokemonTypeSchema.safeParse(input);
+    if (!type.success)
+      throw new CatalogError(
+        400,
+        'INVALID_TYPE',
+        'Use um dos 18 tipos suportados.',
+      );
+    const body = await this.request(
+      'type/' + type.data,
+      z
+        .object({
+          name: pokemonTypeSchema,
+          pokemon: z
+            .array(
+              z.object({
+                slot: z.number().int().min(1).max(2),
+                pokemon: z.object({
+                  name: identifierSchema,
+                  url: z
+                    .string()
+                    .regex(
+                      /^https:\/\/pokeapi\.co\/api\/v2\/pokemon\/[1-9]\d{0,5}\/$/,
+                    ),
+                }),
+              }),
+            )
+            .max(TYPE_FILTER_LIMITS.maxMembers),
+        })
+        .refine((value) => value.name === type.data),
+      false,
+      TYPE_FILTER_LIMITS.maxResponseBytes,
+    );
+    const result = pokemonTypeIndexSchema.safeParse({
+      type: type.data,
+      items: body.pokemon
+        .map((entry) => ({
+          id: Number(entry.pokemon.url.split('/').at(-2)),
+          name: entry.pokemon.name,
+        }))
+        .sort((left, right) => left.id - right.id),
+    });
+    if (!result.success)
+      throw new CatalogError(
+        502,
+        'INVALID_UPSTREAM',
+        'A PokéAPI retornou associações de tipo incompatíveis.',
+      );
+    return result.data;
+  }
+
+  private async boundedJson(
+    response: Response,
+    maxBytes: number,
+  ): Promise<unknown> {
+    const invalid = () =>
+      new CatalogError(
+        502,
+        'INVALID_UPSTREAM',
+        'A PokéAPI retornou um recurso de tipo incompatível ou excessivo.',
+      );
+    const length = response.headers.get('content-length');
+    if (length && /^\d+$/.test(length) && Number(length) > maxBytes) {
+      void response.body?.cancel().catch(() => {});
+      throw invalid();
+    }
+    const reader = response.body?.getReader();
+    if (!reader) throw invalid();
+    const chunks: Uint8Array[] = [];
+    let size = 0,
+      complete = false;
+    try {
+      for (;;) {
+        const result = await reader.read();
+        if (result.done) {
+          complete = true;
+          break;
+        }
+        size += result.value.byteLength;
+        if (size > maxBytes) throw invalid();
+        chunks.push(result.value);
+      }
+    } finally {
+      if (!complete) void reader.cancel().catch(() => {});
+      reader.releaseLock();
+    }
+    const bytes = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    try {
+      return JSON.parse(
+        new TextDecoder('utf-8', { fatal: true }).decode(bytes),
+      );
+    } catch {
+      throw invalid();
+    }
+  }
+
   private async request<T>(
     path: string,
     schema: z.ZodType<T>,
     missingPokemon = false,
+    maxBytes?: number,
   ): Promise<T> {
     for (let attempt = 0; attempt < 2; attempt++) {
       const controller = new AbortController();
@@ -173,6 +279,8 @@ export class PokeApiAdapter {
             headers: { accept: 'application/json' },
           },
         );
+        // Release unread error bodies before retry/admission cleanup.
+        if (!response.ok) void response.body?.cancel().catch(() => {});
         if (response.status === 404 && missingPokemon)
           throw new CatalogError(
             404,
@@ -185,7 +293,11 @@ export class PokeApiAdapter {
             'UPSTREAM_UNAVAILABLE',
             'A PokéAPI está temporariamente indisponível.',
           );
-        const raw = schema.safeParse(await response.json());
+        const raw = schema.safeParse(
+          maxBytes
+            ? await this.boundedJson(response, maxBytes)
+            : await response.json(),
+        );
         if (!raw.success)
           throw new CatalogError(
             502,

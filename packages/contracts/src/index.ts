@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { POKEMON_TYPES, STAT_NAMES } from '@pokelab/pokemon-domain';
 import { identifierSchema } from './identifiers.js';
 import { pokemonPageSchema } from './pagination.js';
+import { pokemonTypeSchema } from './type-filter.js';
 export { identifierSchema } from './identifiers.js';
 
 export const artworkSchema = z
@@ -127,5 +128,11 @@ export const pokemonPageResponseSchema = pokemonPageSchema.safeExtend({
   meta: sourceMetadataSchema,
 });
 export type PokemonPageResponse = z.infer<typeof pokemonPageResponseSchema>;
+export const pokemonCatalogPageResponseSchema =
+  pokemonPageResponseSchema.safeExtend({ type: pokemonTypeSchema.optional() });
+export type PokemonCatalogPageResponse = z.infer<
+  typeof pokemonCatalogPageResponseSchema
+>;
 
 export * from './pagination.js';
+export * from './type-filter.js';
