@@ -1,7 +1,46 @@
-# Public API — M0, PL-001 and PL-002
+# Public API — M0 and M1 increments
 
 Development origin: `http://localhost:3001`. OpenAPI UI: `/docs`, JSON: `/docs-json`.
 `GET /v1/pokemon`, `GET /v1/pokemon/summaries` and `GET /v1/pokemon/:idOrName` are public and read-only.
+
+## Single-type reference filtering — PL-005
+
+`GET /v1/pokemon?type=electric&page=1&pageSize=20` returns the existing page envelope,
+plus `type: 'electric'`. Omitting `type` preserves the original unfiltered response shape
+without a `type` property. Pagination defaults/bounds stay page 1–1000 and size 1–50,
+default size 20. The shared `pokemonCatalogPageResponseSchema` documents both shapes.
+
+- One canonical lowercase name from the existing 18-type enum. Empty, whitespace/case
+  variants, numeric type IDs, repeated/array values and comma-separated selections are
+  rejected. `search`, `generation` and other unsupported combinations return 400
+  `INVALID_PAGINATION` before upstream access. No silent AND/OR or type alias behavior.
+- The adapter performs one constructed `/api/v2/type/{type}` request per attempt. Its
+  `pokemon` membership is validated for requested type name, slots 1/2, exact canonical
+  Pokémon URLs and unique normalized entry IDs/names. Referenced URLs are never followed.
+  There is no list/detail/species fan-out. Primary and secondary type memberships count.
+- Current PokéAPI entry/form membership only; neither species deduplication, generation
+  introduction nor historical type changes/battle effects are inferred. Results are sorted
+  by numeric entry ID. Total is the validated index length, never a hardcoded catalog count.
+- One normalized persistent index per type:
+  `pokeapi-v2:normalized-v1:pokemon-type-index/{type}`. Pages/sizes share in-flight work
+  and cache entries; no per-page index duplication. A second API/service instance reads
+  the same PostgreSQL payload. Cached identity, sortedness and uniqueness are revalidated.
+- Maximum 10,000 references and 1,048,576 streamed/decompressed response bytes. An oversized
+  declared Content-Length is rejected early; missing or misleading lengths cannot bypass
+  streamed byte counting. Invalid JSON/UTF-8, excessive data, wrong type and malformed or
+  duplicate references return 502 `INVALID_UPSTREAM`, with no retry. Interrupted streams,
+  network errors, unavailable HTTP statuses (including a missing supported type resource)
+  use the existing bounded retry/503 policy. Unread error bodies are cancelled before retry.
+- Type-index loading uses the shared four-slot admission budget, including cache reads.
+  An in-flight index can be joined by other pages even when all slots are occupied; a
+  new index/page/detail beyond the limit returns 503 `CATALOG_BUSY`. No unbounded queue.
+- Existing cache TTL (24h default) and stale policy apply. Page `meta` preserves the index's
+  original `fetchedAt`; validated expired data may rescue upstream failure with `stale: true`.
+  Invalid/wrong-type cache content cannot be used as fresh or stale data. Beyond-total
+  pages return HTTP 200 with `items: []`, `hasNext: false` and the selected type.
+- This is an API increment. The `/pokedex` web parser and controls still do not accept
+  type filtering; PL-006 will add filter-aware URL/pagination/detail-return behavior.
+  No dependency, environment or migration changes.
 
 ## Bounded card summaries — PL-002
 
@@ -83,9 +122,10 @@ from an ID. Entry IDs can differ from species IDs. `PokemonCard` accepts this DT
 
 - Defaults: page 1, page size 20. Bounds: page 1–1000, page size 1–50;
   maximum offset 49,950. Only canonical positive integer query strings are accepted.
-- Unknown fields (including `search`, `type`, `generation`, `offset`, `limit`) and
-  repeated/array fields return 400 `INVALID_PAGINATION`. List search and type/generation
-  filters remain unsupported; PL-004 web exact lookup uses the separate detail endpoint.
+- Unknown fields (including `search`, `generation`, `offset`, `limit`) and repeated/array
+  fields return 400 `INVALID_PAGINATION`. PL-005 adds the optional single-type variant
+  documented above; list search and generation filters remain unsupported. PL-004 web
+  exact lookup uses the separate detail endpoint.
 - One attempt calls the constructed `/api/v2/pokemon/?limit=…&offset=…` path.
   Entry reference URLs must match the exact Pokémon resource origin/path and a
   supported numeric ID. Reference, next and previous URLs are never followed.

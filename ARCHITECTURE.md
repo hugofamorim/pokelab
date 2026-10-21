@@ -90,7 +90,24 @@ There is no separate summary cache, eager list enrichment or new infrastructure.
 per-item failures return explicit unavailable results; unexpected failures use the sanitized
 HTTP error envelope. The proposed search/filter API below remains future work.
 
-- GET `/v1/pokemon?search=&type=&generation=&page=&pageSize=` -> `{items, page, pageSize, total?, hasNext}`; bounded pageSize <=50.
+PL-005 implements only the optional single-type filter on `GET /v1/pokemon`. Canonical
+18-type names share pagination validation; multi-type, search and generation combinations
+remain rejected. The adapter constructs `/type/{type}`, validates requested type identity,
+slot (1/2), canonical Pokémon reference URLs and unique IDs/names, then sorts references
+by Pokémon entry ID. Forms remain separate entries; no species IDs or detail data are inferred.
+The source body is limited to 1 MiB of streamed/decompressed bytes (also rejecting an
+oversized declared length), and normalized indexes allow at most 10,000 members.
+
+Each type has one persistent `pokemon-type-index/{type}` cache key under the existing
+source/schema namespace. Different pages/sizes join the same in-flight index load; pages
+are projected after that load, avoiding nested admission or repeated page-level copies.
+Type loads share the existing four slots with pages/details and use the existing configurable
+24-hour default TTL/stale-if-error policy. Fresh/stale metadata belongs to the index and
+is preserved across pages. No distributed limiter, new database model, environment or dependency.
+Unread HTTP error bodies are cancelled before retries. Type resource schema/byte failures
+are 502 without retry; transport/HTTP failures retain one bounded retry and 503 handling.
+
+- Implemented: GET `/v1/pokemon?type=&page=&pageSize=` -> bounded references and source metadata, optional single-type identity. List-level search and generation/multi-type combinations remain future work; exact web search uses detail lookup.
 - GET `/v1/pokemon/:idOrName` -> normalized detail, explicit form metadata.
 - GET `/v1/pokemon/:idOrName/evolution` -> normalized evolution chain.
 - GET `/v1/types` -> supported type chart/ruleset list.

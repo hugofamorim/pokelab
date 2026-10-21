@@ -19,15 +19,19 @@ subsequently merged the same validated PL-002 commits into `main`. See
 PL-003 (`feat/pl-003-catalog-ui`) adds the responsive `/pokedex` UI with URL pagination,
 progressive summary batches, failure/retry/empty/stale states and page-preserving detail
 navigation. PR #5 was merged into the old PL-002 branch after #4 reached `main`;
-[integration PR #6](https://github.com/hugofamorim/pokelab/pull/6) brings PL-003 to `main`. See
+[integration PR #6](https://github.com/hugofamorim/pokelab/pull/6) subsequently merged PL-003 into `main`. See
 [`docs/PL-003_VALIDATION.md`](docs/PL-003_VALIDATION.md).
 PL-004 (`feat/pl-004-name-id-search`) adds exact name/ID lookup with URL state, explicit
 submission, debounced validation, clear/Escape, failure/empty/stale states and search-aware
-detail return/history restoration. It targets `main`, depending on integration PR #6;
-the diff narrows automatically when #6 is merged. See
+detail return/history restoration. [PR #7](https://github.com/hugofamorim/pokelab/pull/7)
+was merged into `main` after #6. See
 [`docs/PL-004_VALIDATION.md`](docs/PL-004_VALIDATION.md).
-M1 as a whole is not complete: type/generation filters and detail enrichment remain.
-Next issue: PL-005, cached type-filter API with bounded pagination and membership validation.
+PL-005 (`feat/pl-005-type-filter-api`) starts from integrated `main` at `66ba715` and adds
+the single-type reference-list API, normalized persistent membership index, bounded source
+responses, shared admission/deduplication and offline tests. See
+[`docs/PL-005_VALIDATION.md`](docs/PL-005_VALIDATION.md).
+M1 as a whole is not complete: type filter UI, generation filters and detail enrichment remain.
+Next issue: PL-006, responsive type-filter controls with URL state and filter-aware return.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)
