@@ -5,11 +5,17 @@ import {
   pokemonSchema,
   pokemonListQuerySchema,
   pokemonPageSchema,
+  pokemonSummaryQuerySchema,
+  pokemonSummarySchema,
+  summaryUnavailableCodeSchema,
+  SUMMARY_LIMITS,
 } from '@pokelab/contracts';
 import type {
   PokemonResponse,
   PokemonPageResponse,
   SourceMetadata,
+  PokemonSummariesResponse,
+  PokemonSummaryResult,
 } from '@pokelab/contracts';
 import { CONFIG } from './config.js';
 import type { Config } from './config.js';
@@ -26,6 +32,10 @@ export class CatalogService {
     Promise<PokemonPageResponse>
   >();
   private active = 0;
+  private readonly pendingSummaries = new Map<
+    string,
+    Promise<PokemonSummariesResponse>
+  >();
   constructor(
     @Inject(RESOURCE_CACHE) private readonly cache: ResourceCache,
     @Inject(PokeApiAdapter) private readonly adapter: PokeApiAdapter,
@@ -43,7 +53,14 @@ export class CatalogService {
     const identifier = parsed.data;
     const key = `pokeapi-v2:normalized-v1:pokemon/${identifier}`;
     return this.admit(this.pendingDetails, key, () =>
-      this.load(key, pokemonSchema, () => this.adapter.get(identifier)),
+      this.load(
+        key,
+        pokemonSchema.refine(
+          (value) =>
+            !/^\d+$/.test(identifier) || value.id === Number(identifier),
+        ),
+        () => this.adapter.get(identifier),
+      ),
     );
   }
 
@@ -67,6 +84,70 @@ export class CatalogService {
       );
       return { ...result.data, meta: result.meta };
     });
+  }
+
+  async summaries(input: unknown): Promise<PokemonSummariesResponse> {
+    const parsed = pokemonSummaryQuerySchema.safeParse(input);
+    if (!parsed.success)
+      throw new CatalogError(
+        400,
+        'INVALID_SUMMARY_QUERY',
+        'Use ids com 1 a 12 IDs distintos, separados por vírgula.',
+      );
+    const { ids } = parsed.data;
+    const key = ids.join(',');
+    const existing = this.pendingSummaries.get(key);
+    if (existing) return existing;
+    if (this.pendingSummaries.size >= SUMMARY_LIMITS.maxBatches)
+      throw new CatalogError(
+        503,
+        'CATALOG_BUSY',
+        'Muitos lotes em andamento. Tente novamente em instantes.',
+      );
+    // Batch admission is separate: workers use the existing global four detail/list slots.
+    const task = this.enrichSummaries(ids).finally(() =>
+      this.pendingSummaries.delete(key),
+    );
+    this.pendingSummaries.set(key, task);
+    return task;
+  }
+
+  private async enrichSummaries(
+    ids: number[],
+  ): Promise<PokemonSummariesResponse> {
+    const items: PokemonSummaryResult[] = [];
+    let next = 0;
+    const worker = async () => {
+      while (next < ids.length) {
+        const index = next++;
+        const id = ids[index]!;
+        try {
+          const result = await this.get(String(id));
+          items[index] = {
+            id,
+            status: 'ready',
+            data: pokemonSummarySchema.parse(result.data),
+            meta: result.meta,
+          };
+        } catch (error) {
+          const code = summaryUnavailableCodeSchema.safeParse(
+            error instanceof CatalogError ? error.code : undefined,
+          );
+          if (!code.success) throw error;
+          items[index] = { id, status: 'unavailable', code: code.data };
+        }
+      }
+    };
+    // allSettled keeps the batch admitted until all workers have released their slots.
+    const workers = await Promise.allSettled(
+      Array.from(
+        { length: Math.min(ids.length, SUMMARY_LIMITS.workers) },
+        worker,
+      ),
+    );
+    for (const result of workers)
+      if (result.status === 'rejected') throw result.reason;
+    return { items };
   }
 
   private admit<T>(

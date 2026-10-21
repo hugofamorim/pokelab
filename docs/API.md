@@ -1,7 +1,62 @@
-# Public API — M0 and PL-001
+# Public API — M0, PL-001 and PL-002
 
 Development origin: `http://localhost:3001`. OpenAPI UI: `/docs`, JSON: `/docs-json`.
-`GET /v1/pokemon` and `GET /v1/pokemon/:idOrName` are public and read-only.
+`GET /v1/pokemon`, `GET /v1/pokemon/summaries` and `GET /v1/pokemon/:idOrName` are public and read-only.
+
+## Bounded card summaries — PL-002
+
+`GET /v1/pokemon/summaries?ids=1,25,10025` returns ordered results:
+
+```ts
+{
+  items: (
+    | {
+        id: number;
+        status: 'ready';
+        data: PokemonSummary;
+        meta: { source: 'pokeapi-v2'; fetchedAt: string; stale: boolean };
+      }
+    | {
+        id: number;
+        status: 'unavailable';
+        code: 'POKEMON_NOT_FOUND' | 'INVALID_UPSTREAM' | 'UPSTREAM_UNAVAILABLE'
+          | 'CACHE_UNAVAILABLE' | 'CATALOG_BUSY';
+      }
+  )[];
+}
+```
+
+`PokemonSummary` is a projection of the shared detail schema: `id`, `name`, `species`
+(`id`, `name`), `isDefault`, nullable `artwork`, and one or two validated `types`.
+Types and image URLs come from validated detail responses; no URL or type is inferred
+from an ID. Entry IDs can differ from species IDs. `PokemonCard` accepts this DTO.
+
+- Required `ids`: comma-separated canonical integers 1–999999, 1–12 distinct IDs,
+  maximum 83 characters. No names, whitespace, leading zeroes, repeated parameters,
+  extra query fields or duplicate IDs. Invalid queries return 400 `INVALID_SUMMARY_QUERY`
+  before any upstream call. Summary routing precedes dynamic detail routing.
+- HTTP 200 can contain ready and unavailable items, even when all items are unavailable.
+  Missing artwork remains `null` on a ready item. An unavailable item has no data/freshness;
+  clients can join its ID with the reference page for its label. Missing entries are not
+  removed from the result. Unexpected internal failures return sanitized HTTP 500.
+- At most two workers per batch, with no unbounded queue. They use the existing four
+  admission slots shared with page/detail requests, including cache reads. Under contention,
+  affected items can report `CATALOG_BUSY`; the client may retry explicitly.
+- At most two distinct in-flight batches per instance. An identical ordered ID list joins
+  its in-flight batch; a third distinct batch returns HTTP 503 `CATALOG_BUSY`. Reordering
+  IDs changes the batch key, but overlapping detail keys still deduplicate.
+- A cold batch of 12 IDs makes at most 12 detail requests plus one transient retry each
+  (24 upstream attempts), never a list/species request. Each attempt retains the configured
+  timeout. Six two-worker waves mean a slow cold batch can take roughly 62 seconds at the
+  default timeout (roughly 182 seconds at the maximum setting). This is bounded enrichment,
+  not a measured low-latency catalog guarantee; future UI should request visible groups
+  and render reference placeholders without waiting for all details.
+- Existing persistent normalized detail entries are reused, not copied into a second
+  summary cache. Each ready item exposes its own original freshness, including stale
+  fallback. Failures are never persisted as successful detail or summary data.
+- Numeric detail reads and upstream responses must match the requested entry ID. An
+  otherwise valid cached Pokémon under a different numeric key cannot be served or used
+  as stale fallback. No new dependency, environment variable or database migration.
 
 ## Paginated entry references — PL-001
 
@@ -36,7 +91,7 @@ Development origin: `http://localhost:3001`. OpenAPI UI: `/docs`, JSON: `/docs-j
   supported numeric ID. Reference, next and previous URLs are never followed.
 - Entries are Pokémon/form-specific references, not species. No artwork, types,
   species or detail requests are invented or inferred for a list item. Card-summary
-  enrichment is the next issue, with its own request budget.
+  enrichment is explicit through the separate PL-002 endpoint and request budget above.
 - `total` comes from the validated upstream count, not a pinned Pokémon/species total.
   `hasNext` is computed from offset, returned length and total. A page beyond the
   total returns 200 with an empty `items` array and `hasNext: false`.

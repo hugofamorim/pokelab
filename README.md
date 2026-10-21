@@ -4,6 +4,8 @@ An independent, open-source Pokémon discovery and strategy studio. M0 implement
 
 M1 has begun with **PL-001**: [paginated entry references](http://127.0.0.1:3001/v1/pokemon?page=1&pageSize=20), with strict query bounds, persistent caching and no detail fan-out. This is an API increment; the browsing UI and search/type/generation filters are still pending.
 
+**PL-002** adds [card summaries](http://127.0.0.1:3001/v1/pokemon/summaries?ids=1,25,10025): up to 12 distinct entry IDs, real types/artwork, explicit form/species identity and per-item availability/freshness. Two workers reuse the detail cache; two admitted batches share the existing four request slots. `PokemonCard` accepts the shared summary DTO.
+
 ## Run locally
 
 Requirements: Node **24.20.0**, pnpm **12.6.0**, Docker with Compose. Exact dependencies are committed in `pnpm-lock.yaml`. Ports: web 3000, API 3001, PostgreSQL 5432.
@@ -54,7 +56,7 @@ pnpm test:e2e
 
 Jest/Supertest cover the API using a captured PokéAPI fixture. A PostgreSQL integration test verifies persistence across clients. Vitest covers contracts, domain conversions and the web API client. Playwright starts an offline Nest fixture server and the production web app; it checks 375/768/1280/1600px, keyboard navigation, zoom and failure states. Browser artwork requests are blocked in offline tests; real artwork is verified separately. Screenshots go to ignored `artifacts/` and are uploaded by CI.
 
-See [M0 validation](docs/M0_VALIDATION.md) and [PL-001 validation](docs/PL-001_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
+See [M0 validation](docs/M0_VALIDATION.md), [PL-001 validation](docs/PL-001_VALIDATION.md) and [PL-002 validation](docs/PL-002_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
 
 ## Configuration
 
@@ -74,7 +76,7 @@ Environment files are ignored; only harmless examples are tracked. API validatio
 - [Domain rules](docs/DOMAIN_RULES.md), [design system](docs/POKELAB_DESIGN_SYSTEM.md), [agent instructions](AGENTS.md)
 - [Initial audit](docs/M0_AUDIT.md), [ADR-001](docs/adr/001-foundation.md), [API/cache policy](docs/API.md)
 
-Next smallest issue: **PL-002 — bounded card-summary enrichment**, reusing cached details with explicit concurrency/request budgets, before building the M1 browsing interface.
+Next smallest issue: **PL-003 — paginated browsing UI**, consuming references and summary batches with accessible loading, partial-error and empty states. Search/type/generation filters remain separate work. PL-002 depends on the open PL-001 PR; neither is merged automatically.
 
 ## Attribution
 
