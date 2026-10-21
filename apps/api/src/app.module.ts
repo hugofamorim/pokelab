@@ -6,6 +6,7 @@ import {
   pokemonResponseSchema,
   pokemonPageResponseSchema,
   PAGINATION_LIMITS,
+  pokemonSummariesResponseSchema,
 } from '@pokelab/contracts';
 import { CatalogService } from './catalog.service.js';
 import { CONFIG, configSchema } from './config.js';
@@ -62,6 +63,32 @@ export class PokemonController {
   })
   list(@Query() query: unknown) {
     return this.catalog.list(query);
+  }
+
+  @Get('summaries')
+  @ApiOperation({
+    summary:
+      'Up to 12 cached card summaries, ordered with per-item availability',
+  })
+  @ApiQuery({
+    name: 'ids',
+    required: true,
+    schema: { type: 'string', maxLength: 83, example: '1,25,10025' },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ordered results; unavailable items have no fabricated data',
+    schema: z.toJSONSchema(pokemonSummariesResponseSchema, {
+      target: 'openapi-3.0',
+    }) as SchemaObject,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid, repeated, excessive or unsupported query',
+  })
+  @ApiResponse({ status: 503, description: 'Batch admission limit reached' })
+  summaries(@Query() query: unknown) {
+    return this.catalog.summaries(query);
   }
 
   @Get(':idOrName')

@@ -240,7 +240,7 @@ describe('catalog cache and admission control', () => {
     releases.forEach((release) => release());
     await Promise.all(pending);
     fetcher.mockResolvedValue(response());
-    expect((await service.get('5')).data.id).toBe(25);
+    expect((await service.get('25')).data.id).toBe(25);
   });
 });
 

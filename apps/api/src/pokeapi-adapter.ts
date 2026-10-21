@@ -100,7 +100,10 @@ export class PokeApiAdapter {
         hidden: entry.is_hidden,
       })),
     });
-    if (!result.success)
+    if (
+      !result.success ||
+      (/^\d+$/.test(parsed.data) && result.data.id !== Number(parsed.data))
+    )
       throw new CatalogError(
         502,
         'INVALID_UPSTREAM',
