@@ -64,8 +64,13 @@ Inspected ignored screenshots: `artifacts/search-real-1600.png`,
 PL-002 is in `main` via PR #4. PL-003 PR #5 was merged into the old PL-002 branch
 afterward; [PR #6](https://github.com/hugofamorim/pokelab/pull/6) integrates the validated
 catalog into `main`. PL-004 also targets `main`: merge #6 first to narrow the PL-004 diff
-automatically. No retarget, force push or automatic merge is needed. Remote CI/review
-will be tracked by the published PL-004 PR.
+automatically. No retarget, force push or automatic merge is needed.
+[PR #7](https://github.com/hugofamorim/pokelab/pull/7) contains PL-004 and targets `main`.
+Implementation/documentation head `831d7f3` is checked by
+[Linux CI #27](https://github.com/hugofamorim/pokelab/actions/runs/39679457772);
+the [branch workflow history](https://github.com/hugofamorim/pokelab/actions/workflows/ci.yml?query=branch%3Afeat%2Fpl-004-name-id-search)
+tracks subsequent heads. PL-003 integration checks passed in
+[CI #25](https://github.com/hugofamorim/pokelab/actions/runs/39677226762).
 
 This increment is exact lookup, not a full searchable index. Type/generation filters,
 substring search and remaining detail resources need separate contracts. Existing alias
