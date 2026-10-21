@@ -1,0 +1,586 @@
+[
+  {
+    "id": 1,
+    "name": "bulbasaur",
+    "species": {
+      "id": 1,
+      "name": "bulbasaur"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png",
+    "types": ["grass", "poison"],
+    "heightMeters": 0.7,
+    "weightKg": 6.9,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 45
+      },
+      {
+        "name": "attack",
+        "value": 49
+      },
+      {
+        "name": "defense",
+        "value": 49
+      },
+      {
+        "name": "special-attack",
+        "value": 65
+      },
+      {
+        "name": "special-defense",
+        "value": 65
+      },
+      {
+        "name": "speed",
+        "value": 45
+      }
+    ],
+    "abilities": [
+      {
+        "name": "overgrow",
+        "hidden": false
+      },
+      {
+        "name": "chlorophyll",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "ivysaur",
+    "species": {
+      "id": 2,
+      "name": "ivysaur"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/2.png",
+    "types": ["grass", "poison"],
+    "heightMeters": 1,
+    "weightKg": 13,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 60
+      },
+      {
+        "name": "attack",
+        "value": 62
+      },
+      {
+        "name": "defense",
+        "value": 63
+      },
+      {
+        "name": "special-attack",
+        "value": 80
+      },
+      {
+        "name": "special-defense",
+        "value": 80
+      },
+      {
+        "name": "speed",
+        "value": 60
+      }
+    ],
+    "abilities": [
+      {
+        "name": "overgrow",
+        "hidden": false
+      },
+      {
+        "name": "chlorophyll",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "venusaur",
+    "species": {
+      "id": 3,
+      "name": "venusaur"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/3.png",
+    "types": ["grass", "poison"],
+    "heightMeters": 2,
+    "weightKg": 100,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 80
+      },
+      {
+        "name": "attack",
+        "value": 82
+      },
+      {
+        "name": "defense",
+        "value": 83
+      },
+      {
+        "name": "special-attack",
+        "value": 100
+      },
+      {
+        "name": "special-defense",
+        "value": 100
+      },
+      {
+        "name": "speed",
+        "value": 80
+      }
+    ],
+    "abilities": [
+      {
+        "name": "overgrow",
+        "hidden": false
+      },
+      {
+        "name": "chlorophyll",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "charmander",
+    "species": {
+      "id": 4,
+      "name": "charmander"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png",
+    "types": ["fire"],
+    "heightMeters": 0.6,
+    "weightKg": 8.5,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 39
+      },
+      {
+        "name": "attack",
+        "value": 52
+      },
+      {
+        "name": "defense",
+        "value": 43
+      },
+      {
+        "name": "special-attack",
+        "value": 60
+      },
+      {
+        "name": "special-defense",
+        "value": 50
+      },
+      {
+        "name": "speed",
+        "value": 65
+      }
+    ],
+    "abilities": [
+      {
+        "name": "blaze",
+        "hidden": false
+      },
+      {
+        "name": "solar-power",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "charmeleon",
+    "species": {
+      "id": 5,
+      "name": "charmeleon"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/5.png",
+    "types": ["fire"],
+    "heightMeters": 1.1,
+    "weightKg": 19,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 58
+      },
+      {
+        "name": "attack",
+        "value": 64
+      },
+      {
+        "name": "defense",
+        "value": 58
+      },
+      {
+        "name": "special-attack",
+        "value": 80
+      },
+      {
+        "name": "special-defense",
+        "value": 65
+      },
+      {
+        "name": "speed",
+        "value": 80
+      }
+    ],
+    "abilities": [
+      {
+        "name": "blaze",
+        "hidden": false
+      },
+      {
+        "name": "solar-power",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "charizard",
+    "species": {
+      "id": 6,
+      "name": "charizard"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png",
+    "types": ["fire", "flying"],
+    "heightMeters": 1.7,
+    "weightKg": 90.5,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 78
+      },
+      {
+        "name": "attack",
+        "value": 84
+      },
+      {
+        "name": "defense",
+        "value": 78
+      },
+      {
+        "name": "special-attack",
+        "value": 109
+      },
+      {
+        "name": "special-defense",
+        "value": 85
+      },
+      {
+        "name": "speed",
+        "value": 100
+      }
+    ],
+    "abilities": [
+      {
+        "name": "blaze",
+        "hidden": false
+      },
+      {
+        "name": "solar-power",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "squirtle",
+    "species": {
+      "id": 7,
+      "name": "squirtle"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png",
+    "types": ["water"],
+    "heightMeters": 0.5,
+    "weightKg": 9,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 44
+      },
+      {
+        "name": "attack",
+        "value": 48
+      },
+      {
+        "name": "defense",
+        "value": 65
+      },
+      {
+        "name": "special-attack",
+        "value": 50
+      },
+      {
+        "name": "special-defense",
+        "value": 64
+      },
+      {
+        "name": "speed",
+        "value": 43
+      }
+    ],
+    "abilities": [
+      {
+        "name": "torrent",
+        "hidden": false
+      },
+      {
+        "name": "rain-dish",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "wartortle",
+    "species": {
+      "id": 8,
+      "name": "wartortle"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/8.png",
+    "types": ["water"],
+    "heightMeters": 1,
+    "weightKg": 22.5,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 59
+      },
+      {
+        "name": "attack",
+        "value": 63
+      },
+      {
+        "name": "defense",
+        "value": 80
+      },
+      {
+        "name": "special-attack",
+        "value": 65
+      },
+      {
+        "name": "special-defense",
+        "value": 80
+      },
+      {
+        "name": "speed",
+        "value": 58
+      }
+    ],
+    "abilities": [
+      {
+        "name": "torrent",
+        "hidden": false
+      },
+      {
+        "name": "rain-dish",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "blastoise",
+    "species": {
+      "id": 9,
+      "name": "blastoise"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png",
+    "types": ["water"],
+    "heightMeters": 1.6,
+    "weightKg": 85.5,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 79
+      },
+      {
+        "name": "attack",
+        "value": 83
+      },
+      {
+        "name": "defense",
+        "value": 100
+      },
+      {
+        "name": "special-attack",
+        "value": 85
+      },
+      {
+        "name": "special-defense",
+        "value": 105
+      },
+      {
+        "name": "speed",
+        "value": 78
+      }
+    ],
+    "abilities": [
+      {
+        "name": "torrent",
+        "hidden": false
+      },
+      {
+        "name": "rain-dish",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "caterpie",
+    "species": {
+      "id": 10,
+      "name": "caterpie"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10.png",
+    "types": ["bug"],
+    "heightMeters": 0.3,
+    "weightKg": 2.9,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 45
+      },
+      {
+        "name": "attack",
+        "value": 30
+      },
+      {
+        "name": "defense",
+        "value": 35
+      },
+      {
+        "name": "special-attack",
+        "value": 20
+      },
+      {
+        "name": "special-defense",
+        "value": 20
+      },
+      {
+        "name": "speed",
+        "value": 45
+      }
+    ],
+    "abilities": [
+      {
+        "name": "shield-dust",
+        "hidden": false
+      },
+      {
+        "name": "run-away",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "name": "metapod",
+    "species": {
+      "id": 11,
+      "name": "metapod"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/11.png",
+    "types": ["bug"],
+    "heightMeters": 0.7,
+    "weightKg": 9.9,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 50
+      },
+      {
+        "name": "attack",
+        "value": 20
+      },
+      {
+        "name": "defense",
+        "value": 55
+      },
+      {
+        "name": "special-attack",
+        "value": 25
+      },
+      {
+        "name": "special-defense",
+        "value": 25
+      },
+      {
+        "name": "speed",
+        "value": 30
+      }
+    ],
+    "abilities": [
+      {
+        "name": "shed-skin",
+        "hidden": false
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "name": "butterfree",
+    "species": {
+      "id": 12,
+      "name": "butterfree"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/12.png",
+    "types": ["bug", "flying"],
+    "heightMeters": 1.1,
+    "weightKg": 32,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 60
+      },
+      {
+        "name": "attack",
+        "value": 45
+      },
+      {
+        "name": "defense",
+        "value": 50
+      },
+      {
+        "name": "special-attack",
+        "value": 90
+      },
+      {
+        "name": "special-defense",
+        "value": 80
+      },
+      {
+        "name": "speed",
+        "value": 70
+      }
+    ],
+    "abilities": [
+      {
+        "name": "compound-eyes",
+        "hidden": false
+      },
+      {
+        "name": "tinted-lens",
+        "hidden": true
+      }
+    ]
+  }
+]
