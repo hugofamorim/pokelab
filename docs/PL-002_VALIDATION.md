@@ -1,8 +1,10 @@
 # PL-002 — Bounded card-summary enrichment
 
 Validated locally on 2026-10-21. Branch: `feat/pl-002-card-summaries`, based on
-`feat/pl-001-paginated-catalog` at `e7f750e`. PL-001 PR #2 is still open; PL-002 is a
-separate dependent change, with no automatic merge. M1 remains incomplete.
+`feat/pl-001-paginated-catalog` at `e7f750e`. At validation time PL-001 PR #2 was open.
+It was subsequently merged into `main`; PL-002 PR #3 was merged into the PL-001 branch
+afterward. [PR #4](https://github.com/hugofamorim/pokelab/pull/4) integrates the same
+validated PL-002 commits into `main`. M1 remains incomplete.
 
 ## Acceptance and implementation
 
@@ -54,8 +56,8 @@ Encoded trailing newline returned 400; detail 25 and all three OpenAPI routes wo
 
 ## Review and limits
 
-Local gates passed. [PR #3](https://github.com/hugofamorim/pokelab/pull/3) is open for
-review and targets the PL-001 branch. Remote checks run on Linux and are tracked in
+Local gates passed. [PR #3](https://github.com/hugofamorim/pokelab/pull/3) was merged
+into the PL-001 branch; integration into `main` is tracked in PR #4. Remote checks run on Linux and are tracked in
 the [branch workflow history](https://github.com/hugofamorim/pokelab/actions/workflows/ci.yml?query=branch%3Afeat%2Fpl-002-card-summaries).
 The implementation and initial documentation head `9a40e6b` is checked by
 [CI run #13](https://github.com/hugofamorim/pokelab/actions/runs/39671931031).

@@ -1,10 +1,12 @@
 # PokéLab — Trainer Studio
 
-An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. Catalog browsing, team building, analysis, accounts and cloud saves remain future milestones.
+An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 now includes paginated catalog browsing. Search/filters, team building, analysis, accounts and cloud saves remain future work.
 
-M1 has begun with **PL-001**: [paginated entry references](http://127.0.0.1:3001/v1/pokemon?page=1&pageSize=20), with strict query bounds, persistent caching and no detail fan-out. This is an API increment; the browsing UI and search/type/generation filters are still pending.
+**PL-001** provides [paginated entry references](http://127.0.0.1:3001/v1/pokemon?page=1&pageSize=20), with strict query bounds, persistent caching and no detail fan-out.
 
 **PL-002** adds [card summaries](http://127.0.0.1:3001/v1/pokemon/summaries?ids=1,25,10025): up to 12 distinct entry IDs, real types/artwork, explicit form/species identity and per-item availability/freshness. Two workers reuse the detail cache; two admitted batches share the existing four request slots. `PokemonCard` accepts the shared summary DTO.
+
+**PL-003** adds [the Pokédex](http://localhost:3000/pokedex): 12 references per page, progressive types/artwork in sequential four-ID batches, explicit partial failure/retry, empty and stale states, URL pagination and a detail return link that preserves the originating page. Desktop uses a three-column grid at wide widths; tablet uses two columns and mobile uses full-width cards. No search/filter controls are shown before their APIs exist.
 
 ## Run locally
 
@@ -21,7 +23,7 @@ pnpm build
 pnpm dev
 ```
 
-Open [the app](http://localhost:3000/pokemon/25), [normalized JSON](http://localhost:3001/v1/pokemon/25), or [OpenAPI documentation](http://localhost:3001/docs). `/` redirects to Pikachu. Individual Pokémon can be opened by ID/name, e.g. `/pokemon/bulbasaur`. UI is Brazilian Portuguese; source ability names remain English.
+Open [the app](http://localhost:3000/pokedex), [normalized JSON](http://localhost:3001/v1/pokemon/25), or [OpenAPI documentation](http://localhost:3001/docs). `/` redirects to `/pokedex`; `/pokedex?page=2` is directly shareable. Individual Pokémon can be opened by ID/name, e.g. `/pokemon/bulbasaur`. UI is Brazilian Portuguese; source ability names remain English.
 
 For production smoke testing, use two terminals: `pnpm --filter @pokelab/api start` and `pnpm --filter @pokelab/web start`. The API binds to loopback; public deployment needs hosting/reverse-proxy configuration and operational hardening. Never expose development database credentials. `docker compose stop` preserves the database volume.
 
@@ -56,7 +58,7 @@ pnpm test:e2e
 
 Jest/Supertest cover the API using a captured PokéAPI fixture. A PostgreSQL integration test verifies persistence across clients. Vitest covers contracts, domain conversions and the web API client. Playwright starts an offline Nest fixture server and the production web app; it checks 375/768/1280/1600px, keyboard navigation, zoom and failure states. Browser artwork requests are blocked in offline tests; real artwork is verified separately. Screenshots go to ignored `artifacts/` and are uploaded by CI.
 
-See [M0 validation](docs/M0_VALIDATION.md), [PL-001 validation](docs/PL-001_VALIDATION.md) and [PL-002 validation](docs/PL-002_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
+See [M0 validation](docs/M0_VALIDATION.md), [PL-001 validation](docs/PL-001_VALIDATION.md), [PL-002 validation](docs/PL-002_VALIDATION.md) and [PL-003 validation](docs/PL-003_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
 
 ## Configuration
 
@@ -76,10 +78,10 @@ Environment files are ignored; only harmless examples are tracked. API validatio
 - [Domain rules](docs/DOMAIN_RULES.md), [design system](docs/POKELAB_DESIGN_SYSTEM.md), [agent instructions](AGENTS.md)
 - [Initial audit](docs/M0_AUDIT.md), [ADR-001](docs/adr/001-foundation.md), [API/cache policy](docs/API.md)
 
-Next smallest issue: **PL-003 — paginated browsing UI**, consuming references and summary batches with accessible loading, partial-error and empty states. Search/type/generation filters remain separate work. PL-002 depends on the open PL-001 PR; neither is merged automatically.
+Next smallest issue: **PL-004 — name/ID search**, with explicit matching semantics and URL state. Type/generation filters and detail enrichment remain separate M1 work. PL-002 was merged into the PL-001 branch after PL-001 reached `main`; [integration PR #4](https://github.com/hugofamorim/pokelab/pull/4) brings the validated summaries into `main`. PL-003 is stacked on PL-002 until that integration is merged. No PR is merged automatically.
 
 ## Attribution
 
-Data: [PokéAPI v2](https://pokeapi.co/docs/v2), following its fair-use/caching policy. Test fixture captured from `/api/v2/pokemon/25` on 2026-10-21. Artwork is referenced from PokéAPI's sprite repository, never presented as original work. Nunito Sans/Fontsource and Lucide ship their respective licenses. Supplied brand assets remain in `pokelab-assets/`; only the logo is installed in the app.
+Data: [PokéAPI v2](https://pokeapi.co/docs/v2), following its fair-use/caching policy. Test fixtures captured from `/api/v2/pokemon/25` and a single visible 12-entry page through the normalized NestJS API on 2026-10-21. The offline browser catalog deliberately uses a small thirteen-entry fixture set; its totals/order are test scenarios, not production catalog facts. Artwork is referenced from PokéAPI's sprite repository, never presented as original work. Nunito Sans/Fontsource and Lucide ship their respective licenses. Supplied brand assets remain in `pokelab-assets/`; only the logo is installed in the app.
 
 Pokémon and associated names/artwork belong to their respective rights holders. This unofficial educational/portfolio project is not affiliated with or endorsed by Nintendo, Game Freak, Creatures or The Pokémon Company. Review asset rights before production publication.

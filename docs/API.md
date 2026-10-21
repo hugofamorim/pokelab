@@ -160,3 +160,22 @@ failures are sanitized to 500. Errors are not persisted as successful cache entr
   edge controls are deployment work, not evidence of load-tested production readiness.
 
 Upstream documentation and fair-use policy: [PokéAPI v2](https://pokeapi.co/docs/v2).
+
+## Web consumption — PL-003
+
+`/pokedex` uses fixed 12-entry reference pages and accepts only canonical `page` query
+strings (1–1000). Unknown, repeated or unsupported query fields show an explicit invalid
+page state. The browser requests summaries in sequential groups of four from the
+same-origin web route `GET /api/catalog/summaries?ids=…`. This is a Next.js gateway,
+not a second catalog service: it validates the shared bounded query, rejects repeated
+fields, forwards only the constructed NestJS summary path and validates returned IDs/order.
+Success and availability-error responses use `Cache-Control: no-store`; unsafe input
+returns 400 `INVALID_SUMMARY_QUERY`, upstream/validation failures return sanitized
+503 `CATALOG_UNAVAILABLE`. Upstream messages/traces are not forwarded.
+
+Reference fetch timeout is 15 seconds. The gateway retains a bounded 185-second timeout
+for the full twelve-ID API contract; the four-ID browser batches have a 70-second timeout
+and are cancelled on navigation. NestJS may finish admitted work after disconnect.
+No background page prefetch or automatic retry loop; failed IDs can be retried explicitly.
+The server API origin remains private to server modules; no new environment variable,
+public upstream access, dependency or migration is introduced.
