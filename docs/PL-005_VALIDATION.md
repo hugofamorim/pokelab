@@ -66,8 +66,11 @@ same persistent index, with 114 entries and expiry `2026-10-22T21:46:39.473Z`.
 
 ## Review and remaining work
 
-Local checks passed. The PL-005 PR targets `main`; remote CI/review will be linked after
-publication. No merge is performed automatically. Current type membership is not a
+Local checks passed. [PR #8](https://github.com/hugofamorim/pokelab/pull/8) targets `main`.
+Implementation/documentation head `e1543ae` is checked by
+[Linux CI #33](https://github.com/hugofamorim/pokelab/actions/runs/39681974160);
+the [branch workflow history](https://github.com/hugofamorim/pokelab/actions/workflows/ci.yml?query=branch%3Afeat%2Fpl-005-type-filter-api)
+tracks subsequent heads. No merge is performed automatically. Current type membership is not a
 generation filter or battle simulation. Existing stale-age cutoff, cache retention,
 alias duplication and distributed rate-limiting limitations remain.
 Next smallest issue: PL-006, responsive single-type controls with URL pagination/reset
