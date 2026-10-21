@@ -54,7 +54,11 @@ Encoded trailing newline returned 400; detail 25 and all three OpenAPI routes wo
 
 ## Review and limits
 
-Local gates passed. Remote CI and pull-request review are pending publication.
+Local gates passed. [PR #3](https://github.com/hugofamorim/pokelab/pull/3) is open for
+review and targets the PL-001 branch. Remote checks run on Linux and are tracked in
+the [branch workflow history](https://github.com/hugofamorim/pokelab/actions/workflows/ci.yml?query=branch%3Afeat%2Fpl-002-card-summaries).
+The implementation and initial documentation head `9a40e6b` is checked by
+[CI run #13](https://github.com/hugofamorim/pokelab/actions/runs/39671931031).
 Per-instance bounds do not replace deployment rate limiting. Cold batches can be slow
 under timeout/retry conditions; request budgets and worst-case timing are documented in
 `docs/API.md`. Existing alias cache duplication, lack of stale-age cutoff and cache
