@@ -340,6 +340,7 @@ describe('GET /v1/pokemon', () => {
     'page=1&page=2',
     'pageSize=1&pageSize=2',
     'page=1.2',
+    'page=1%0A',
     'search=pika',
     'type=grass',
     'generation=1',

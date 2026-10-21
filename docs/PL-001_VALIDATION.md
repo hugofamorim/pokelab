@@ -22,7 +22,7 @@ Branch: `feat/pl-001-paginated-catalog`. This does not complete M1.
 - `pnpm install --frozen-lockfile`: passed, no lockfile changes.
 - `pnpm db:migrate`: passed, no pending migrations.
 - `pnpm lint`, `pnpm typecheck`, `pnpm build`: passed.
-- `pnpm test`: 102 passed (domain 5, contracts 39, API 54, web client 4).
+- `pnpm test`: 105 passed (domain 5, contracts 41, API 55, web client 4).
 - `pnpm test:e2e`: 6 passed, preserving the existing detail experience at
   375/768/1280/1600px, missing/error/loading states, keyboard navigation and zoom.
 - Real API smoke: page 1/size 2 returned Bulbasaur #1 and Ivysaur #2, upstream total

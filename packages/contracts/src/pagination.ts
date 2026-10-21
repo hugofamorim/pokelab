@@ -16,6 +16,7 @@ export const pokemonPaginationSchema = z.strictObject({
 const queryInteger = z
   .string()
   .max(6)
+  .refine((value) => value === value.trim(), 'Whitespace is not allowed')
   .regex(/^[1-9]\d*$/)
   .transform(Number);
 export const pokemonListQuerySchema = z

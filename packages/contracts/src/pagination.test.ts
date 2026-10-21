@@ -18,6 +18,8 @@ describe('pagination contracts', () => {
     { page: '01' },
     { page: '' },
     { page: ' 1' },
+    { page: '1\n' },
+    { pageSize: '2\n' },
     { page: '1001' },
     { page: '999999999999999999' },
     { page: ['1', '2'] },
