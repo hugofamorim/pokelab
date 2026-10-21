@@ -34,9 +34,32 @@ async function start() {
     async () => {},
   );
   const getDetail = adapter.get.bind(adapter);
-  adapter.get = async (identifier) =>
-    catalog.find((item) => String(item.id) === identifier) ??
-    getDetail(identifier);
+  adapter.get = async (identifier) => {
+    if (identifier === 'ivysaur')
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+    if (identifier === 'venusaur')
+      throw new CatalogError(
+        503,
+        'UPSTREAM_UNAVAILABLE',
+        'Fonte indisponível.',
+      );
+    const captured = catalog.find(
+      (item) => String(item.id) === identifier || item.name === identifier,
+    );
+    if (captured) return captured;
+    if (
+      ['25', 'pikachu', 'slow', 'no-art', 'missing', 'unavailable'].includes(
+        identifier,
+      )
+    )
+      return getDetail(identifier);
+    throw new CatalogError(404, 'POKEMON_NOT_FOUND', 'Pokémon não encontrado.');
+  };
+  entries.set('pokeapi-v2:normalized-v1:pokemon/venusaur', {
+    payload: catalog.find((item) => item.name === 'venusaur'),
+    fetchedAt: new Date('2026-10-20T12:00:00Z'),
+    expiresAt: new Date(0),
+  });
   const references = [
     ...catalog.map(({ id, name }) => ({ id, name })),
     { id: 25, name: 'pikachu' },

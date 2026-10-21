@@ -4,20 +4,18 @@ import { PokemonDetail } from '../../../components/pokemon-detail';
 import { DataState, DetailSkeleton } from '../../../components/states';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { catalogHref, parseCatalogPage } from '../../../lib/catalog';
+import { catalogReturnHref } from '../../../lib/catalog-search';
 type PageProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 async function Detail({ params, searchParams }: PageProps) {
   const { id } = await params;
-  const fromPage = (await searchParams).fromPage;
-  const back =
-    parseCatalogPage(fromPage === undefined ? {} : { page: fromPage }) ?? 1;
+  const back = catalogReturnHref(await searchParams);
   const result = await getPokemon(id);
   return (
     <>
-      <Link className="detail-back" href={catalogHref(back)} prefetch={false}>
+      <Link className="detail-back" href={back} prefetch={false}>
         <ArrowLeft size={16} aria-hidden="true" />
         Voltar à Pokédex
       </Link>

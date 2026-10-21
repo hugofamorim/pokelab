@@ -8,16 +8,18 @@ import { POKEMON_TYPE_TOKENS } from '../lib/type-tokens';
 export function PokemonCard({
   pokemon,
   fromPage,
+  fromSearch,
 }: {
   pokemon: PokemonSummary;
   fromPage?: number;
+  fromSearch?: string;
 }) {
   const accent = POKEMON_TYPE_TOKENS[pokemon.types[0] ?? 'normal'];
   return (
     <Link
       className="pokemon-card"
       style={{ '--type-soft': accent.soft } as CSSProperties}
-      href={`/pokemon/${pokemon.id}${fromPage ? `?fromPage=${fromPage}` : ''}`}
+      href={`/pokemon/${pokemon.id}${fromSearch ? `?${new URLSearchParams({ fromSearch })}` : fromPage ? `?fromPage=${fromPage}` : ''}`}
       prefetch={false}
     >
       <div>
