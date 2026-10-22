@@ -10,6 +10,8 @@ import {
   pokemonSummarySchema,
   summaryUnavailableCodeSchema,
   SUMMARY_LIMITS,
+  generationSpeciesQuerySchema,
+  generationSpeciesIndexSchema,
 } from '@pokelab/contracts';
 import type {
   PokemonResponse,
@@ -19,6 +21,8 @@ import type {
   SourceMetadata,
   PokemonSummariesResponse,
   PokemonSummaryResult,
+  GenerationSpeciesIndex,
+  GenerationSpeciesPageResponse,
 } from '@pokelab/contracts';
 import { CONFIG } from './config.js';
 import type { Config } from './config.js';
@@ -35,6 +39,10 @@ export class CatalogService {
     Promise<PokemonPageResponse>
   >();
   private active = 0;
+  private readonly pendingGenerationIndexes = new Map<
+    string,
+    Promise<{ data: GenerationSpeciesIndex; meta: SourceMetadata }>
+  >();
   private readonly pendingTypeIndexes = new Map<
     string,
     Promise<{ data: PokemonTypeIndex; meta: SourceMetadata }>
@@ -115,6 +123,40 @@ export class CatalogService {
       );
       return { ...result.data, meta: result.meta };
     });
+  }
+
+  async speciesByGeneration(
+    input: unknown,
+  ): Promise<GenerationSpeciesPageResponse> {
+    const parsed = generationSpeciesQuerySchema.safeParse(input);
+    if (!parsed.success)
+      throw new CatalogError(
+        400,
+        'INVALID_GENERATION_QUERY',
+        'Use generation de 1 a 9, page de 1 a 1000 e pageSize de 1 a 50, sem outros filtros.',
+      );
+    const { generation, page, pageSize } = parsed.data;
+    const key = `pokeapi-v2:normalized-v1:generation-species-index/${generation}`;
+    const result = await this.admit(this.pendingGenerationIndexes, key, () =>
+      this.load(
+        key,
+        generationSpeciesIndexSchema.refine(
+          (value) => value.generation.id === generation,
+        ),
+        () => this.adapter.generationIndex(generation),
+      ),
+    );
+    const offset = (page - 1) * pageSize;
+    const items = result.data.items.slice(offset, offset + pageSize);
+    return {
+      generation: result.data.generation,
+      items,
+      page,
+      pageSize,
+      total: result.data.items.length,
+      hasNext: offset + items.length < result.data.items.length,
+      meta: result.meta,
+    };
   }
 
   async summaries(input: unknown): Promise<PokemonSummariesResponse> {

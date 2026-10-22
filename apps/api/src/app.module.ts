@@ -14,6 +14,7 @@ import { CONFIG, configSchema } from './config.js';
 import type { Config } from './config.js';
 import { PrismaCache, RESOURCE_CACHE } from './cache.js';
 import { PokeApiAdapter } from './pokeapi-adapter.js';
+import { SpeciesController } from './species.controller.js';
 
 @ApiTags('pokemon')
 @Controller('v1/pokemon')
@@ -125,7 +126,7 @@ export class PokemonController {
   }
 }
 @Module({
-  controllers: [PokemonController],
+  controllers: [PokemonController, SpeciesController],
   providers: [
     {
       provide: CONFIG,

@@ -3,6 +3,7 @@ import { POKEMON_TYPES, STAT_NAMES } from '@pokelab/pokemon-domain';
 import { identifierSchema } from './identifiers.js';
 import { pokemonPageSchema } from './pagination.js';
 import { pokemonTypeSchema } from './type-filter.js';
+import { generationSpeciesPageSchema } from './generation.js';
 export { identifierSchema } from './identifiers.js';
 
 export const artworkSchema = z
@@ -136,3 +137,11 @@ export type PokemonCatalogPageResponse = z.infer<
 
 export * from './pagination.js';
 export * from './type-filter.js';
+export * from './generation.js';
+export const generationSpeciesPageResponseSchema =
+  generationSpeciesPageSchema.safeExtend({
+    meta: sourceMetadataSchema,
+  });
+export type GenerationSpeciesPageResponse = z.infer<
+  typeof generationSpeciesPageResponseSchema
+>;

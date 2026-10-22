@@ -8,12 +8,17 @@ import {
   pokemonTypeSchema,
   pokemonTypeIndexSchema,
   TYPE_FILTER_LIMITS,
+  generationIdSchema,
+  generationSchema,
+  generationSpeciesIndexSchema,
+  GENERATION_LIMITS,
 } from '@pokelab/contracts';
 import type {
   Pokemon,
   PokemonPagination,
   PokemonPage,
   PokemonTypeIndex,
+  GenerationSpeciesIndex,
 } from '@pokelab/contracts';
 import { POKEMON_TYPES, STAT_NAMES, toMetric } from '@pokelab/pokemon-domain';
 import { CatalogError } from './errors.js';
@@ -211,6 +216,59 @@ export class PokeApiAdapter {
     return result.data;
   }
 
+  async generationIndex(input: number): Promise<GenerationSpeciesIndex> {
+    const generation = generationIdSchema.safeParse(input);
+    if (!generation.success)
+      throw new CatalogError(
+        400,
+        'INVALID_GENERATION',
+        'Use uma geração suportada de 1 a 9.',
+      );
+    const body = await this.request(
+      'generation/' + generation.data,
+      z
+        .object({
+          id: generationIdSchema,
+          name: generationSchema.shape.name,
+          pokemon_species: z
+            .array(
+              z.object({
+                name: identifierSchema,
+                url: z
+                  .string()
+                  .regex(
+                    /^https:\/\/pokeapi\.co\/api\/v2\/pokemon-species\/[1-9]\d{0,5}\/$/,
+                  ),
+              }),
+            )
+            .max(GENERATION_LIMITS.maxMembers),
+        })
+        .refine(
+          (value) =>
+            value.id === generation.data &&
+            generationSchema.safeParse(value).success,
+        ),
+      false,
+      GENERATION_LIMITS.maxResponseBytes,
+    );
+    const normalized = generationSpeciesIndexSchema.safeParse({
+      generation: { id: body.id, name: body.name },
+      items: body.pokemon_species
+        .map((species) => ({
+          speciesId: Number(species.url.split('/').at(-2)),
+          name: species.name,
+        }))
+        .sort((a, b) => a.speciesId - b.speciesId),
+    });
+    if (!normalized.success)
+      throw new CatalogError(
+        502,
+        'INVALID_UPSTREAM',
+        'A PokéAPI retornou espécies incompatíveis.',
+      );
+    return normalized.data;
+  }
+
   private async boundedJson(
     response: Response,
     maxBytes: number,
@@ -219,7 +277,7 @@ export class PokeApiAdapter {
       new CatalogError(
         502,
         'INVALID_UPSTREAM',
-        'A PokéAPI retornou um recurso de tipo incompatível ou excessivo.',
+        'A PokéAPI retornou um recurso incompatível ou excessivo.',
       );
     const length = response.headers.get('content-length');
     if (length && /^\d+$/.test(length) && Number(length) > maxBytes) {
