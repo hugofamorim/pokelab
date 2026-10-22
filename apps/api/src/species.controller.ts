@@ -6,6 +6,7 @@ import {
   generationSpeciesPageResponseSchema,
   GENERATION_NAMES,
   PAGINATION_LIMITS,
+  defaultVarietiesResponseSchema,
 } from '@pokelab/contracts';
 import { CatalogService } from './catalog.service.js';
 
@@ -15,6 +16,39 @@ export class SpeciesController {
   constructor(
     @Inject(CatalogService) private readonly catalog: CatalogService,
   ) {}
+
+  @Get('default-varieties')
+  @ApiOperation({
+    summary:
+      'Resolve up to 12 explicit species IDs to their upstream default Pokémon variety; no Pokémon detail fan-out',
+  })
+  @ApiQuery({
+    name: 'speciesIds',
+    required: true,
+    schema: { type: 'string', maxLength: 83, example: '1,413' },
+    description:
+      'Distinct canonical species IDs 1–999999, comma separated; input order is preserved',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Ordered mappings with independent per-species availability and freshness',
+    schema: z.toJSONSchema(defaultVarietiesResponseSchema, {
+      target: 'openapi-3.0',
+    }) as SchemaObject,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Missing, repeated, excessive, invalid or unsupported query parameters',
+  })
+  @ApiResponse({
+    status: 503,
+    description: 'Distinct species batch admission limit reached',
+  })
+  defaultVarieties(@Query() query: unknown) {
+    return this.catalog.defaultVarieties(query);
+  }
 
   @Get()
   @ApiOperation({

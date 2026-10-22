@@ -1,9 +1,12 @@
 import { z } from 'zod';
 import { POKEMON_TYPES, STAT_NAMES } from '@pokelab/pokemon-domain';
 import { identifierSchema } from './identifiers.js';
-import { pokemonPageSchema } from './pagination.js';
+import { pokemonPageSchema, pokemonReferenceSchema } from './pagination.js';
 import { pokemonTypeSchema } from './type-filter.js';
-import { generationSpeciesPageSchema } from './generation.js';
+import {
+  generationSpeciesPageSchema,
+  speciesReferenceSchema,
+} from './generation.js';
 export { identifierSchema } from './identifiers.js';
 
 export const artworkSchema = z
@@ -144,4 +147,62 @@ export const generationSpeciesPageResponseSchema =
   });
 export type GenerationSpeciesPageResponse = z.infer<
   typeof generationSpeciesPageResponseSchema
+>;
+
+export const DEFAULT_VARIETY_LIMITS = {
+  maxIds: SUMMARY_LIMITS.maxIds,
+  workers: 2,
+  maxBatches: 2,
+  maxVarieties: 128,
+  maxResponseBytes: 1048576,
+} as const;
+export const defaultVarietyQuerySchema = z.strictObject({
+  speciesIds: pokemonSummaryQuerySchema.shape.ids,
+});
+export const defaultVarietyMappingSchema = z.strictObject({
+  species: speciesReferenceSchema,
+  pokemon: pokemonReferenceSchema,
+});
+export type DefaultVarietyMapping = z.infer<typeof defaultVarietyMappingSchema>;
+export const defaultVarietyResponseSchema = z.object({
+  data: defaultVarietyMappingSchema,
+  meta: sourceMetadataSchema,
+});
+export type DefaultVarietyResponse = z.infer<
+  typeof defaultVarietyResponseSchema
+>;
+export const defaultVarietyUnavailableCodeSchema = z.enum([
+  ...summaryUnavailableCodeSchema.options.filter(
+    (code) => code !== 'POKEMON_NOT_FOUND',
+  ),
+  'SPECIES_NOT_FOUND',
+]);
+export const defaultVarietyResultSchema = z.discriminatedUnion('status', [
+  z
+    .object({
+      speciesId: speciesReferenceSchema.shape.speciesId,
+      status: z.literal('ready'),
+      data: defaultVarietyMappingSchema,
+      meta: sourceMetadataSchema,
+    })
+    .refine((item) => item.speciesId === item.data.species.speciesId),
+  z.object({
+    speciesId: speciesReferenceSchema.shape.speciesId,
+    status: z.literal('unavailable'),
+    code: defaultVarietyUnavailableCodeSchema,
+  }),
+]);
+export type DefaultVarietyResult = z.infer<typeof defaultVarietyResultSchema>;
+export const defaultVarietiesResponseSchema = z.object({
+  items: z
+    .array(defaultVarietyResultSchema)
+    .min(1)
+    .max(DEFAULT_VARIETY_LIMITS.maxIds)
+    .refine(
+      (items) =>
+        new Set(items.map((item) => item.speciesId)).size === items.length,
+    ),
+});
+export type DefaultVarietiesResponse = z.infer<
+  typeof defaultVarietiesResponseSchema
 >;
