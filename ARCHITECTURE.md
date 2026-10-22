@@ -119,6 +119,15 @@ Unread HTTP error bodies are cancelled before retries. Type resource schema/byte
 are 502 without retry; transport/HTTP failures retain one bounded retry and 503 handling.
 
 - Implemented: GET `/v1/pokemon?type=&page=&pageSize=` -> bounded references and source metadata, optional single-type identity. List-level search and generation/multi-type combinations remain future work; exact web search uses detail lookup.
+- PL-007: GET `/v1/pokemon-species?generation=1&page=1&pageSize=20` -> species
+  introduced in one supported generation (I–IX), sorted by explicit `speciesId`.
+  One constructed `/generation/{id}` request populates a normalized persistent index
+  per generation, with the existing TTL, stale-if-error, in-flight deduplication and
+  four shared admission slots. Pages/sizes project that index; no species/detail fan-out.
+  Generation ID/name, canonical species URLs, uniqueness, 10,000 members and 1 MiB
+  streamed/decompressed response bounds are validated. This separate route avoids
+  interpreting species IDs as form-specific Pokémon IDs. Default-variety resolution,
+  combined type/generation queries and visual generation controls require later work.
 - GET `/v1/pokemon/:idOrName` -> normalized detail, explicit form metadata.
 - GET `/v1/pokemon/:idOrName/evolution` -> normalized evolution chain.
 - GET `/v1/types` -> supported type chart/ruleset list.

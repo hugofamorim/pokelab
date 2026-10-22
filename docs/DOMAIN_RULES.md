@@ -30,6 +30,11 @@
 - Not all flavor entries have pt-BR; use en-US fallback with label indicating source language.
 - Some Pokémon artwork URLs are absent; use fallback illustration/icon with descriptive alt text.
 - Some forms and move pools differ by game; show 'unknown' rather than incorrect universal availability.
+- The generation membership index describes the generation in which a species was
+  introduced. It is not a regional Pokédex, game-availability list, historical typing
+  snapshot, or the generation in which every variety/form appeared. Species references
+  expose `speciesId`; resolve a default variety from validated species data before using
+  a Pokémon entry/detail/summary ID. Never infer that mapping from equal numeric IDs.
 
 ## Unit test matrix
 
