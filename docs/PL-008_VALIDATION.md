@@ -28,13 +28,13 @@ Source: [PokéAPI species varieties](https://pokeapi.co/docs/v2#pokemon-species)
 
 ## Verification
 
-| Check                                 | Result                                                           |
-| ------------------------------------- | ---------------------------------------------------------------- |
-| Frozen installation                   | Passed; lockfile/versions unchanged                              |
-| PostgreSQL / migration deployment     | Healthy; no pending migrations                                   |
-| Automated tests                       | 436 passed: domain 5, contracts 126, API 231, web 74             |
-| Final formatting/lint/typecheck/build | Passed after the search regression repair                        |
-| Browser regression                    | 20 passed before global timeout; per-file completion in progress |
+| Check                                 | Result                                                                  |
+| ------------------------------------- | ----------------------------------------------------------------------- |
+| Frozen installation                   | Passed; lockfile/versions unchanged                                     |
+| PostgreSQL / migration deployment     | Healthy; no pending migrations                                          |
+| Automated tests                       | 436 passed: domain 5, contracts 126, API 231, web 74                    |
+| Final formatting/lint/typecheck/build | Passed after the search regression repair                               |
+| Browser regression                    | All 29 scenarios covered locally; full-attempt/per-file breakdown below |
 
 There are 77 new contract/API cases: canonical query bounds, distinct IDs/names,
 order-independent explicit default selection, wrong species/default ambiguity, duplicates,
@@ -54,8 +54,11 @@ Existing keyboard/history/no-JavaScript submission checks are retained. This int
 repair introduces no visual redesign or generation control.
 
 The corrected full local run passed its first twenty scenarios without assertion errors,
-then hit the unchanged global limit before nine remaining scenarios. Those files are
-being verified separately locally; CI still runs the complete unchanged-timeout suite.
+then hit the unchanged global limit before nine remaining scenarios. The complete search
+file then passed all 9 tests, including initial/persisted pageshow and HTML submission;
+the complete type-filter file passed all 7 tests. Together with the 7 catalog and 6 detail
+tests already passed on the same final build, all 29 scenarios were covered locally.
+CI still runs the complete unchanged-timeout suite in one invocation.
 The local production web app uses port 3002 because another project owns port 3000;
 that process was inspected and left untouched. API remains on port 3001.
 
@@ -73,7 +76,21 @@ owning species `413 / wormadam` and `isDefault: true`. Invalid/repeated/combined
 queries returned 400 and OpenAPI exposed the new route. A separate Prisma process
 re-read and validated the same mapping with expiry `2026-10-23T19:11:19.174Z`.
 
-Publication and Linux CI verification pending.
+An additional real-browser smoke on port 3002 verified draft preservation through initial
+pageshow, exact Pikachu search, loaded official artwork and no JavaScript runtime errors,
+with desktop/mobile captures `artifacts/pl-008-live-search-{375,1600}.png`. The first
+attempt displayed the controlled unavailable state during an API `CACHE_UNAVAILABLE`;
+subsequent API and browser requests succeeded without code/environment changes. Both
+localhost and explicit IPv4 API requests were checked. Offline layout captures were also
+visually inspected, with artwork intentionally blocked by those tests.
+
+Review: [PR #11](https://github.com/hugofamorim/pokelab/pull/11) targets `main` without
+a stacked dependency. Implementation/documentation head `7aed4e6` was submitted to
+[Linux CI #48](https://github.com/hugofamorim/pokelab/actions/runs/39839931755).
+That run passed all checks, including 436 automated tests and all 29 browser scenarios
+together under the existing 180-second suite limit.
+The [branch workflow history](https://github.com/hugofamorim/pokelab/actions/workflows/ci.yml?query=branch%3Afeat%2Fpl-008-default-variety-resolution)
+tracks subsequent heads; PR checks provide the final Linux result. No automatic merge.
 
 ## Remaining work
 
