@@ -53,6 +53,17 @@ restores the committed URL term after React Activity or browser history-cache re
 Validated `fromSearch` constructs the internal detail return link. No list search/index,
 bulk fetch, new backend endpoint or direct browser upstream access is introduced.
 
+PL-006 connects the single-type index to `/pokedex?page=…&type=…`. The web parser
+accepts one canonical type with pagination, while exact search remains a separate mode.
+Selecting a type resets page/search; submitting search clears the filter. Filter links
+use the existing typed palette and disable speculative prefetch; mobile scrolls the
+chip row horizontally and desktop wraps it. The stable filter boundary reads committed
+URL state independently of streamed results. The server verifies returned page, size
+and type identity; grid boundaries include both page and type to discard obsolete loads.
+Validated `fromType` plus `fromPage` constructs internal return URLs for ready and
+unavailable cards. Retry/first-page recovery retains the active filter. No new API,
+dependency, database migration or environment variable is introduced.
+
 - Avoid runtime `fetch()` calls outside Suspense when `cacheComponents` is on. Separate cached public data from request-scoped private data. Use framework caching deliberately; do not mix private session data in shared cache.
 - Do not add route segment `dynamic = 'force-dynamic'` while Cache Components is enabled. Run `next build` in CI to catch prerender errors.
 

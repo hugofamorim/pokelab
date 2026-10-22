@@ -30,8 +30,11 @@ PL-005 (`feat/pl-005-type-filter-api`) starts from integrated `main` at `66ba715
 the single-type reference-list API, normalized persistent membership index, bounded source
 responses, shared admission/deduplication and offline tests. See
 [`docs/PL-005_VALIDATION.md`](docs/PL-005_VALIDATION.md).
-M1 as a whole is not complete: type filter UI, generation filters and detail enrichment remain.
-Next issue: PL-006, responsive type-filter controls with URL state and filter-aware return.
+PL-006 (`feat/pl-006-type-filter-ui`) builds on PL-005 with responsive single-type controls,
+URL pagination/reset, filter-aware detail return and offline browser coverage. See
+[`docs/PL-006_VALIDATION.md`](docs/PL-006_VALIDATION.md) for actual validation status.
+M1 as a whole is not complete: generation filters and detail enrichment remain.
+Next issue: PL-007, a bounded generation-reference API with explicit form/species semantics.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)
