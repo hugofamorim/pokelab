@@ -3,6 +3,52 @@
 Development origin: `http://localhost:3001`. OpenAPI UI: `/docs`, JSON: `/docs-json`.
 `GET /v1/pokemon`, `GET /v1/pokemon/summaries` and `GET /v1/pokemon/:idOrName` are public and read-only.
 
+## Species introduced in a generation — PL-007
+
+`GET /v1/pokemon-species?generation=1&page=1&pageSize=20` returns a
+`GenerationSpeciesPageResponse`: `generation: { id, name }`,
+`items: [{ speciesId, name }]`, `page`, `pageSize`, `total`, `hasNext` and `meta`.
+The schema is shared and exposed by OpenAPI. Items are species references, with no
+Pokémon entry ID, artwork, types, form metadata or implied default variety.
+
+- Required `generation`: one canonical numeric string 1–9, pinned supported scope I–IX
+  verified against the upstream generation list. Generation ID and canonical name must
+  agree. This is **species introduction**, not every Pokémon obtainable in a game, a
+  regional Pokédex, historical typing or a form's release generation.
+- Same pagination defaults/bounds as the entry route: page 1–1000 (default 1), size
+  1–50 (default 20). Missing/empty/unknown/repeated/comma-separated generation, names,
+  whitespace/leading-zero variants, invalid pagination and any extra parameter
+  (`type`, `search`, etc.) return 400 `INVALID_GENERATION_QUERY` before upstream access.
+  `/v1/pokemon?generation=…` remains unsupported: species and entries are distinct.
+- One constructed `/api/v2/generation/{id}` request per attempt. `pokemon_species`
+  references must use exact canonical `https://pokeapi.co/api/v2/pokemon-species/{id}/`
+  URLs, bounded IDs and valid names. URLs are parsed as identifiers and never followed.
+  Unique IDs/names are required; output is sorted by numeric species ID. No species or
+  Pokémon detail requests are made. Total is index length, never a production constant.
+- Persistent key: `pokeapi-v2:normalized-v1:generation-species-index/{id}`. All pages/sizes
+  share one index and in-flight load. Other generations/types/entry pages remain isolated.
+  Cache reads and upstream work share the existing four-slot admission budget. Existing
+  loads can be joined when saturated; new distinct work returns 503 `CATALOG_BUSY`.
+- Maximum 10,000 species references and 1,048,576 streamed/decompressed bytes. Oversized
+  declared lengths fail early; streamed bytes are counted regardless of header accuracy.
+  Wrong ID/name, invalid references/duplicates, excessive bodies, bad JSON/UTF-8 return
+  502 `INVALID_UPSTREAM` without retry. Transport interruption/timeouts/unavailable HTTP
+  statuses (including absent supported-generation resources) use one bounded retry,
+  then 503 `UPSTREAM_UNAVAILABLE`. Unread bodies are cancelled before retry.
+- Existing configurable TTL (24h default) and stale-if-error apply. Cache identity,
+  order and uniqueness are revalidated. Original index `fetchedAt` is retained across
+  pages and stale fallback. Database read failures return 503 `CACHE_UNAVAILABLE` without
+  upstream access; malformed/wrong-generation cache cannot rescue failures. Out-of-range
+  pages return 200 with `items: []`, `hasNext: false` and generation/freshness metadata.
+
+Before building generation cards, a later bounded resolver must read validated species
+`varieties` and select the explicit default Pokémon entry. Never reuse `speciesId` as
+a Pokémon ID or assume species names identify default varieties. Combined filters and
+visual generation controls remain unimplemented. No migration, env or dependency change.
+
+Source semantics: [PokéAPI Generations](https://pokeapi.co/docs/v2#generations),
+[Pokémon Species](https://pokeapi.co/docs/v2#pokemon-species).
+
 ## Single-type reference filtering — PL-005
 
 `GET /v1/pokemon?type=electric&page=1&pageSize=20` returns the existing page envelope,

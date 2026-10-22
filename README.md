@@ -1,6 +1,6 @@
 # PokéLab — Trainer Studio
 
-An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 includes browsing, exact name/ID search and responsive single-type filtering. Generation filters, team building, analysis, accounts and cloud saves remain future work.
+An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 includes browsing, exact name/ID search, responsive single-type filtering and a species-introduction generation API. Visual generation filters, team building, analysis, accounts and cloud saves remain future work.
 
 **PL-001** provides [paginated entry references](http://127.0.0.1:3001/v1/pokemon?page=1&pageSize=20), with strict query bounds, persistent caching and no detail fan-out.
 
@@ -13,6 +13,8 @@ An independent, open-source Pokémon discovery and strategy studio. M0 implement
 **PL-005** adds [single-type API filtering](http://127.0.0.1:3001/v1/pokemon?type=electric&page=1&pageSize=20). One validated membership index per type is cached in PostgreSQL, shared across pages/sizes and sorted by entry ID; no Pokémon detail fan-out. Responses include the selected type and original source freshness. Supported input is one of the existing 18 types, with page size 1–50. Type resources are capped at 1 MiB and 10,000 references.
 
 **PL-006** adds [type controls](http://localhost:3000/pokedex?page=1&type=electric): 18 accessible single-selection chips plus “Todos”, wrapping on desktop and scrolling horizontally on mobile. Selecting a type resets page/search; submitting a name/ID search clears the type. URL state survives pagination, reload, history and detail return, including unavailable cards. Error retry and first-page recovery preserve the selected type. Search plus type, multiple types and generation combinations are rejected explicitly.
+
+**PL-007** adds [species introduced in a generation](http://127.0.0.1:3001/v1/pokemon-species?generation=1&page=1&pageSize=20). Supported scope is I–IX; paginated results explicitly expose `speciesId`, generation identity and source freshness. One validated generation resource populates one persistent index, capped at 1 MiB/10,000 references and sharing existing request limits/cache policy. No species/detail fan-out or assumed species-to-form mapping. Default-variety resolution and visual generation controls follow separately.
 
 ## Run locally
 
@@ -64,7 +66,7 @@ pnpm test:e2e
 
 Jest/Supertest cover the API using a captured PokéAPI fixture. A PostgreSQL integration test verifies persistence across clients. Vitest covers contracts, domain conversions and the web API client. Playwright starts an offline Nest fixture server and the production web app; it checks 375/768/1280/1600px, keyboard navigation, zoom and failure states. Browser artwork requests are blocked in offline tests; real artwork is verified separately. Screenshots go to ignored `artifacts/` and are uploaded by CI.
 
-See [M0 validation](docs/M0_VALIDATION.md), [PL-001 validation](docs/PL-001_VALIDATION.md), [PL-002 validation](docs/PL-002_VALIDATION.md), [PL-003 validation](docs/PL-003_VALIDATION.md), [PL-004 validation](docs/PL-004_VALIDATION.md), [PL-005 validation](docs/PL-005_VALIDATION.md) and [PL-006 validation](docs/PL-006_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
+See [M0 validation](docs/M0_VALIDATION.md), [PL-001 validation](docs/PL-001_VALIDATION.md), [PL-002 validation](docs/PL-002_VALIDATION.md), [PL-003 validation](docs/PL-003_VALIDATION.md), [PL-004 validation](docs/PL-004_VALIDATION.md), [PL-005 validation](docs/PL-005_VALIDATION.md), [PL-006 validation](docs/PL-006_VALIDATION.md) and [PL-007 validation](docs/PL-007_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
 
 ## Configuration
 
@@ -84,7 +86,7 @@ Environment files are ignored; only harmless examples are tracked. API validatio
 - [Domain rules](docs/DOMAIN_RULES.md), [design system](docs/POKELAB_DESIGN_SYSTEM.md), [agent instructions](AGENTS.md)
 - [Initial audit](docs/M0_AUDIT.md), [ADR-001](docs/adr/001-foundation.md), [API/cache policy](docs/API.md)
 
-Next smallest issue: **PL-007 — bounded generation-reference API**, defining species/form semantics before adding generation controls. Detail enrichment remains separate M1 work. Catalog and search reached `main` in [PR #6](https://github.com/hugofamorim/pokelab/pull/6) and [PR #7](https://github.com/hugofamorim/pokelab/pull/7). PL-006 depends on the API in [PR #8](https://github.com/hugofamorim/pokelab/pull/8) and targets `main`. No PR is merged automatically.
+Next smallest issue: **PL-008 — bounded default-variety resolution** for one visible species page, before rendering generation cards. Detail enrichment remains separate M1 work. Catalog and search reached `main` in [PR #6](https://github.com/hugofamorim/pokelab/pull/6) and [PR #7](https://github.com/hugofamorim/pokelab/pull/7). PL-007 builds on [PR #8](https://github.com/hugofamorim/pokelab/pull/8) and [PR #9](https://github.com/hugofamorim/pokelab/pull/9), targeting `main`. No PR is merged automatically.
 
 ## Attribution
 
@@ -93,3 +95,8 @@ Data: [PokéAPI v2](https://pokeapi.co/docs/v2), following its fair-use/caching 
 The type-filter fixture retains `id`, `name` and `pokemon` from one `/api/v2/type/electric` response captured on 2026-10-21. Its observed membership count is fixture evidence, never a hardcoded production total. Type membership is current PokéAPI metadata, including forms and primary/secondary slots; it is not a historical generation filter or battle-effectiveness calculation.
 
 Pokémon and associated names/artwork belong to their respective rights holders. This unofficial educational/portfolio project is not affiliated with or endorsed by Nintendo, Game Freak, Creatures or The Pokémon Company. Review asset rights before production publication.
+
+The generation fixture retains `id`, `name` and `pokemon_species` from a single
+`/api/v2/generation/1` response captured on 2026-10-22 UTC. Its observed species count
+is fixture evidence, not a production constant. Generation membership describes species
+introduction, independently of form release generation, game availability and historical typing.

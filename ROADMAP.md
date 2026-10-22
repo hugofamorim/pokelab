@@ -33,8 +33,14 @@ responses, shared admission/deduplication and offline tests. See
 PL-006 (`feat/pl-006-type-filter-ui`) builds on PL-005 with responsive single-type controls,
 URL pagination/reset, filter-aware detail return and offline browser coverage. See
 [`docs/PL-006_VALIDATION.md`](docs/PL-006_VALIDATION.md) for actual validation status.
-M1 as a whole is not complete: generation filters and detail enrichment remain.
-Next issue: PL-007, a bounded generation-reference API with explicit form/species semantics.
+PL-007 (`feat/pl-007-generation-reference-api`) adds the bounded species-introduction
+generation API, with explicit species IDs, one shared persistent index per generation,
+strict identity/body validation, offline HTTP/cache/admission tests and OpenAPI.
+See [`docs/PL-007_VALIDATION.md`](docs/PL-007_VALIDATION.md).
+M1 as a whole is not complete: default-variety resolution, visual generation filters
+and detail enrichment remain.
+Next issue: PL-008, bounded species-to-default-variety resolution for a visible page,
+without assuming species and Pokémon IDs/names match.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)
