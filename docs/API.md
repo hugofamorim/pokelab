@@ -3,6 +3,55 @@
 Development origin: `http://localhost:3001`. OpenAPI UI: `/docs`, JSON: `/docs-json`.
 `GET /v1/pokemon`, `GET /v1/pokemon/summaries` and `GET /v1/pokemon/:idOrName` are public and read-only.
 
+## Explicit default-variety resolution — PL-008
+
+`GET /v1/pokemon-species/default-varieties?speciesIds=1,413` resolves a bounded visible
+batch of species to explicit Pokémon references. `DefaultVarietiesResponse.items`
+preserves input order. Each item is either:
+
+- `{ speciesId, status: 'ready', data: { species: { speciesId, name }, pokemon: { id, name } }, meta }`
+- `{ speciesId, status: 'unavailable', code }`
+
+The outer ID must equal the mapping's species ID. Species and Pokémon names/IDs are
+independent; Wormadam's species name is `wormadam`, its default variety is `wormadam-plant`.
+Mapping freshness belongs to the species resource and is independent of subsequent
+Pokémon summary/detail freshness. No Pokémon detail, artwork or types are fetched here.
+
+- Required `speciesIds`: 1–12 distinct canonical integers 1–999999, comma separated,
+  maximum 83 raw characters. The strict contract reuses the existing bounded ID grammar
+  with explicit species semantics. Missing/empty/repeated parameters, duplicates, leading
+  zeros, whitespace, names, URLs, excessive lists and extra filters return 400
+  `INVALID_SPECIES_QUERY` before cache/upstream access.
+- Each worker constructs `/api/v2/pokemon-species/{id}` and validates matching species
+  identity, at most 128 varieties, exact canonical Pokémon reference URLs, unique variety
+  IDs/names and exactly one `is_default: true`. Position, numeric equality and name
+  similarity are never used to select the default. Referenced URLs are never followed.
+- One normalized persistent mapping per species:
+  `pokeapi-v2:normalized-v1:species-default-variety/{id}`. Same-species work deduplicates
+  across overlapping batches and existing mappings are revalidated against the requested
+  species. Existing configurable TTL (24h default) and stale-if-error apply; original
+  source timestamps are retained. Malformed/wrong-species mappings cannot rescue failures.
+- Two workers per mapping batch; at most two distinct mapping batches per instance,
+  with identical ordered requests joining the same in-flight batch. This pool is separate
+  from the summary batch pool, while every resource operation shares the same four-slot
+  global admission budget with types/generations/pages/details. New batch admission
+  beyond the cap returns 503 `CATALOG_BUSY`; resource contention is per-item unavailable.
+  No unbounded queue or whole-generation enrichment is introduced.
+- Response bodies are capped at 1 MiB streamed/decompressed bytes, including misleading
+  Content-Length handling. Invalid identity/defaults/references/body/JSON/UTF-8 fail
+  without retry. Timeout/transport/HTTP failures retain one bounded retry. A twelve-item
+  transient outage permits at most 24 upstream attempts, never Pokémon-detail fan-out.
+- Species HTTP 404 becomes `SPECIES_NOT_FOUND` without retry and does not use expired
+  stale data. Other expected per-item codes are `INVALID_UPSTREAM`, `UPSTREAM_UNAVAILABLE`,
+  `CACHE_UNAVAILABLE` and `CATALOG_BUSY`. Ready items survive other failures in the same
+  HTTP 200 response. Unexpected failures use the sanitized HTTP 500 envelope; raw upstream
+  data, database traces and credentials are not exposed.
+
+No combined generation/type query, UI generation control, migration, env or dependency
+change. A future card consumer must validate summary identity, owning species and
+`isDefault` against the mapping, and preserve both sources' freshness/failure states.
+Source: [PokéAPI Pokémon Species / varieties](https://pokeapi.co/docs/v2#pokemon-species).
+
 ## Species introduced in a generation — PL-007
 
 `GET /v1/pokemon-species?generation=1&page=1&pageSize=20` returns a
@@ -41,10 +90,10 @@ Pokémon entry ID, artwork, types, form metadata or implied default variety.
   upstream access; malformed/wrong-generation cache cannot rescue failures. Out-of-range
   pages return 200 with `items: []`, `hasNext: false` and generation/freshness metadata.
 
-Before building generation cards, a later bounded resolver must read validated species
-`varieties` and select the explicit default Pokémon entry. Never reuse `speciesId` as
-a Pokémon ID or assume species names identify default varieties. Combined filters and
-visual generation controls remain unimplemented. No migration, env or dependency change.
+PL-008 supplies the bounded resolver described above. A card consumer must resolve
+`varieties` before requesting Pokémon summaries; never reuse `speciesId` as a Pokémon ID
+or assume species names identify default varieties. Combined filters and visual generation
+controls remain unimplemented. No migration, env or dependency change.
 
 Source semantics: [PokéAPI Generations](https://pokeapi.co/docs/v2#generations),
 [Pokémon Species](https://pokeapi.co/docs/v2#pokemon-species).

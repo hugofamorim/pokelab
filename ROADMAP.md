@@ -37,10 +37,13 @@ PL-007 (`feat/pl-007-generation-reference-api`) adds the bounded species-introdu
 generation API, with explicit species IDs, one shared persistent index per generation,
 strict identity/body validation, offline HTTP/cache/admission tests and OpenAPI.
 See [`docs/PL-007_VALIDATION.md`](docs/PL-007_VALIDATION.md).
-M1 as a whole is not complete: default-variety resolution, visual generation filters
-and detail enrichment remain.
-Next issue: PL-008, bounded species-to-default-variety resolution for a visible page,
-without assuming species and Pokémon IDs/names match.
+PL-005/006/007 were integrated into `main` through PRs #8, #9 and #10.
+PL-008 (`feat/pl-008-default-variety-resolution`) starts from integrated `main` at
+`3c714c3`, adding bounded explicit default-variety mappings, per-item failures/freshness,
+shared cache/admission and offline tests. See [`docs/PL-008_VALIDATION.md`](docs/PL-008_VALIDATION.md).
+M1 as a whole is not complete: visual generation filters and detail enrichment remain.
+Next issue: PL-009, generation controls with URL state, bounded mapping/summary gateways,
+identity checks, partial failures and generation-aware detail return.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)

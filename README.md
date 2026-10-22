@@ -14,7 +14,9 @@ An independent, open-source Pokémon discovery and strategy studio. M0 implement
 
 **PL-006** adds [type controls](http://localhost:3000/pokedex?page=1&type=electric): 18 accessible single-selection chips plus “Todos”, wrapping on desktop and scrolling horizontally on mobile. Selecting a type resets page/search; submitting a name/ID search clears the type. URL state survives pagination, reload, history and detail return, including unavailable cards. Error retry and first-page recovery preserve the selected type. Search plus type, multiple types and generation combinations are rejected explicitly.
 
-**PL-007** adds [species introduced in a generation](http://127.0.0.1:3001/v1/pokemon-species?generation=1&page=1&pageSize=20). Supported scope is I–IX; paginated results explicitly expose `speciesId`, generation identity and source freshness. One validated generation resource populates one persistent index, capped at 1 MiB/10,000 references and sharing existing request limits/cache policy. No species/detail fan-out or assumed species-to-form mapping. Default-variety resolution and visual generation controls follow separately.
+**PL-007** adds [species introduced in a generation](http://127.0.0.1:3001/v1/pokemon-species?generation=1&page=1&pageSize=20). Supported scope is I–IX; paginated results explicitly expose `speciesId`, generation identity and source freshness. One validated generation resource populates one persistent index, capped at 1 MiB/10,000 references and sharing existing request limits/cache policy. No species/detail fan-out or assumed species-to-form mapping. PL-008 supplies default-variety resolution; visual generation controls follow separately.
+
+**PL-008** adds [explicit default-variety mappings](http://127.0.0.1:3001/v1/pokemon-species/default-varieties?speciesIds=1,413): up to twelve species IDs, ordered results and independent per-item availability/freshness. The adapter selects exactly one upstream `is_default` variety, with canonical URLs and bounded responses. Two workers/two distinct mapping batches reuse a persistent per-species cache and share the existing four resource slots. Species IDs/names are never reused as assumed Pokémon IDs/names; no Pokémon detail fan-out occurs. Generation controls remain future work.
 
 ## Run locally
 
@@ -66,7 +68,7 @@ pnpm test:e2e
 
 Jest/Supertest cover the API using a captured PokéAPI fixture. A PostgreSQL integration test verifies persistence across clients. Vitest covers contracts, domain conversions and the web API client. Playwright starts an offline Nest fixture server and the production web app; it checks 375/768/1280/1600px, keyboard navigation, zoom and failure states. Browser artwork requests are blocked in offline tests; real artwork is verified separately. Screenshots go to ignored `artifacts/` and are uploaded by CI.
 
-See [M0 validation](docs/M0_VALIDATION.md), [PL-001 validation](docs/PL-001_VALIDATION.md), [PL-002 validation](docs/PL-002_VALIDATION.md), [PL-003 validation](docs/PL-003_VALIDATION.md), [PL-004 validation](docs/PL-004_VALIDATION.md), [PL-005 validation](docs/PL-005_VALIDATION.md), [PL-006 validation](docs/PL-006_VALIDATION.md) and [PL-007 validation](docs/PL-007_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
+See [M0 validation](docs/M0_VALIDATION.md), [PL-001 validation](docs/PL-001_VALIDATION.md), [PL-002 validation](docs/PL-002_VALIDATION.md), [PL-003 validation](docs/PL-003_VALIDATION.md), [PL-004 validation](docs/PL-004_VALIDATION.md), [PL-005 validation](docs/PL-005_VALIDATION.md), [PL-006 validation](docs/PL-006_VALIDATION.md), [PL-007 validation](docs/PL-007_VALIDATION.md) and [PL-008 validation](docs/PL-008_VALIDATION.md) for actual results and outstanding gates. [GitHub Actions](.github/workflows/ci.yml) runs frozen installation, formatting, lint, typecheck, tests, build and offline browser checks with PostgreSQL.
 
 ## Configuration
 
@@ -86,7 +88,7 @@ Environment files are ignored; only harmless examples are tracked. API validatio
 - [Domain rules](docs/DOMAIN_RULES.md), [design system](docs/POKELAB_DESIGN_SYSTEM.md), [agent instructions](AGENTS.md)
 - [Initial audit](docs/M0_AUDIT.md), [ADR-001](docs/adr/001-foundation.md), [API/cache policy](docs/API.md)
 
-Next smallest issue: **PL-008 — bounded default-variety resolution** for one visible species page, before rendering generation cards. Detail enrichment remains separate M1 work. Catalog and search reached `main` in [PR #6](https://github.com/hugofamorim/pokelab/pull/6) and [PR #7](https://github.com/hugofamorim/pokelab/pull/7). PL-007 builds on [PR #8](https://github.com/hugofamorim/pokelab/pull/8) and [PR #9](https://github.com/hugofamorim/pokelab/pull/9), targeting `main`. No PR is merged automatically.
+Next smallest issue: **PL-009 — responsive generation controls**, with URL state, bounded mapping/summary gateways, identity validation, partial failures and generation-aware return. Detail enrichment remains separate M1 work. PL-005/006/007 reached `main` in [PR #8](https://github.com/hugofamorim/pokelab/pull/8), [PR #9](https://github.com/hugofamorim/pokelab/pull/9) and [PR #10](https://github.com/hugofamorim/pokelab/pull/10). PL-008 starts from integrated `main` and also targets `main`. No PR is merged automatically.
 
 ## Attribution
 
@@ -100,3 +102,7 @@ The generation fixture retains `id`, `name` and `pokemon_species` from a single
 `/api/v2/generation/1` response captured on 2026-10-22 UTC. Its observed species count
 is fixture evidence, not a production constant. Generation membership describes species
 introduction, independently of form release generation, game availability and historical typing.
+
+The default-variety fixture retains original `id`, `name` and `varieties` from one
+`/api/v2/pokemon-species/413` response captured on 2026-10-22 UTC. Synthetic differing-ID
+boundary fixtures are used only in tests and are never served as production data.
