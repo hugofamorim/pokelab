@@ -12,6 +12,11 @@ import {
   SUMMARY_LIMITS,
   generationSpeciesQuerySchema,
   generationSpeciesIndexSchema,
+  speciesReferenceSchema,
+  defaultVarietyMappingSchema,
+  defaultVarietyQuerySchema,
+  defaultVarietyUnavailableCodeSchema,
+  DEFAULT_VARIETY_LIMITS,
 } from '@pokelab/contracts';
 import type {
   PokemonResponse,
@@ -23,6 +28,9 @@ import type {
   PokemonSummaryResult,
   GenerationSpeciesIndex,
   GenerationSpeciesPageResponse,
+  DefaultVarietyResponse,
+  DefaultVarietiesResponse,
+  DefaultVarietyResult,
 } from '@pokelab/contracts';
 import { CONFIG } from './config.js';
 import type { Config } from './config.js';
@@ -39,6 +47,14 @@ export class CatalogService {
     Promise<PokemonPageResponse>
   >();
   private active = 0;
+  private readonly pendingDefaultVarieties = new Map<
+    string,
+    Promise<DefaultVarietyResponse>
+  >();
+  private readonly pendingDefaultBatches = new Map<
+    string,
+    Promise<DefaultVarietiesResponse>
+  >();
   private readonly pendingGenerationIndexes = new Map<
     string,
     Promise<{ data: GenerationSpeciesIndex; meta: SourceMetadata }>
@@ -157,6 +173,85 @@ export class CatalogService {
       hasNext: offset + items.length < result.data.items.length,
       meta: result.meta,
     };
+  }
+
+  async resolveDefaultVariety(input: number): Promise<DefaultVarietyResponse> {
+    const parsed = speciesReferenceSchema.shape.speciesId.safeParse(input);
+    if (!parsed.success)
+      throw new CatalogError(
+        400,
+        'INVALID_SPECIES_ID',
+        'Use um ID de espécie de 1 a 999999.',
+      );
+    const speciesId = parsed.data;
+    const key = `pokeapi-v2:normalized-v1:species-default-variety/${speciesId}`;
+    return this.admit(this.pendingDefaultVarieties, key, () =>
+      this.load(
+        key,
+        defaultVarietyMappingSchema.refine(
+          (value) => value.species.speciesId === speciesId,
+        ),
+        () => this.adapter.defaultVariety(speciesId),
+      ),
+    );
+  }
+
+  async defaultVarieties(input: unknown): Promise<DefaultVarietiesResponse> {
+    const parsed = defaultVarietyQuerySchema.safeParse(input);
+    if (!parsed.success)
+      throw new CatalogError(
+        400,
+        'INVALID_SPECIES_QUERY',
+        'Use speciesIds com 1 a 12 IDs distintos, separados por vírgula, sem outros filtros.',
+      );
+    const { speciesIds } = parsed.data;
+    const key = speciesIds.join(',');
+    const existing = this.pendingDefaultBatches.get(key);
+    if (existing) return existing;
+    if (this.pendingDefaultBatches.size >= DEFAULT_VARIETY_LIMITS.maxBatches)
+      throw new CatalogError(
+        503,
+        'CATALOG_BUSY',
+        'Muitos lotes de espécies em andamento. Tente novamente em instantes.',
+      );
+    // Separate batch admission; each worker uses the same global four resource slots.
+    const task = this.resolveDefaultBatch(speciesIds).finally(() =>
+      this.pendingDefaultBatches.delete(key),
+    );
+    this.pendingDefaultBatches.set(key, task);
+    return task;
+  }
+
+  private async resolveDefaultBatch(
+    speciesIds: number[],
+  ): Promise<DefaultVarietiesResponse> {
+    const items: DefaultVarietyResult[] = [];
+    let next = 0;
+    const worker = async () => {
+      while (next < speciesIds.length) {
+        const index = next++;
+        const speciesId = speciesIds[index]!;
+        try {
+          const result = await this.resolveDefaultVariety(speciesId);
+          items[index] = { speciesId, status: 'ready', ...result };
+        } catch (error) {
+          const code = defaultVarietyUnavailableCodeSchema.safeParse(
+            error instanceof CatalogError ? error.code : undefined,
+          );
+          if (!code.success) throw error;
+          items[index] = { speciesId, status: 'unavailable', code: code.data };
+        }
+      }
+    };
+    const workers = await Promise.allSettled(
+      Array.from(
+        { length: Math.min(speciesIds.length, DEFAULT_VARIETY_LIMITS.workers) },
+        worker,
+      ),
+    );
+    for (const result of workers)
+      if (result.status === 'rejected') throw result.reason;
+    return { items };
   }
 
   async summaries(input: unknown): Promise<PokemonSummariesResponse> {

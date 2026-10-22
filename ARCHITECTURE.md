@@ -126,8 +126,18 @@ are 502 without retry; transport/HTTP failures retain one bounded retry and 503 
   four shared admission slots. Pages/sizes project that index; no species/detail fan-out.
   Generation ID/name, canonical species URLs, uniqueness, 10,000 members and 1 MiB
   streamed/decompressed response bounds are validated. This separate route avoids
-  interpreting species IDs as form-specific Pokémon IDs. Default-variety resolution,
-  combined type/generation queries and visual generation controls require later work.
+  interpreting species IDs as form-specific Pokémon IDs. Combined type/generation
+  queries and visual generation controls require later work.
+- PL-008: GET `/v1/pokemon-species/default-varieties?speciesIds=1,413` -> at most 12
+  ordered explicit species-to-default-Pokémon mappings, with per-item availability and
+  species-source freshness. The adapter validates one default flag, every variety URL,
+  uniqueness, matching species ID, at most 128 varieties and a 1 MiB body cap. No Pokémon
+  detail request follows. One normalized mapping cache per species serves overlapping
+  batches. Two workers/two distinct mapping batches have independent batch admission;
+  their resource operations share the existing four global slots with summaries and
+  other resources. Cache TTL/stale handling is reused; species 404 is explicit without
+  retry/stale rescue. Future card consumers must cross-check mapped Pokémon summaries
+  against owning species/default identity and expose both sources' freshness.
 - GET `/v1/pokemon/:idOrName` -> normalized detail, explicit form metadata.
 - GET `/v1/pokemon/:idOrName/evolution` -> normalized evolution chain.
 - GET `/v1/types` -> supported type chart/ruleset list.

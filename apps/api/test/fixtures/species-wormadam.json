@@ -1,0 +1,27 @@
+{
+  "id": 413,
+  "name": "wormadam",
+  "varieties": [
+    {
+      "is_default": true,
+      "pokemon": {
+        "name": "wormadam-plant",
+        "url": "https://pokeapi.co/api/v2/pokemon/413/"
+      }
+    },
+    {
+      "is_default": false,
+      "pokemon": {
+        "name": "wormadam-sandy",
+        "url": "https://pokeapi.co/api/v2/pokemon/10004/"
+      }
+    },
+    {
+      "is_default": false,
+      "pokemon": {
+        "name": "wormadam-trash",
+        "url": "https://pokeapi.co/api/v2/pokemon/10005/"
+      }
+    }
+  ]
+}

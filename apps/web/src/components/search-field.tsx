@@ -45,6 +45,7 @@ export function SearchField({ initialValue = '' }: { initialValue?: string }) {
   const helpId = `${fieldId}-help`;
   const errorId = `${fieldId}-error`;
   const inputRef = useRef<HTMLInputElement>(null);
+  const hasActivated = useRef(false);
   const validationTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
@@ -68,11 +69,26 @@ export function SearchField({ initialValue = '' }: { initialValue?: string }) {
         300,
       );
     };
-    restore();
-    window.addEventListener('pageshow', restore);
+    if (hasActivated.current) restore();
+    else {
+      hasActivated.current = true;
+      // A user can type before passive effects run. Initial activation validates
+      // that draft without replacing it with the URL's default value.
+      const draft = inputRef.current?.value ?? '';
+      clearTimeout(validationTimer.current);
+      validationTimer.current = setTimeout(
+        () =>
+          setError(normalizeSearch(draft) === null ? validationMessage : null),
+        300,
+      );
+    }
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) restore();
+    };
+    window.addEventListener('pageshow', onPageShow);
     window.addEventListener('popstate', restore);
     return () => {
-      window.removeEventListener('pageshow', restore);
+      window.removeEventListener('pageshow', onPageShow);
       window.removeEventListener('popstate', restore);
       clearTimeout(validationTimer.current);
     };

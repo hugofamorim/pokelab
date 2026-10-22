@@ -12,6 +12,9 @@ import {
   generationSchema,
   generationSpeciesIndexSchema,
   GENERATION_LIMITS,
+  speciesReferenceSchema,
+  defaultVarietyMappingSchema,
+  DEFAULT_VARIETY_LIMITS,
 } from '@pokelab/contracts';
 import type {
   Pokemon,
@@ -19,6 +22,7 @@ import type {
   PokemonPage,
   PokemonTypeIndex,
   GenerationSpeciesIndex,
+  DefaultVarietyMapping,
 } from '@pokelab/contracts';
 import { POKEMON_TYPES, STAT_NAMES, toMetric } from '@pokelab/pokemon-domain';
 import { CatalogError } from './errors.js';
@@ -84,7 +88,7 @@ export class PokeApiAdapter {
     const p = await this.request(
       'pokemon/' + parsed.data,
       upstreamSchema,
-      true,
+      'pokemon',
     );
     const result = pokemonSchema.safeParse({
       id: p.id,
@@ -269,6 +273,61 @@ export class PokeApiAdapter {
     return normalized.data;
   }
 
+  async defaultVariety(input: number): Promise<DefaultVarietyMapping> {
+    const speciesId = speciesReferenceSchema.shape.speciesId.safeParse(input);
+    if (!speciesId.success)
+      throw new CatalogError(
+        400,
+        'INVALID_SPECIES_ID',
+        'Use um ID de espécie de 1 a 999999.',
+      );
+    const body = await this.request(
+      'pokemon-species/' + speciesId.data,
+      z
+        .object({
+          id: speciesReferenceSchema.shape.speciesId,
+          name: identifierSchema,
+          varieties: z
+            .array(
+              z.object({
+                is_default: z.boolean(),
+                pokemon: z.object({
+                  name: identifierSchema,
+                  url: z
+                    .string()
+                    .regex(
+                      /^https:\/\/pokeapi\.co\/api\/v2\/pokemon\/[1-9]\d{0,5}\/$/,
+                    ),
+                }),
+              }),
+            )
+            .min(1)
+            .max(DEFAULT_VARIETY_LIMITS.maxVarieties),
+        })
+        .refine(
+          (value) =>
+            value.id === speciesId.data &&
+            value.varieties.filter((variety) => variety.is_default).length ===
+              1 &&
+            new Set(value.varieties.map((variety) => variety.pokemon.url))
+              .size === value.varieties.length &&
+            new Set(value.varieties.map((variety) => variety.pokemon.name))
+              .size === value.varieties.length,
+        ),
+      'species',
+      DEFAULT_VARIETY_LIMITS.maxResponseBytes,
+    );
+    // The upstream flag, never position or matching IDs/names, selects the mapping.
+    const selected = body.varieties.find((variety) => variety.is_default)!;
+    return defaultVarietyMappingSchema.parse({
+      species: { speciesId: body.id, name: body.name },
+      pokemon: {
+        id: Number(selected.pokemon.url.split('/').at(-2)),
+        name: selected.pokemon.name,
+      },
+    });
+  }
+
   private async boundedJson(
     response: Response,
     maxBytes: number,
@@ -322,7 +381,7 @@ export class PokeApiAdapter {
   private async request<T>(
     path: string,
     schema: z.ZodType<T>,
-    missingPokemon = false,
+    missingResource: 'pokemon' | 'species' | false = false,
     maxBytes?: number,
   ): Promise<T> {
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -339,11 +398,15 @@ export class PokeApiAdapter {
         );
         // Release unread error bodies before retry/admission cleanup.
         if (!response.ok) void response.body?.cancel().catch(() => {});
-        if (response.status === 404 && missingPokemon)
+        if (response.status === 404 && missingResource)
           throw new CatalogError(
             404,
-            'POKEMON_NOT_FOUND',
-            'Pokémon não encontrado.',
+            missingResource === 'species'
+              ? 'SPECIES_NOT_FOUND'
+              : 'POKEMON_NOT_FOUND',
+            missingResource === 'species'
+              ? 'Espécie não encontrada.'
+              : 'Pokémon não encontrado.',
           );
         if (!response.ok)
           throw new CatalogError(
