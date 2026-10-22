@@ -38,8 +38,9 @@ default size 20. The shared `pokemonCatalogPageResponseSchema` documents both sh
   original `fetchedAt`; validated expired data may rescue upstream failure with `stale: true`.
   Invalid/wrong-type cache content cannot be used as fresh or stale data. Beyond-total
   pages return HTTP 200 with `items: []`, `hasNext: false` and the selected type.
-- This is an API increment. The `/pokedex` web parser and controls still do not accept
-  type filtering; PL-006 will add filter-aware URL/pagination/detail-return behavior.
+- PL-006 consumes this API through `/pokedex?page=1&type=electric`, preserving the
+  filter through pagination, retry and detail return. Web page size remains fixed at 12;
+  search/type combinations remain explicitly unsupported.
   No dependency, environment or migration changes.
 
 ## Bounded card summaries — PL-002

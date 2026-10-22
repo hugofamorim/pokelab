@@ -12,14 +12,19 @@ import {
 import { CatalogSearchResult } from '../../components/catalog-search-result';
 import { redirect } from 'next/navigation';
 import { searchHref } from '../../lib/catalog-search';
+import type { PokemonType } from '@pokelab/pokemon-domain';
+import { POKEMON_TYPE_TOKENS } from '../../lib/type-tokens';
+import { TypeFilter, TypeFilterFallback } from '../../components/type-filter';
 
 type Query = Promise<Record<string, string | string[] | undefined>>;
 function CatalogState({
   kind,
   page = 1,
+  type,
 }: {
   kind: 'invalid' | 'invalidSearch' | 'error' | 'empty';
   page?: number;
+  type?: PokemonType;
 }) {
   return (
     <section className="catalog-state" role="status">
@@ -37,19 +42,19 @@ function CatalogState({
         {kind === 'invalidSearch'
           ? 'Use um nome completo ou ID com até 64 caracteres, sem filtros ou paginação na mesma consulta.'
           : kind === 'invalid'
-            ? 'Use uma página de 1 a 1000 ou uma busca por nome completo/ID. Não combine busca e paginação.'
+            ? 'Use uma página de 1 a 1000 e um dos 18 tipos disponíveis, ou busque por nome completo/ID separadamente.'
             : kind === 'empty'
               ? 'Você chegou além das entradas disponíveis. Volte para continuar explorando.'
               : 'O serviço está indisponível no momento. Aguarde um pouco e tente novamente.'}
       </p>
       {kind === 'error' && (
-        <a className="button button-primary" href={catalogHref(page)}>
+        <a className="button button-primary" href={catalogHref(page, type)}>
           Tentar novamente
         </a>
       )}
       <Link
         className="button button-secondary"
-        href="/pokedex"
+        href={catalogHref(1, type)}
         prefetch={false}
       >
         Ir para a primeira página
@@ -74,17 +79,21 @@ async function Catalog({ searchParams }: { searchParams: Query }) {
           <CatalogSearchResult term={query.term} />
         </Suspense>
       ) : (
-        <Suspense key={query.page} fallback={<CatalogSkeleton />}>
-          <Browse page={query.page} />
+        <Suspense
+          key={`${query.type ?? 'all'}:${query.page}`}
+          fallback={<CatalogSkeleton />}
+        >
+          <Browse page={query.page} type={query.type} />
         </Suspense>
       )}
     </>
   );
 }
-async function Browse({ page }: { page: number }) {
-  const result = await getCatalogPage(page);
-  if (!result) return <CatalogState kind="error" page={page} />;
-  if (!result.items.length) return <CatalogState kind="empty" page={page} />;
+async function Browse({ page, type }: { page: number; type?: PokemonType }) {
+  const result = await getCatalogPage(page, type);
+  if (!result) return <CatalogState kind="error" page={page} type={type} />;
+  if (!result.items.length)
+    return <CatalogState kind="empty" page={page} type={type} />;
   const start = (page - 1) * result.pageSize + 1;
   return (
     <>
@@ -100,18 +109,27 @@ async function Browse({ page }: { page: number }) {
         </p>
       )}
       <div className="catalog-toolbar">
-        <h2>Encontre sua próxima descoberta</h2>
+        <h2>
+          {type
+            ? `Pokémon do tipo ${POKEMON_TYPE_TOKENS[type].label}`
+            : 'Encontre sua próxima descoberta'}
+        </h2>
         <span>
           {start}–{start + result.items.length - 1} de{' '}
           {result.total.toLocaleString('pt-BR')} entradas
         </span>
       </div>
-      <CatalogGrid key={page} references={result.items} page={page} />
+      <CatalogGrid
+        key={`${type ?? 'all'}:${page}`}
+        references={result.items}
+        page={page}
+        type={type}
+      />
       <nav className="pagination" aria-label="Paginação do catálogo">
         {page > 1 ? (
           <Link
             className="button button-secondary"
-            href={catalogHref(page - 1)}
+            href={catalogHref(page - 1, type)}
             prefetch={false}
           >
             <ArrowLeft size={18} aria-hidden="true" />
@@ -126,7 +144,7 @@ async function Browse({ page }: { page: number }) {
         {result.hasNext && page < 1000 ? (
           <Link
             className="button button-primary"
-            href={catalogHref(page + 1)}
+            href={catalogHref(page + 1, type)}
             prefetch={false}
           >
             Próxima
@@ -189,6 +207,9 @@ export default function Page({ searchParams }: { searchParams: Query }) {
       </section>
       <Suspense fallback={<SearchFieldFallback />}>
         <CatalogSearchField />
+      </Suspense>
+      <Suspense fallback={<TypeFilterFallback />}>
+        <TypeFilter />
       </Suspense>
       <Suspense fallback={<CatalogSkeleton />}>
         <Catalog searchParams={searchParams} />
