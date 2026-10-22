@@ -1,6 +1,7 @@
 // Offline browser-test server: real Nest controller, captured upstream fixture.
 import 'reflect-metadata';
 import { createRequire } from 'node:module';
+import { URL } from 'node:url';
 const require = createRequire(import.meta.url);
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../dist/app.module.js';
@@ -8,8 +9,13 @@ import { CONFIG } from '../dist/config.js';
 import { RESOURCE_CACHE } from '../dist/cache.js';
 import { PokeApiAdapter } from '../dist/pokeapi-adapter.js';
 import { ApiErrorFilter, CatalogError } from '../dist/errors.js';
-import { pokemonSchema, pokemonPageSchema } from '@pokelab/contracts';
+import {
+  pokemonSchema,
+  pokemonPageSchema,
+  pokemonTypeIndexSchema,
+} from '@pokelab/contracts';
 const fixture = require('./fixtures/pikachu.json');
+const electricFixture = require('./fixtures/type-electric.json');
 // Captured normalized facts; the thirteen-entry test catalog is intentionally small.
 const catalog = require('./fixtures/catalog-details.json').map((item) =>
   pokemonSchema.parse(item),
@@ -64,6 +70,41 @@ async function start() {
     ...catalog.map(({ id, name }) => ({ id, name })),
     { id: 25, name: 'pikachu' },
   ];
+  const indexFor = (type) =>
+    pokemonTypeIndexSchema.parse({
+      type,
+      items:
+        type === 'electric'
+          ? electricFixture.pokemon
+              .map(({ pokemon }) => ({
+                id: Number(
+                  new URL(pokemon.url).pathname
+                    .split('/')
+                    .filter(Boolean)
+                    .at(-1),
+                ),
+                name: pokemon.name,
+              }))
+              .sort((a, b) => a.id - b.id)
+          : catalog
+              .filter((item) => item.types.includes(type))
+              .map(({ id, name }) => ({ id, name })),
+    });
+  // Controlled outage/empty/stale scenarios in the deliberately limited offline dataset.
+  adapter.typeIndex = async (type) => {
+    if (type === 'ghost' || type === 'water')
+      throw new CatalogError(
+        503,
+        'UPSTREAM_UNAVAILABLE',
+        'Fonte indisponível.',
+      );
+    return indexFor(type);
+  };
+  entries.set('pokeapi-v2:normalized-v1:pokemon-type-index/water', {
+    payload: indexFor('water'),
+    fetchedAt: new Date('2026-10-20T12:00:00Z'),
+    expiresAt: new Date(0),
+  });
   adapter.list = async ({ page, pageSize }) => {
     if (page === 999 || page === 998)
       throw new CatalogError(

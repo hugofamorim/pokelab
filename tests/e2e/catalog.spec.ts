@@ -137,7 +137,7 @@ test('handles invalid, empty, stale and unavailable pages', async ({
   await expect(
     page.getByRole('heading', { name: 'Página inválida' }),
   ).toBeVisible();
-  await page.goto('/pokedex?type=grass');
+  await page.goto('/pokedex?type=unknown');
   await expect(
     page.getByRole('heading', { name: 'Página inválida' }),
   ).toBeVisible();
