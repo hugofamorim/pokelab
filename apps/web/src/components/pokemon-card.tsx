@@ -5,21 +5,31 @@ import { PokemonArtwork } from './pokemon-artwork';
 import { TypeBadge } from './type-badge';
 import type { CSSProperties } from 'react';
 import { POKEMON_TYPE_TOKENS } from '../lib/type-tokens';
+import { catalogDetailHref } from '../lib/catalog';
+import type { PokemonType } from '@pokelab/pokemon-domain';
 export function PokemonCard({
   pokemon,
   fromPage,
   fromSearch,
+  fromType,
 }: {
   pokemon: PokemonSummary;
   fromPage?: number;
   fromSearch?: string;
+  fromType?: PokemonType;
 }) {
   const accent = POKEMON_TYPE_TOKENS[pokemon.types[0] ?? 'normal'];
   return (
     <Link
       className="pokemon-card"
       style={{ '--type-soft': accent.soft } as CSSProperties}
-      href={`/pokemon/${pokemon.id}${fromSearch ? `?${new URLSearchParams({ fromSearch })}` : fromPage ? `?fromPage=${fromPage}` : ''}`}
+      href={
+        fromSearch
+          ? `/pokemon/${pokemon.id}?${new URLSearchParams({ fromSearch })}`
+          : fromPage
+            ? catalogDetailHref(pokemon.id, fromPage, fromType)
+            : `/pokemon/${pokemon.id}`
+      }
       prefetch={false}
     >
       <div>

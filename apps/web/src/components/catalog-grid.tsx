@@ -7,14 +7,21 @@ import type {
   PokemonSummaryResult,
 } from '@pokelab/contracts';
 import { PokemonCard } from './pokemon-card';
-import { CATALOG_BATCH_SIZE, parseSummaryBatch } from '../lib/catalog';
+import {
+  CATALOG_BATCH_SIZE,
+  parseSummaryBatch,
+  catalogDetailHref,
+} from '../lib/catalog';
+import type { PokemonType } from '@pokelab/pokemon-domain';
 
 export function CatalogGrid({
   references,
   page,
+  type,
 }: {
   references: PokemonPageResponse['items'];
   page: number;
+  type?: PokemonType;
 }) {
   const [results, setResults] = useState<Record<number, PokemonSummaryResult>>(
     {},
@@ -84,7 +91,11 @@ export function CatalogGrid({
             <li key={reference.id}>
               {result?.status === 'ready' ? (
                 <>
-                  <PokemonCard pokemon={result.data} fromPage={page} />
+                  <PokemonCard
+                    pokemon={result.data}
+                    fromPage={page}
+                    fromType={type}
+                  />
                   {result.meta.stale && (
                     <p className="card-freshness">
                       Dados salvos em{' '}
@@ -101,7 +112,7 @@ export function CatalogGrid({
                 <div className="pokemon-card reference-card">
                   <Link
                     className="reference-link"
-                    href={`/pokemon/${reference.id}?fromPage=${page}`}
+                    href={catalogDetailHref(reference.id, page, type)}
                     prefetch={false}
                   >
                     <span className="eyebrow">

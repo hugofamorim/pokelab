@@ -3,6 +3,7 @@ import {
   pokemonSummariesResponseSchema,
 } from '@pokelab/contracts';
 import type { PokemonSummariesResponse } from '@pokelab/contracts';
+import type { PokemonType } from '@pokelab/pokemon-domain';
 
 export const CATALOG_PAGE_SIZE = 12;
 export const CATALOG_BATCH_SIZE = 4;
@@ -13,7 +14,16 @@ export function parseCatalogPage(input: unknown): number | null {
   if (input && typeof input === 'object' && 'pageSize' in input) return null;
   return parsed.data.page;
 }
-export const catalogHref = (page: number) => `/pokedex?page=${page}`;
+export const catalogHref = (page: number, type?: PokemonType) =>
+  `/pokedex?${new URLSearchParams({ page: String(page), ...(type ? { type } : {}) })}`;
+
+export function catalogDetailHref(
+  id: number,
+  page: number,
+  type?: PokemonType,
+) {
+  return `/pokemon/${id}?${new URLSearchParams({ fromPage: String(page), ...(type ? { fromType: type } : {}) })}`;
+}
 
 // Used on both sides of the same-origin boundary: reject reordered, omitted or substituted results.
 export function parseSummaryBatch(
