@@ -56,6 +56,15 @@ for (const width of [375, 768, 1280, 1600]) {
     await expect(page).toHaveURL(/page=2&type=electric$/);
     await page.reload();
     await expect(electric).toHaveAttribute('aria-current', 'true');
+    await expect
+      .poll(async () =>
+        electric.evaluate((chip) => {
+          const bounds = chip.getBoundingClientRect();
+          const row = chip.parentElement!.getBoundingClientRect();
+          return bounds.left >= row.left && bounds.right <= row.right;
+        }),
+      )
+      .toBe(true);
     await filters.getByRole('link', { name: 'Planta', exact: true }).click();
     await expect(page).toHaveURL(/page=1&type=grass$/);
     await expect(

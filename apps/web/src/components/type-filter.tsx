@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Check } from 'lucide-react';
 import type { CSSProperties } from 'react';
+import { useEffect, useRef } from 'react';
 import { POKEMON_TYPES } from '@pokelab/pokemon-domain';
 import { parseCatalogQuery } from '../lib/catalog-search';
 import { catalogHref } from '../lib/catalog';
@@ -11,6 +12,7 @@ import { POKEMON_TYPE_TOKENS } from '../lib/type-tokens';
 
 export function TypeFilter() {
   const params = useSearchParams();
+  const optionsRef = useRef<HTMLElement>(null);
   // Preserve repeated values so ambiguous URLs never appear selected.
   const input = Object.fromEntries(
     [...new Set(params.keys())].map((key) => {
@@ -20,13 +22,36 @@ export function TypeFilter() {
   );
   const query = parseCatalogQuery(input);
   const selected = query.kind === 'browse' ? query.type : undefined;
+  useEffect(() => {
+    const options = optionsRef.current;
+    if (!options) return;
+    const revealSelection = () => {
+      const active = options.querySelector<HTMLElement>('[aria-current]');
+      if (!active) {
+        options.scrollLeft = 0;
+        return;
+      }
+      const bounds = options.getBoundingClientRect();
+      const target = active.getBoundingClientRect();
+      // Move only this row: scrollIntoView would also jump the whole page.
+      options.scrollLeft +=
+        target.left - bounds.left - (options.clientWidth - target.width) / 2;
+    };
+    const observer = new ResizeObserver(revealSelection);
+    observer.observe(options);
+    return () => observer.disconnect();
+  }, [selected]);
   return (
     <section className="type-filter" aria-label="Filtro por tipo">
       <div className="type-filter-heading">
         <h2>Explore por tipo</h2>
         <p>Escolha um tipo ou busque por nome/ID acima.</p>
       </div>
-      <nav className="type-filter-options" aria-label="Tipos de Pokémon">
+      <nav
+        ref={optionsRef}
+        className="type-filter-options"
+        aria-label="Tipos de Pokémon"
+      >
         <Link
           className="type-filter-chip"
           href="/pokedex"
