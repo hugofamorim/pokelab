@@ -4,7 +4,8 @@ import type { SchemaObject } from '@nestjs/swagger';
 import { z } from 'zod';
 import {
   pokemonResponseSchema,
-  pokemonPageResponseSchema,
+  pokemonCatalogPageResponseSchema,
+  pokemonTypeSchema,
   PAGINATION_LIMITS,
   pokemonSummariesResponseSchema,
 } from '@pokelab/contracts';
@@ -23,7 +24,7 @@ export class PokemonController {
   @Get()
   @ApiOperation({
     summary:
-      'Bounded page of Pokémon entry references; no detail fan-out or filters',
+      'Bounded entry references, optionally filtered by one current Pokémon type; no detail fan-out',
   })
   @ApiQuery({
     name: 'page',
@@ -45,10 +46,19 @@ export class PokemonController {
       default: PAGINATION_LIMITS.defaultPageSize,
     },
   })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    schema: z.toJSONSchema(pokemonTypeSchema, {
+      target: 'openapi-3.0',
+    }) as SchemaObject,
+    description:
+      'One canonical lowercase type; search/generation/multiple-type combinations are unsupported',
+  })
   @ApiResponse({
     status: 200,
     description: 'Page or empty page with source freshness',
-    schema: z.toJSONSchema(pokemonPageResponseSchema, {
+    schema: z.toJSONSchema(pokemonCatalogPageResponseSchema, {
       target: 'openapi-3.0',
     }) as SchemaObject,
   })

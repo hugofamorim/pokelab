@@ -19,12 +19,13 @@ const queryInteger = z
   .refine((value) => value === value.trim(), 'Whitespace is not allowed')
   .regex(/^[1-9]\d*$/)
   .transform(Number);
-export const pokemonListQuerySchema = z
-  .strictObject({
-    page: queryInteger.default(PAGINATION_LIMITS.defaultPage),
-    pageSize: queryInteger.default(PAGINATION_LIMITS.defaultPageSize),
-  })
-  .pipe(pokemonPaginationSchema);
+export const pokemonPaginationQuerySchema = z.strictObject({
+  page: queryInteger.default(PAGINATION_LIMITS.defaultPage),
+  pageSize: queryInteger.default(PAGINATION_LIMITS.defaultPageSize),
+});
+export const pokemonListQuerySchema = pokemonPaginationQuerySchema.pipe(
+  pokemonPaginationSchema,
+);
 
 // These are Pokémon entry IDs, not species IDs; list resources contain no species data.
 export const pokemonReferenceSchema = z.object({

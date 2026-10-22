@@ -3,7 +3,8 @@ import type { z } from 'zod';
 import {
   identifierSchema,
   pokemonSchema,
-  pokemonListQuerySchema,
+  pokemonCatalogQuerySchema,
+  pokemonTypeIndexSchema,
   pokemonPageSchema,
   pokemonSummaryQuerySchema,
   pokemonSummarySchema,
@@ -13,6 +14,8 @@ import {
 import type {
   PokemonResponse,
   PokemonPageResponse,
+  PokemonCatalogPageResponse,
+  PokemonTypeIndex,
   SourceMetadata,
   PokemonSummariesResponse,
   PokemonSummaryResult,
@@ -32,6 +35,10 @@ export class CatalogService {
     Promise<PokemonPageResponse>
   >();
   private active = 0;
+  private readonly pendingTypeIndexes = new Map<
+    string,
+    Promise<{ data: PokemonTypeIndex; meta: SourceMetadata }>
+  >();
   private readonly pendingSummaries = new Map<
     string,
     Promise<PokemonSummariesResponse>
@@ -64,15 +71,39 @@ export class CatalogService {
     );
   }
 
-  async list(input: unknown): Promise<PokemonPageResponse> {
-    const parsed = pokemonListQuerySchema.safeParse(input);
+  async list(input: unknown): Promise<PokemonCatalogPageResponse> {
+    const parsed = pokemonCatalogQuerySchema.safeParse(input);
     if (!parsed.success)
       throw new CatalogError(
         400,
         'INVALID_PAGINATION',
-        'Use page de 1 a 1000 e pageSize de 1 a 50. Outros filtros ainda não são suportados.',
+        'Use page de 1 a 1000, pageSize de 1 a 50 e, opcionalmente, um dos 18 tipos. Outros filtros ainda não são suportados.',
       );
     const query = parsed.data;
+    if (query.type) {
+      const type = query.type;
+      const key = `pokeapi-v2:normalized-v1:pokemon-type-index/${type}`;
+      // All pages/sizes for a type join one admitted index load; no nested admission.
+      const result = await this.admit(this.pendingTypeIndexes, key, () =>
+        this.load(
+          key,
+          pokemonTypeIndexSchema.refine((value) => value.type === type),
+          () => this.adapter.typeIndex(type),
+        ),
+      );
+      const offset = (query.page - 1) * query.pageSize;
+      const items = result.data.items.slice(offset, offset + query.pageSize);
+      const total = result.data.items.length;
+      return {
+        type,
+        items,
+        page: query.page,
+        pageSize: query.pageSize,
+        total,
+        hasNext: offset + items.length < total,
+        meta: result.meta,
+      };
+    }
     const key = `pokeapi-v2:normalized-v1:pokemon-page/${query.page}/${query.pageSize}`;
     return this.admit(this.pendingPages, key, async () => {
       const schema = pokemonPageSchema.refine(
