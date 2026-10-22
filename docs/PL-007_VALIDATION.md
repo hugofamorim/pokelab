@@ -71,7 +71,11 @@ A separate Prisma process re-read and validated the same persistent 151-species 
 with expiry `2026-10-23T03:01:40.868Z`. A temporary smoke-script import needed the
 workspace package's explicit built path; correcting that script completed verification.
 
-Publication and Linux CI verification are pending.
+Review: [PR #10](https://github.com/hugofamorim/pokelab/pull/10) targets `main` and
+depends on #8/#9. Implementation/documentation head `764e215` was submitted to
+[Linux CI #41](https://github.com/hugofamorim/pokelab/actions/runs/39714965984).
+The [branch workflow history](https://github.com/hugofamorim/pokelab/actions/workflows/ci.yml?query=branch%3Afeat%2Fpl-007-generation-reference-api)
+tracks subsequent heads; PR checks provide the final Linux result. No automatic merge.
 
 ## Remaining work
 
