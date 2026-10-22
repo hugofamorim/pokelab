@@ -65,7 +65,11 @@ The smoke script's first immediate URL assertion ran before navigation committed
 an explicit route wait completed the smoke successfully. Application code did not require
 a navigation correction.
 
-CI/PR status: publication and Linux verification pending.
+Review: [PR #9](https://github.com/hugofamorim/pokelab/pull/9) targets `main` and
+depends on #8. Implementation/documentation head `a2c2b01` was submitted to
+[Linux CI #37](https://github.com/hugofamorim/pokelab/actions/runs/39712614590).
+The [branch workflow history](https://github.com/hugofamorim/pokelab/actions/workflows/ci.yml?query=branch%3Afeat%2Fpl-006-type-filter-ui)
+tracks subsequent heads; PR checks provide the final Linux result. No automatic merge.
 
 Offline browser fixtures reuse captured electric membership. Only Pikachu has an electric
 detail fixture; other electric cards deliberately exercise reference-only unavailable
