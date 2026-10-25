@@ -49,6 +49,16 @@ import type { ResourceCache } from './cache.js';
 import { PokeApiAdapter } from './pokeapi-adapter.js';
 import { CatalogError } from './errors.js';
 import {
+  COMBINED_FILTER_LIMITS,
+  combinedFilterQuerySchema,
+  combinedFilterResponseSchema,
+} from '@pokelab/contracts';
+import type {
+  CombinedFilterQuery,
+  CombinedFilterResponse,
+  CombinedFilterItem,
+} from '@pokelab/contracts';
+import {
   moveIdParamSchema,
   pokemonMovesQuerySchema,
   pokemonLearnsetSchema,
@@ -64,6 +74,10 @@ import type {
 
 @Injectable()
 export class CatalogService {
+  private readonly pendingFilterScans = new Map<
+    string,
+    Promise<CombinedFilterResponse>
+  >();
   private readonly pendingLearnsets = new Map<
     string,
     Promise<{ data: PokemonLearnset; meta: SourceMetadata }>
@@ -115,6 +129,121 @@ export class CatalogService {
     @Inject(PokeApiAdapter) private readonly adapter: PokeApiAdapter,
     @Inject(CONFIG) private readonly config: Config,
   ) {}
+
+  async filterScan(input: unknown): Promise<CombinedFilterResponse> {
+    const parsed = combinedFilterQuerySchema.safeParse(input);
+    if (!parsed.success)
+      throw new CatalogError(
+        400,
+        'INVALID_FILTER_QUERY',
+        'Use um tipo, geração de 1 a 9, after de 0 a 999999 e limit de 1 a 12, sem outros parâmetros.',
+      );
+    const query = parsed.data;
+    const key = `${query.type}/${query.generation}/${query.after}/${query.limit}`;
+    const existing = this.pendingFilterScans.get(key);
+    if (existing) return existing;
+    if (this.pendingFilterScans.size >= COMBINED_FILTER_LIMITS.maxScans)
+      throw new CatalogError(
+        503,
+        'CATALOG_BUSY',
+        'Muitas consultas combinadas em andamento. Tente novamente em instantes.',
+      );
+    const task = this.scanCandidates(query).finally(() =>
+      this.pendingFilterScans.delete(key),
+    );
+    this.pendingFilterScans.set(key, task);
+    return task;
+  }
+
+  private async scanCandidates(
+    query: CombinedFilterQuery,
+  ): Promise<CombinedFilterResponse> {
+    // Wait for both resource operations to release before scan admission is removed.
+    const [typeResult, generationResult] = await Promise.allSettled([
+      this.loadTypeIndex(query.type),
+      this.loadGenerationIndex(query.generation),
+    ]);
+    if (typeResult.status === 'rejected') throw typeResult.reason;
+    if (generationResult.status === 'rejected') throw generationResult.reason;
+    const type = typeResult.value,
+      generation = generationResult.value;
+    const candidates = type.data.items.filter((item) => item.id > query.after);
+    const references = candidates.slice(0, query.limit);
+    const species = new Map(
+      generation.data.items.map((item) => [item.speciesId, item.name]),
+    );
+    const speciesIds = new Map(
+      generation.data.items.map((item) => [item.name, item.speciesId]),
+    );
+    const summaries = references.length
+      ? await this.summaries({ ids: references.map((ref) => ref.id).join(',') })
+      : { items: [] };
+    const items: CombinedFilterItem[] = references.map((reference, index) => {
+      const item = summaries.items[index];
+      if (!item || item.id !== reference.id)
+        throw new CatalogError(
+          502,
+          'INVALID_UPSTREAM',
+          'O lote de dados não corresponde às referências solicitadas.',
+        );
+      if (item.status === 'unavailable')
+        return { reference, status: 'unavailable', code: item.code };
+      const owningName = species.get(item.data.species.id);
+      if (
+        item.data.id !== reference.id ||
+        item.data.name !== reference.name ||
+        !item.data.types.includes(query.type) ||
+        (speciesIds.has(item.data.species.name) &&
+          speciesIds.get(item.data.species.name) !== item.data.species.id) ||
+        (owningName !== undefined && owningName !== item.data.species.name)
+      )
+        return { reference, status: 'unavailable', code: 'INVALID_UPSTREAM' };
+      const ready = { reference, data: item.data, meta: item.meta };
+      return owningName === undefined
+        ? { ...ready, status: 'excluded', reason: 'species-not-in-generation' }
+        : { ...ready, status: 'match' };
+    });
+    const hasMore = candidates.length > references.length;
+    return combinedFilterResponseSchema.parse({
+      semantics: 'current-entry-type-and-species-introduction',
+      type: query.type,
+      generation: generation.data.generation,
+      scan: {
+        afterId: query.after,
+        limit: query.limit,
+        totalCandidates: type.data.items.length,
+        scanned: items.length,
+        hasMore,
+        nextAfterId: hasMore ? references.at(-1)!.id : null,
+      },
+      items,
+      meta: { type: type.meta, generation: generation.meta },
+    });
+  }
+
+  private async loadTypeIndex(type: PokemonTypeIndex['type']) {
+    const key = `pokeapi-v2:normalized-v1:pokemon-type-index/${type}`;
+    return this.admit(this.pendingTypeIndexes, key, () =>
+      this.load(
+        key,
+        pokemonTypeIndexSchema.refine((value) => value.type === type),
+        () => this.adapter.typeIndex(type),
+      ),
+    );
+  }
+
+  private async loadGenerationIndex(generation: number) {
+    const key = `pokeapi-v2:normalized-v1:generation-species-index/${generation}`;
+    return this.admit(this.pendingGenerationIndexes, key, () =>
+      this.load(
+        key,
+        generationSpeciesIndexSchema.refine(
+          (value) => value.generation.id === generation,
+        ),
+        () => this.adapter.generationIndex(generation),
+      ),
+    );
+  }
 
   async pokemonMoves(
     input: string,
@@ -314,15 +443,7 @@ export class CatalogService {
     const query = parsed.data;
     if (query.type) {
       const type = query.type;
-      const key = `pokeapi-v2:normalized-v1:pokemon-type-index/${type}`;
-      // All pages/sizes for a type join one admitted index load; no nested admission.
-      const result = await this.admit(this.pendingTypeIndexes, key, () =>
-        this.load(
-          key,
-          pokemonTypeIndexSchema.refine((value) => value.type === type),
-          () => this.adapter.typeIndex(type),
-        ),
-      );
+      const result = await this.loadTypeIndex(type);
       const offset = (query.page - 1) * query.pageSize;
       const items = result.data.items.slice(offset, offset + query.pageSize);
       const total = result.data.items.length;
@@ -360,16 +481,7 @@ export class CatalogService {
         'Use generation de 1 a 9, page de 1 a 1000 e pageSize de 1 a 50, sem outros filtros.',
       );
     const { generation, page, pageSize } = parsed.data;
-    const key = `pokeapi-v2:normalized-v1:generation-species-index/${generation}`;
-    const result = await this.admit(this.pendingGenerationIndexes, key, () =>
-      this.load(
-        key,
-        generationSpeciesIndexSchema.refine(
-          (value) => value.generation.id === generation,
-        ),
-        () => this.adapter.generationIndex(generation),
-      ),
-    );
+    const result = await this.loadGenerationIndex(generation);
     const offset = (page - 1) * pageSize;
     const items = result.data.items.slice(offset, offset + pageSize);
     return {

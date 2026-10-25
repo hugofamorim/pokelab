@@ -7,6 +7,11 @@ import { speciesDescriptionSchema } from './species-description.js';
 import { speciesEvolutionDataSchema } from './evolution.js';
 import { pokemonMovesPageSchema, moveMetadataSchema } from './moves.js';
 import {
+  combinedFilterScanSchema,
+  COMBINED_FILTER_LIMITS,
+} from './combined-filter.js';
+import { generationSchema } from './generation.js';
+import {
   generationSpeciesPageSchema,
   speciesReferenceSchema,
 } from './generation.js';
@@ -246,3 +251,72 @@ export const moveMetadataResponseSchema = z.object({
   meta: sourceMetadataSchema,
 });
 export type MoveMetadataResponse = z.infer<typeof moveMetadataResponseSchema>;
+
+export * from './combined-filter.js';
+const scanReady = {
+  reference: pokemonReferenceSchema,
+  data: pokemonSummarySchema,
+  meta: sourceMetadataSchema,
+};
+export const combinedFilterItemSchema = z
+  .discriminatedUnion('status', [
+    z.strictObject({ ...scanReady, status: z.literal('match') }),
+    z.strictObject({
+      ...scanReady,
+      status: z.literal('excluded'),
+      reason: z.literal('species-not-in-generation'),
+    }),
+    z.strictObject({
+      reference: pokemonReferenceSchema,
+      status: z.literal('unavailable'),
+      code: summaryUnavailableCodeSchema,
+    }),
+  ])
+  .refine(
+    (item) =>
+      item.status === 'unavailable' ||
+      (item.reference.id === item.data.id &&
+        item.reference.name === item.data.name),
+  );
+export type CombinedFilterItem = z.infer<typeof combinedFilterItemSchema>;
+export const combinedFilterResponseSchema = z
+  .strictObject({
+    semantics: z.literal('current-entry-type-and-species-introduction'),
+    type: pokemonTypeSchema,
+    generation: generationSchema,
+    scan: combinedFilterScanSchema,
+    items: z
+      .array(combinedFilterItemSchema)
+      .max(COMBINED_FILTER_LIMITS.maxCandidates),
+    meta: z.strictObject({
+      type: sourceMetadataSchema,
+      generation: sourceMetadataSchema,
+    }),
+  })
+  .refine((value) => {
+    const { items, scan } = value;
+    return (
+      scan.scanned === items.length &&
+      items.length <= scan.limit &&
+      scan.totalCandidates >= items.length &&
+      items.every(
+        (item, i) =>
+          item.reference.id > scan.afterId &&
+          (i === 0 || items[i - 1]!.reference.id < item.reference.id) &&
+          (item.status === 'unavailable' ||
+            item.data.types.includes(value.type)),
+      ) &&
+      new Set(items.map((item) => item.reference.name)).size === items.length &&
+      (scan.hasMore
+        ? items.length === scan.limit &&
+          scan.nextAfterId === items.at(-1)?.reference.id &&
+          scan.totalCandidates > items.length
+        : scan.nextAfterId === null) &&
+      (scan.afterId !== 0 ||
+        scan.hasMore ||
+        scan.totalCandidates === items.length)
+    );
+  });
+export type CombinedFilterResponse = z.infer<
+  typeof combinedFilterResponseSchema
+>;

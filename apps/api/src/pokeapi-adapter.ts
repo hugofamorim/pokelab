@@ -45,6 +45,7 @@ import {
 } from './evolution.js';
 
 const named = z.object({ name: identifierSchema });
+export const POKEMON_DETAIL_MAX_BYTES = 2 * 1024 * 1024;
 const upstreamSchema = z.object({
   id: z.number().int().positive(),
   name: identifierSchema,
@@ -163,6 +164,7 @@ export class PokeApiAdapter {
       'pokemon/' + parsed.data,
       upstreamSchema,
       'pokemon',
+      POKEMON_DETAIL_MAX_BYTES,
     );
     const result = pokemonSchema.safeParse({
       id: p.id,

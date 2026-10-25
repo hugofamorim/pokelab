@@ -8,6 +8,7 @@ import {
   pokemonTypeSchema,
   PAGINATION_LIMITS,
   pokemonSummariesResponseSchema,
+  combinedFilterResponseSchema,
 } from '@pokelab/contracts';
 import { CatalogService } from './catalog.service.js';
 import { CONFIG, configSchema } from './config.js';
@@ -101,6 +102,61 @@ export class PokemonController {
   @ApiResponse({ status: 503, description: 'Batch admission limit reached' })
   summaries(@Query() query: unknown) {
     return this.catalog.summaries(query);
+  }
+
+  @Get('filter-scan')
+  @ApiOperation({
+    summary:
+      'Bounded current-type entry scan intersected with species-introduction generation; not a page of all matches',
+  })
+  @ApiQuery({
+    name: 'type',
+    required: true,
+    schema: z.toJSONSchema(pokemonTypeSchema, {
+      target: 'openapi-3.0',
+    }) as SchemaObject,
+  })
+  @ApiQuery({
+    name: 'generation',
+    required: true,
+    schema: { type: 'integer', minimum: 1, maximum: 9 },
+  })
+  @ApiQuery({
+    name: 'after',
+    required: false,
+    schema: { type: 'integer', minimum: 0, maximum: 999999, default: 0 },
+    description:
+      'Exclusive Pokémon entry ID cursor in the current type index; not a species ID or match offset',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    schema: { type: 'integer', minimum: 1, maximum: 12, default: 4 },
+    description: 'Maximum candidates examined, not minimum matches returned',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Ordered match/excluded/unavailable outcomes and cursor; totalCandidates counts type entries, not combined matches',
+    schema: z.toJSONSchema(combinedFilterResponseSchema, {
+      target: 'openapi-3.0',
+    }) as SchemaObject,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid, repeated or unsupported query',
+  })
+  @ApiResponse({
+    status: 502,
+    description: 'Invalid index or composed resource',
+  })
+  @ApiResponse({
+    status: 503,
+    description:
+      'Index/cache/admission unavailable; individual detail failures remain per item',
+  })
+  filterScan(@Query() query: unknown) {
+    return this.catalog.filterScan(query);
   }
 
   @Get(':idOrName')
