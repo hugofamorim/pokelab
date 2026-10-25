@@ -1,0 +1,33 @@
+{
+  "id": 204,
+  "name": "charm",
+  "type": {
+    "name": "fairy",
+    "url": "https://pokeapi.co/api/v2/type/18/"
+  },
+  "damage_class": {
+    "name": "status",
+    "url": "https://pokeapi.co/api/v2/move-damage-class/1/"
+  },
+  "power": null,
+  "pp": 20,
+  "accuracy": 100,
+  "priority": 0,
+  "past_values": [
+    {
+      "accuracy": null,
+      "power": null,
+      "pp": null,
+      "effect_chance": null,
+      "effect_entries": [],
+      "type": {
+        "name": "normal",
+        "url": "https://pokeapi.co/api/v2/type/1/"
+      },
+      "version_group": {
+        "name": "x-y",
+        "url": "https://pokeapi.co/api/v2/version-group/15/"
+      }
+    }
+  ]
+}
