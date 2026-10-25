@@ -16,6 +16,7 @@ import {
   defaultVarietyMappingSchema,
   DEFAULT_VARIETY_LIMITS,
   SPECIES_DESCRIPTION_LIMITS,
+  EVOLUTION_LIMITS,
 } from '@pokelab/contracts';
 import type {
   Pokemon,
@@ -31,6 +32,11 @@ import {
   descriptionUpstreamSchema,
   normalizeDescription,
 } from './species-description.js';
+import {
+  evolutionUpstreamSchema,
+  evolutionReferenceUpstreamSchema,
+  validateEvolutionId,
+} from './evolution.js';
 
 const named = z.object({ name: identifierSchema });
 const upstreamSchema = z.object({
@@ -81,6 +87,26 @@ export class PokeApiAdapter {
     private readonly pause: (ms: number) => Promise<void> = (ms) =>
       new Promise((resolve) => setTimeout(resolve, ms)),
   ) {}
+
+  async evolutionReference(input: number) {
+    const id = validateEvolutionId(input);
+    return this.request(
+      'pokemon-species/' + id,
+      evolutionReferenceUpstreamSchema(id),
+      'species',
+      EVOLUTION_LIMITS.maxResponseBytes,
+    );
+  }
+
+  async evolutionChain(input: number) {
+    const id = validateEvolutionId(input);
+    return this.request(
+      'evolution-chain/' + id,
+      evolutionUpstreamSchema(id),
+      'evolution-chain',
+      EVOLUTION_LIMITS.maxResponseBytes,
+    );
+  }
 
   async speciesDescription(input: number) {
     const speciesId = speciesReferenceSchema.shape.speciesId.safeParse(input);
@@ -403,7 +429,7 @@ export class PokeApiAdapter {
   private async request<T>(
     path: string,
     schema: z.ZodType<T>,
-    missingResource: 'pokemon' | 'species' | false = false,
+    missingResource: 'pokemon' | 'species' | 'evolution-chain' | false = false,
     maxBytes?: number,
   ): Promise<T> {
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -420,16 +446,23 @@ export class PokeApiAdapter {
         );
         // Release unread error bodies before retry/admission cleanup.
         if (!response.ok) void response.body?.cancel().catch(() => {});
-        if (response.status === 404 && missingResource)
-          throw new CatalogError(
-            404,
-            missingResource === 'species'
-              ? 'SPECIES_NOT_FOUND'
-              : 'POKEMON_NOT_FOUND',
-            missingResource === 'species'
-              ? 'Espécie não encontrada.'
-              : 'Pokémon não encontrado.',
-          );
+        if (response.status === 404 && missingResource) {
+          const missing = {
+            pokemon: {
+              code: 'POKEMON_NOT_FOUND',
+              message: 'Pokémon não encontrado.',
+            },
+            species: {
+              code: 'SPECIES_NOT_FOUND',
+              message: 'Espécie não encontrada.',
+            },
+            'evolution-chain': {
+              code: 'EVOLUTION_CHAIN_NOT_FOUND',
+              message: 'Cadeia de evolução não encontrada.',
+            },
+          }[missingResource];
+          throw new CatalogError(404, missing.code, missing.message);
+        }
         if (!response.ok)
           throw new CatalogError(
             503,

@@ -14,6 +14,7 @@ import {
   PAGINATION_LIMITS,
   defaultVarietiesResponseSchema,
   speciesDescriptionResponseSchema,
+  speciesEvolutionResponseSchema,
 } from '@pokelab/contracts';
 import { CatalogService } from './catalog.service.js';
 
@@ -23,6 +24,45 @@ export class SpeciesController {
   constructor(
     @Inject(CatalogService) private readonly catalog: CatalogService,
   ) {}
+
+  @Get(':speciesId/evolution')
+  @ApiOperation({
+    summary:
+      'Resolve an explicit owning species to its bounded evolution tree; species references and version/form conditions, without Pokémon detail fan-out',
+  })
+  @ApiParam({
+    name: 'speciesId',
+    schema: { type: 'string', pattern: '^[1-9]\\d{0,5}$' },
+    description: 'Owning species ID, not a Pokémon entry or evolution-chain ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Parent-before-child species nodes and alternative condition records; independent reference/chain freshness; null chain only when source reference is null',
+    schema: z.toJSONSchema(speciesEvolutionResponseSchema, {
+      target: 'openapi-3.0',
+    }) as SchemaObject,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid species ID or unsupported query',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Species or referenced evolution chain not found',
+  })
+  @ApiResponse({
+    status: 502,
+    description:
+      'Invalid, unsupported, excessive or inconsistent upstream metadata',
+  })
+  @ApiResponse({
+    status: 503,
+    description: 'Upstream, cache or admission unavailable',
+  })
+  evolution(@Param('speciesId') speciesId: string, @Query() query: unknown) {
+    return this.catalog.speciesEvolution(speciesId, query);
+  }
 
   @Get(':speciesId/description')
   @ApiOperation({

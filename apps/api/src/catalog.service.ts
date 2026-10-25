@@ -20,6 +20,9 @@ import {
   speciesDescriptionSchema,
   speciesIdParamSchema,
   speciesDescriptionQuerySchema,
+  speciesEvolutionReferenceSchema,
+  evolutionChainSchema,
+  speciesEvolutionResponseSchema,
 } from '@pokelab/contracts';
 import type {
   PokemonResponse,
@@ -35,6 +38,9 @@ import type {
   DefaultVarietiesResponse,
   DefaultVarietyResult,
   SpeciesDescriptionResponse,
+  SpeciesEvolutionReference,
+  SpeciesEvolutionResponse,
+  EvolutionChain,
 } from '@pokelab/contracts';
 import { CONFIG } from './config.js';
 import type { Config } from './config.js';
@@ -45,6 +51,14 @@ import { CatalogError } from './errors.js';
 
 @Injectable()
 export class CatalogService {
+  private readonly pendingEvolutionReferences = new Map<
+    string,
+    Promise<{ data: SpeciesEvolutionReference; meta: SourceMetadata }>
+  >();
+  private readonly pendingEvolutionChains = new Map<
+    string,
+    Promise<{ data: EvolutionChain; meta: SourceMetadata }>
+  >();
   private readonly pendingDescriptions = new Map<
     string,
     Promise<SpeciesDescriptionResponse>
@@ -80,6 +94,60 @@ export class CatalogService {
     @Inject(PokeApiAdapter) private readonly adapter: PokeApiAdapter,
     @Inject(CONFIG) private readonly config: Config,
   ) {}
+
+  async speciesEvolution(
+    input: string,
+    query: unknown = {},
+  ): Promise<SpeciesEvolutionResponse> {
+    const parsed = speciesIdParamSchema.safeParse(input);
+    if (
+      !parsed.success ||
+      !speciesDescriptionQuerySchema.safeParse(query).success
+    )
+      throw new CatalogError(
+        400,
+        'INVALID_SPECIES_QUERY',
+        'Use um ID de espécie de 1 a 999999, sem parâmetros de consulta.',
+      );
+    const speciesId = parsed.data;
+    const refKey = `pokeapi-v2:normalized-v1:species-evolution-reference/${speciesId}`;
+    const reference = await this.admit(
+      this.pendingEvolutionReferences,
+      refKey,
+      () =>
+        this.load(
+          refKey,
+          speciesEvolutionReferenceSchema.refine(
+            (value) => value.species.speciesId === speciesId,
+          ),
+          () => this.adapter.evolutionReference(speciesId),
+        ),
+    );
+    let chain: null | { data: EvolutionChain; meta: SourceMetadata } = null;
+    if (reference.data.chainId !== null) {
+      const chainId = reference.data.chainId;
+      const key = `pokeapi-v2:normalized-v1:evolution-chain/${chainId}`;
+      // The reference slot is released before chain admission; shared chains join by ID.
+      chain = await this.admit(this.pendingEvolutionChains, key, () =>
+        this.load(
+          key,
+          evolutionChainSchema.refine((value) => value.chainId === chainId),
+          () => this.adapter.evolutionChain(chainId),
+        ),
+      );
+    }
+    const result = speciesEvolutionResponseSchema.safeParse({
+      data: { species: reference.data.species, chain: chain?.data ?? null },
+      meta: { species: reference.meta, chain: chain?.meta ?? null },
+    });
+    if (!result.success)
+      throw new CatalogError(
+        502,
+        'INVALID_UPSTREAM',
+        'A cadeia de evolução não corresponde à espécie solicitada.',
+      );
+    return result.data;
+  }
 
   async speciesDescription(
     input: string,
