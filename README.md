@@ -30,6 +30,11 @@ An independent, open-source Pokémon discovery and strategy studio. M0 implement
 
 **PL-014** adds the [moves panel](http://localhost:3000/pokemon/25?fromPage=1#movimentos). Choose a source version group explicitly; the URL retains `moveVersion`/`movePage`, six records appear per page, and changing versions resets pagination. Native learning disclosures preserve all methods/levels/orders. Current attributes load for one selected move on demand through a validated same-origin gateway, with separate historical fields and freshness. No game is selected automatically; no current attributes are presented as historical battle values. Loading, missing/empty/error/retry/stale states remain independent of other detail panels. See [PL-014 validation](docs/PL-014_VALIDATION.md). M1 still needs combined type/generation filtering and final acceptance.
 
+The detail navigation now uses functional tabs: only the selected section is visible.
+Direct hash links, browser history, movement version/page and catalog return context are
+preserved. Arrow keys, Home/End and Enter/Space operate the tab list. See
+[detail tabs validation](docs/PL-014_TABS_VALIDATION.md).
+
 ## Run locally
 
 Requirements: Node **24.20.0**, pnpm **12.6.0**, Docker with Compose. Exact dependencies are committed in `pnpm-lock.yaml`. Ports: web 3000, API 3001, PostgreSQL 5432.

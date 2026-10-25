@@ -80,6 +80,9 @@ native learning disclosures and single-selection current metadata/history with i
 failure/freshness. See [`docs/PL-014_VALIDATION.md`](docs/PL-014_VALIDATION.md).
 Published for review in [PR #17](https://github.com/hugofamorim/pokelab/pull/17),
 targeting integrated `main` without pending dependencies.
+PL-014 visual follow-up, requested before continuing M1: section navigation now shows
+only the selected tab's content, retaining hash/history, keyboard operation and movement
+query state. See [`docs/PL-014_TABS_VALIDATION.md`](docs/PL-014_TABS_VALIDATION.md).
 Next issue: PL-015, bounded combined type/generation filtering, starting with explicit
 species/entry semantics and API contracts before integrating controls.
 Combined filter UI and final integrated acceptance remain before completing M1.

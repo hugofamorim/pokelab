@@ -255,6 +255,29 @@ No new Nest endpoint, shared contract, domain-framework coupling, dependency, mi
 environment variable or asset is introduced. Existing logo, shell, buttons, panels, retry,
 artwork and typed palette are reused. Offline fixtures never call live PokéAPI in CI.
 
+## Detail tabs — PL-014 visual follow-up
+
+The former scroll-only section menu is now a typed tab list with exactly one visible
+panel: attributes, abilities, identity, species description, evolutions or moves. The
+hero stays visible. Existing section IDs are preserved as hash links; attributes is
+the default for an empty/unrecognized hash. `#sobre` continues to address the project
+footer, not species metadata. Movement/catalog query parameters remain untouched.
+
+The client subscribes to hash/history changes using `useSyncExternalStore`, with unique
+ARIA tab/panel associations and roving focus. Left/Right wrap, Home/End jump, Enter/Space
+activate. Same-page activation adds a history entry without scrolling the menu out of
+view; back/forward/reload restore the selected section. Native anchors and CSS `:target`
+plus `:has` select a single server-rendered section before hydration. Before the client
+can read the hash, no tab falsely claims ARIA selection and all native anchors are focusable;
+hydration then supplies the current selection and roving tabindex.
+
+Inactive panels use `display:none`, excluding their content and controls from visual,
+keyboard and accessibility navigation. Existing server streaming/resource fetching is
+preserved; this is not lazy fetching of inactive data. Child component state stays mounted,
+so moving between tabs retains move choices/previews; admitted requests may finish while
+a tab is hidden. Existing cache, validation, deadlines and on-demand enrichment are unchanged.
+No API, domain, environment, dependency, migration or asset changes are introduced.
+
 ## Domain module model
 
 - Entities/value objects: `PokemonRef`, `PokemonType`, `Ruleset`, `TeamSlot`, `Team`, `TypeEffectiveness`, `CoverageReport`.
