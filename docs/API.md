@@ -418,6 +418,51 @@ stack trace. Statuses: 400 invalid identifier, 404 absent Pokémon, 502 incompat
 upstream payload, 503 unavailable upstream/admission limit. Unexpected internal
 failures are sanitized to 500. Errors are not persisted as successful cache entries.
 
+## Move records and metadata — PL-013
+
+`GET /v1/pokemon/:pokemonId/moves?versionGroup=1&page=1&pageSize=20`
+
+- Canonical numeric Pokémon **entry** ID and required numeric `versionGroup`, both
+  1–999999 without leading zeros. No name alias or implicit game selection. Page 1–1000
+  (default 1), size 1–50 (default 20). Unknown/repeated/array query fields are rejected.
+- `{ data: { pokemon: {id,name}, species: {speciesId,name}, isDefault,
+requestedVersionGroupId, versionGroup: {id,name}|null, availableVersionGroups,
+items: [{move:{id,name}, records:[{versionGroup:{id,name}, method:{id,name},
+level, order:number|null}]}], page, pageSize, total, hasNext }, meta }`.
+- One item per distinct move, sorted by ID; all matching source learning records are
+  retained in source order. Available groups are sorted by resource ID and describe
+  records present in the source, not supported game availability. Unknown requested group
+  gives null group, total zero and empty items; a page beyond the last is also empty.
+- A single normalized learnset cache is reused across groups/pages. No metadata fetches.
+  Numeric entry identity, species reference, group/method ID/name consistency, uniqueness,
+  levels 0–100, nullable order 0–1000000, at most 2,000 moves, 512 records per move,
+  128 groups and a 1 MiB streamed/decompressed source cap are validated.
+
+`GET /v1/moves/:moveId`
+
+- Canonical numeric ID 1–999999; no query parameters. Returns `{data,meta}` independently.
+- Data: `{move:{id,name}, snapshot:'current-source', type:{id,name},
+damageClass:{id,name}, power:number|null, pp:number|null, accuracy:number|null,
+priority, historicalChanges:[{versionGroup:{id,name},type:{id,name}|null,
+power:number|null,pp:number|null,accuracy:number|null}]}`.
+- This is current source metadata plus selected historical change fields, **not** a
+  selected game's effective battle values. Null historical fields are unsupplied changes,
+  not effective null stats. Version-group boundaries retain upstream meaning; no sorting
+  by numeric ID to infer historical chronology. Historical class/effects, damage,
+  acquisition/transfer legality and move availability are not computed. Current null
+  values are preserved. At most 128 historical records and 1 MiB source bytes.
+- A consumer joining a move page and metadata must verify both move ID and name, keep
+  each resource's freshness independent and label the current snapshot separately from
+  the selected learning version. No automatic joining/enrichment occurs in this API.
+
+Both endpoints reuse TTL, four shared resource slots, deduplication, timeouts and one
+retry. Cache namespaces: `pokeapi-v2:normalized-v1:pokemon-learnset/{id}` and
+`pokeapi-v2:normalized-v1:move-metadata/{id}`. Schema-valid expired data may rescue 5xx
+with original freshness; 404 never rescues stale. Errors: 400 `INVALID_MOVE_QUERY`,
+404 `POKEMON_NOT_FOUND`/`MOVE_NOT_FOUND`, 502 `INVALID_UPSTREAM`,
+503 `UPSTREAM_UNAVAILABLE`/`CACHE_UNAVAILABLE`/`CATALOG_BUSY`. No negative cache.
+OpenAPI documents both shared response schemas. No new env, migration or dependency.
+
 ## Cache and request policy
 
 - PostgreSQL stores normalized validated public DTOs with source/schema version in
