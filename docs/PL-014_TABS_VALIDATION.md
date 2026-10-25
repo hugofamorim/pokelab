@@ -49,4 +49,9 @@ was missing. The generated `next-env.d.ts` change was backed up under ignored
 - Updates the existing open PR #17 rather than creating a dependent PR for this requested
   visual revision. The working branch was switched back to `feat/pl-014-moves-panel`
   before commits/publication, preserving all changes. Updated Linux CI is pending publication.
+- Linux run 82 exposed a real 200% CSS-zoom viewport issue: selection worked, but the
+  new heading could fall below the viewport when the menu was near its bottom. Activation
+  now scrolls the menu to the top, retaining both menu and section start in view. The
+  existing viewport assertion is retained. Post-fix validation is recorded in the PR's
+  final checks/description for the exact published head.
   M1 remains in progress. No merge performed by this task.

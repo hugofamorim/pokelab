@@ -51,6 +51,11 @@ export function DetailTabs({
       window.history.pushState(window.history.state, '', `#${id}`);
       window.dispatchEvent(new HashChangeEvent('hashchange'));
     }
+    event.currentTarget.parentElement?.scrollIntoView({
+      block: 'start',
+      inline: 'nearest',
+      behavior: 'instant',
+    });
   }
   function navigate(event: KeyboardEvent<HTMLAnchorElement>, index: number) {
     if (event.key === ' ' || event.key === 'Enter') {
