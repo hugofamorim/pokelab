@@ -3,6 +3,37 @@
 Development origin: `http://localhost:3001`. OpenAPI UI: `/docs`, JSON: `/docs-json`.
 `GET /v1/pokemon`, `GET /v1/pokemon/summaries` and `GET /v1/pokemon/:idOrName` are public and read-only.
 
+## Web generation-card gateway — PL-009
+
+`GET /api/catalog/generation-cards?speciesIds=411,412,413,414` belongs to **Next.js**,
+on the web origin. It accepts at most four distinct canonical species IDs, not a generation
+or caller-supplied URL. Strict shared ID grammar rejects missing, repeated, excessive,
+duplicate or unsupported query fields before any upstream call. Invalid input returns 400
+`INVALID_GENERATION_CARDS_QUERY`; gateway failure returns sanitized 503
+`GENERATION_CARDS_UNAVAILABLE`. Responses use `Cache-Control: no-store`.
+
+The gateway sequentially calls the existing NestJS default-variety and summary endpoints.
+Only ready mapping IDs are requested as summaries, with duplicates removed. Batch
+length/order/request identity is verified in both phases. Each ready item carries
+`speciesId`, `mapping: { data, meta }` and `summary: { data, meta }`; entry ID/name,
+species ownership ID/name and default status must agree. An unavailable item carries
+`speciesId`, an allowlisted error `code`, and optionally the validated mapping/source
+freshness when only its summary failed. These DTOs are inferred from web Zod composition
+of shared contracts in `generation-catalog.ts`, used on both sides of the same-origin boundary.
+The browser additionally matches mapped species names to the SSR reference index.
+
+No current/historical type, region or game availability is inferred from generation.
+The web parser supports page plus one canonical generation I–IX, or the existing browse/type
+and exact-search modes separately. Selecting a mode clears other filters and resets page.
+Pagination, reload/history, error retry and validated `fromGeneration`/`fromPage` detail
+return preserve generation. Raw `/v1/pokemon?generation=…` remains unsupported.
+
+The visible page has twelve species; browser requests are sequential groups of four.
+Only failed species are retried explicitly. Source metadata remains separate and stale
+mapping/summary notices use their own timestamps. Unresolved/unverified species have
+no inferred Pokémon detail URL. Cancellation stops obsolete web work; existing NestJS
+admission/cache bounds remain unchanged. No live PokéAPI access occurs in CI.
+
 ## Explicit default-variety resolution — PL-008
 
 `GET /v1/pokemon-species/default-varieties?speciesIds=1,413` resolves a bounded visible

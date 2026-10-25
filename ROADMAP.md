@@ -41,9 +41,14 @@ PL-005/006/007 were integrated into `main` through PRs #8, #9 and #10.
 PL-008 (`feat/pl-008-default-variety-resolution`) starts from integrated `main` at
 `3c714c3`, adding bounded explicit default-variety mappings, per-item failures/freshness,
 shared cache/admission and offline tests. See [`docs/PL-008_VALIDATION.md`](docs/PL-008_VALIDATION.md).
-M1 as a whole is not complete: visual generation filters and detail enrichment remain.
-Next issue: PL-009, generation controls with URL state, bounded mapping/summary gateways,
-identity checks, partial failures and generation-aware detail return.
+PL-009 (`feat/pl-009-generation-controls`) builds on PL-008 with responsive native
+generation links, URL pagination/reset, validated mapped cards in bounded same-origin
+batches, independent source freshness, partial failures/retry and generation-aware detail
+return. [PR #11](https://github.com/hugofamorim/pokelab/pull/11) was still open at audit time;
+the new PR targets `main` with that dependency. See [`docs/PL-009_VALIDATION.md`](docs/PL-009_VALIDATION.md).
+M1 as a whole is not complete: combined filters and species/evolution/move detail enrichment remain.
+Next issue: PL-010, species descriptions in detail with explicit source-language fallback
+and bounded, cached upstream metadata.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)

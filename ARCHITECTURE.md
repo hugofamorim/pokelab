@@ -64,6 +64,25 @@ Validated `fromType` plus `fromPage` constructs internal return URLs for ready a
 unavailable cards. Retry/first-page recovery retains the active filter. No new API,
 dependency, database migration or environment variable is introduced.
 
+PL-009 adds `/pokedex?page=…&generation=…` as a separate I–IX species-introduction
+mode, with explicit URL validation and `fromGeneration` return links. Native filter
+anchors reset page/search/type and disable prefetch; rows scroll horizontally on mobile.
+Shared pagination/state components preserve the active mode on retry and recovery.
+Server-side species references appear immediately; unresolved species have no guessed
+detail link. Only the visible twelve references are hydrated, in sequential groups of four.
+
+The same-origin `/api/catalog/generation-cards?speciesIds=…` gateway first resolves
+default mappings, then requests summaries only for resolved, distinct Pokémon IDs.
+It verifies ordered batch identity, mapped ID/name, owning species ID/name and `isDefault`.
+The browser repeats response validation and checks species names against the SSR index.
+Expected failures remain per item; source identity contradictions never render ready cards.
+Mapping and summary freshness remain separate; an unavailable summary can retain mapping
+freshness without enabling an unverified link. The combined server deadline is 135 seconds,
+with request cancellation propagated; the browser deadline is 140 seconds. NestJS owns
+resource caching/admission. Previously admitted Nest work may complete after cancellation.
+Grid keys include generation/page, navigation cancels obsolete browser work, and retries
+target failed species only. No backend endpoint, dependency, migration or env changes.
+
 - Avoid runtime `fetch()` calls outside Suspense when `cacheComponents` is on. Separate cached public data from request-scoped private data. Use framework caching deliberately; do not mix private session data in shared cache.
 - Do not add route segment `dynamic = 'force-dynamic'` while Cache Components is enabled. Run `next build` in CI to catch prerender errors.
 
@@ -126,8 +145,8 @@ are 502 without retry; transport/HTTP failures retain one bounded retry and 503 
   four shared admission slots. Pages/sizes project that index; no species/detail fan-out.
   Generation ID/name, canonical species URLs, uniqueness, 10,000 members and 1 MiB
   streamed/decompressed response bounds are validated. This separate route avoids
-  interpreting species IDs as form-specific Pokémon IDs. Combined type/generation
-  queries and visual generation controls require later work.
+  interpreting species IDs as form-specific Pokémon IDs. PL-009 supplies generation
+  controls; combined type/generation queries remain future work.
 - PL-008: GET `/v1/pokemon-species/default-varieties?speciesIds=1,413` -> at most 12
   ordered explicit species-to-default-Pokémon mappings, with per-item availability and
   species-source freshness. The adapter validates one default flag, every variety URL,
