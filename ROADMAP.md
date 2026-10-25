@@ -50,6 +50,7 @@ return. PL-008 and PL-009 were integrated into `main` through
 PL-010 (`feat/pl-010-species-descriptions`) starts from integrated `main` at `c54f47d`,
 adding a bounded cached species-description endpoint and an independently streamed
 detail panel, explicit source language/version, fallback, empty/error/retry/stale states.
+Published in [PR #13](https://github.com/hugofamorim/pokelab/pull/13).
 See [`docs/PL-010_VALIDATION.md`](docs/PL-010_VALIDATION.md) for actual checks and review status.
 M1 as a whole is not complete: combined filters and evolution/move detail enrichment remain.
 Next issue: PL-011, a bounded evolution-chain contract and adapter preserving branches

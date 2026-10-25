@@ -73,7 +73,10 @@ Ignored screenshots: `artifacts/description-live-{width}.png`,
 `artifacts/description-stale.png`. Desktop/mobile hierarchy, wrapped source text, source
 labels and independent states are inspected visually; keyboard and 200% zoom are tested.
 
-Publication and final Linux CI verification are pending.
+Published for review in [PR #13](https://github.com/hugofamorim/pokelab/pull/13),
+targeting integrated `main` without an unmerged dependency.
+Initial Linux validation is tracked in [CI run 58](https://github.com/hugofamorim/pokelab/actions/runs/40149073399).
+Final publication-head verification is recorded in the PR checks. No PR was merged by this task.
 
 ## Remaining work
 
