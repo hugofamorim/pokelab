@@ -80,7 +80,10 @@ Offline captures: `artifacts/generation-{width}.png` and `generation-variety-{wi
 Desktop/mobile captures were visually inspected for hierarchy, spacing, wrapped names,
 badges, artwork, source notices and responsive filter rows. Existing assets are reused.
 
-Publication and Linux CI verification are pending.
+Published for review in [PR #12](https://github.com/hugofamorim/pokelab/pull/12),
+targeting `main` and depending on the still-open PL-008 PR #11.
+Linux validation is tracked in [CI run 52](https://github.com/hugofamorim/pokelab/actions/runs/40146149295).
+Final publication-head verification is recorded in the PR checks; no PR was merged.
 
 ## Remaining work
 
