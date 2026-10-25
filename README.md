@@ -1,6 +1,6 @@
 # PokéLab — Trainer Studio
 
-An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 includes browsing, exact name/ID search, responsive single-type filtering and validated generation browsing. Detail enrichment, combined filters, team building, analysis, accounts and cloud saves remain future work.
+An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 includes browsing, exact name/ID search, responsive single-type filtering, validated generation browsing and species descriptions. Evolutions, moves, combined filters, team building, analysis, accounts and cloud saves remain future work.
 
 **PL-001** provides [paginated entry references](http://127.0.0.1:3001/v1/pokemon?page=1&pageSize=20), with strict query bounds, persistent caching and no detail fan-out.
 
@@ -19,6 +19,8 @@ An independent, open-source Pokémon discovery and strategy studio. M0 implement
 **PL-008** adds [explicit default-variety mappings](http://127.0.0.1:3001/v1/pokemon-species/default-varieties?speciesIds=1,413): up to twelve species IDs, ordered results and independent per-item availability/freshness. The adapter selects exactly one upstream `is_default` variety, with canonical URLs and bounded responses. Two workers/two distinct mapping batches reuse a persistent per-species cache and share the existing four resource slots. Species IDs/names are never reused as assumed Pokémon IDs/names; no Pokémon detail fan-out occurs.
 
 **PL-009** adds [generation browsing](http://localhost:3000/pokedex?page=1&generation=4). Native I–IX links reset other modes and preserve generation/page through pagination, history, retry and detail return. Species references appear first; sequential four-species gateway requests resolve defaults before summaries. Cards require matching entry/name/species/default identity, with independent source freshness and failed-only retry. Unresolved species have no guessed detail link. Type, generation and exact search remain separate modes; current default varieties do not imply game availability or historical typing.
+
+**PL-010** adds [species descriptions](http://localhost:3000/pokemon/25#sobre-especie) through a [bounded species endpoint](http://127.0.0.1:3001/v1/pokemon-species/25/description). The panel loads independently from attributes, using the entry's explicit owning species ID. It prefers original `pt-br` text and falls back to `en` with a visible language label and source game version. Missing translations, outages, retry and stale descriptions have distinct states. Descriptions use their own persistent cache/freshness, reusing existing request limits; catalog browsing does not request this extra metadata.
 
 ## Run locally
 
@@ -90,7 +92,7 @@ Environment files are ignored; only harmless examples are tracked. API validatio
 - [Domain rules](docs/DOMAIN_RULES.md), [design system](docs/POKELAB_DESIGN_SYSTEM.md), [agent instructions](AGENTS.md)
 - [Initial audit](docs/M0_AUDIT.md), [ADR-001](docs/adr/001-foundation.md), [API/cache policy](docs/API.md)
 
-Next smallest issue: **PL-010 — species descriptions in detail**, with explicit source-language fallback and bounded cached metadata. Combined filters, evolutions and moves remain separate M1 work. PL-009 depends on [PR #11](https://github.com/hugofamorim/pokelab/pull/11) and targets `main`. No PR is merged automatically.
+PL-008/009 were integrated into `main` through [PR #11](https://github.com/hugofamorim/pokelab/pull/11) and [PR #12](https://github.com/hugofamorim/pokelab/pull/12). PL-010 starts from that integrated base. Next smallest issue: **PL-011 — bounded evolution-chain contract and adapter**, preserving branches and conditions before UI work. Combined filters and move enrichment remain separate M1 work. No PR is merged automatically.
 
 ## Attribution
 
@@ -113,3 +115,13 @@ PL-009 adds a projected Wormadam membership from generation IV and its normalize
 detail, captured on 2026-10-24 (America/Sao_Paulo). Offline generation pages deliberately
 use restricted captured subsets plus controlled stale/empty/outage scenarios. Production
 generation totals and card data always come from the validated API, never those fixtures.
+
+PL-010 adds projected real species descriptions for Pikachu and Wormadam, captured from
+`/api/v2/pokemon-species/25` and `/413` on 2026-10-24 (America/Sao_Paulo). Each projection
+keeps original identity and the first English entry with language/version references;
+neither source supplied `pt-br` at capture time. Synthetic localization, absence and
+failure cases are test-only. Game text remains attributed to its original rights holders.
+
+PL-010 acceptance evidence is in [its validation record](docs/PL-010_VALIDATION.md).
+Streamed detail HTML works before client hydration but needs React's inline scripts;
+fully disabling JavaScript is not supported by that streamed route.

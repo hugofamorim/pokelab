@@ -1,6 +1,6 @@
 # PokéLab — Trainer Studio | Product Specification
 
-Status: product specification v1.0. M0 foundation implemented; M1 in progress (PL-001 references, PL-002 bounded card summaries, PL-003 browsing UI, PL-004 exact name/ID search, PL-005 type-filter API, PL-006 type controls, PL-007 species-introduction generation API, PL-008 explicit default-variety resolution, PL-009 generation browsing); M2–M5 planned. Validation and review status: ROADMAP.md. Language of product UI: Brazilian Portuguese default, English-ready. Repository: `hugofamorim/pokelab`.
+Status: product specification v1.0. M0 foundation implemented; M1 in progress (PL-001 references, PL-002 bounded card summaries, PL-003 browsing UI, PL-004 exact name/ID search, PL-005 type-filter API, PL-006 type controls, PL-007 species-introduction generation API, PL-008 explicit default-variety resolution, PL-009 generation browsing, PL-010 species descriptions); M2–M5 planned. Validation and review status: ROADMAP.md. Language of product UI: Brazilian Portuguese default, English-ready. Repository: `hugofamorim/pokelab`.
 
 ## Vision
 

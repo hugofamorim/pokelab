@@ -15,6 +15,7 @@ import {
   speciesReferenceSchema,
   defaultVarietyMappingSchema,
   DEFAULT_VARIETY_LIMITS,
+  SPECIES_DESCRIPTION_LIMITS,
 } from '@pokelab/contracts';
 import type {
   Pokemon,
@@ -26,6 +27,10 @@ import type {
 } from '@pokelab/contracts';
 import { POKEMON_TYPES, STAT_NAMES, toMetric } from '@pokelab/pokemon-domain';
 import { CatalogError } from './errors.js';
+import {
+  descriptionUpstreamSchema,
+  normalizeDescription,
+} from './species-description.js';
 
 const named = z.object({ name: identifierSchema });
 const upstreamSchema = z.object({
@@ -76,6 +81,23 @@ export class PokeApiAdapter {
     private readonly pause: (ms: number) => Promise<void> = (ms) =>
       new Promise((resolve) => setTimeout(resolve, ms)),
   ) {}
+
+  async speciesDescription(input: number) {
+    const speciesId = speciesReferenceSchema.shape.speciesId.safeParse(input);
+    if (!speciesId.success)
+      throw new CatalogError(
+        400,
+        'INVALID_SPECIES_ID',
+        'Use um ID de espécie de 1 a 999999.',
+      );
+    const body = await this.request(
+      'pokemon-species/' + speciesId.data,
+      descriptionUpstreamSchema(speciesId.data),
+      'species',
+      SPECIES_DESCRIPTION_LIMITS.maxResponseBytes,
+    );
+    return normalizeDescription(body);
+  }
 
   async get(identifier: string): Promise<Pokemon> {
     const parsed = identifierSchema.safeParse(identifier);

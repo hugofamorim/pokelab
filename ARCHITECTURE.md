@@ -86,6 +86,32 @@ target failed species only. No backend endpoint, dependency, migration or env ch
 - Avoid runtime `fetch()` calls outside Suspense when `cacheComponents` is on. Separate cached public data from request-scoped private data. Use framework caching deliberately; do not mix private session data in shared cache.
 - Do not add route segment `dynamic = 'force-dynamic'` while Cache Components is enabled. Run `next build` in CI to catch prerender errors.
 
+## Species descriptions — PL-010
+
+`GET /v1/pokemon-species/:speciesId/description` uses explicit owning species IDs;
+no form-to-species equality is assumed. The adapter validates matching identity,
+language/version references, at most 512 entries of 8192 characters and a 1 MiB
+streamed body. Selection is deterministic: first nonblank `pt-br` entry in upstream
+order, otherwise first `en`; unsupported/empty collections yield `description: null`.
+Whitespace/control characters become single spaces. Source language and version are
+retained without automatic translation or a claim that this is the newest game's text.
+
+Descriptions have their own normalized cache projection, key
+`pokeapi-v2:normalized-v1:species-description/{id}`, using the existing TTL, four shared
+resource slots, in-flight deduplication and stale-if-error. PL-008 mapping cache keys
+remain compatible: the same upstream species may be fetched once for each distinct
+projection per TTL. A future shared richer species cache can consolidate those reads;
+no migration/cache invalidation or catalog enrichment is needed for this increment.
+Freshness of descriptions remains independent from mappings/Pokémon attributes.
+
+The detail's `#sobre-especie` panel sits inside its own Suspense boundary; its failure
+does not replace the detail. The server client verifies species ID **and name** against
+the owning species from the Pokémon DTO and uses a 15s deadline/no web cache. Retry
+refreshes the current route, retaining query/hash; Nest owns cached source data.
+The panel is rendered before application hydration, but streamed HTML requires React's
+inline scripts to apply. Fully disabled JavaScript is not supported by this streamed detail.
+No dependency, environment, infrastructure or domain-framework coupling is added.
+
 ## Domain module model
 
 - Entities/value objects: `PokemonRef`, `PokemonType`, `Ruleset`, `TeamSlot`, `Team`, `TypeEffectiveness`, `CoverageReport`.

@@ -17,6 +17,9 @@ import {
   defaultVarietyQuerySchema,
   defaultVarietyUnavailableCodeSchema,
   DEFAULT_VARIETY_LIMITS,
+  speciesDescriptionSchema,
+  speciesIdParamSchema,
+  speciesDescriptionQuerySchema,
 } from '@pokelab/contracts';
 import type {
   PokemonResponse,
@@ -31,6 +34,7 @@ import type {
   DefaultVarietyResponse,
   DefaultVarietiesResponse,
   DefaultVarietyResult,
+  SpeciesDescriptionResponse,
 } from '@pokelab/contracts';
 import { CONFIG } from './config.js';
 import type { Config } from './config.js';
@@ -41,6 +45,10 @@ import { CatalogError } from './errors.js';
 
 @Injectable()
 export class CatalogService {
+  private readonly pendingDescriptions = new Map<
+    string,
+    Promise<SpeciesDescriptionResponse>
+  >();
   private readonly pendingDetails = new Map<string, Promise<PokemonResponse>>();
   private readonly pendingPages = new Map<
     string,
@@ -72,6 +80,33 @@ export class CatalogService {
     @Inject(PokeApiAdapter) private readonly adapter: PokeApiAdapter,
     @Inject(CONFIG) private readonly config: Config,
   ) {}
+
+  async speciesDescription(
+    input: string,
+    query: unknown = {},
+  ): Promise<SpeciesDescriptionResponse> {
+    const parsed = speciesIdParamSchema.safeParse(input);
+    if (
+      !parsed.success ||
+      !speciesDescriptionQuerySchema.safeParse(query).success
+    )
+      throw new CatalogError(
+        400,
+        'INVALID_SPECIES_QUERY',
+        'Use um ID de espécie de 1 a 999999, sem parâmetros de consulta.',
+      );
+    const speciesId = parsed.data;
+    const key = `pokeapi-v2:normalized-v1:species-description/${speciesId}`;
+    return this.admit(this.pendingDescriptions, key, () =>
+      this.load(
+        key,
+        speciesDescriptionSchema.refine(
+          (value) => value.species.speciesId === speciesId,
+        ),
+        () => this.adapter.speciesDescription(speciesId),
+      ),
+    );
+  }
 
   async get(input: string): Promise<PokemonResponse> {
     const parsed = identifierSchema.safeParse(input);

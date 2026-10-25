@@ -17,6 +17,7 @@ import {
   GENERATION_NAMES,
 } from '@pokelab/contracts';
 const fixture = require('./fixtures/pikachu.json');
+const descriptions = require('./fixtures/species-descriptions.json');
 const electricFixture = require('./fixtures/type-electric.json');
 const generationFixture = require('./fixtures/generation-i.json');
 const generationFour = require('./fixtures/generation-iv-selection.json');
@@ -47,6 +48,46 @@ async function start() {
     async () => {},
   );
   const getDetail = adapter.get.bind(adapter);
+  const descriptionAdapter = new PokeApiAdapter(
+    100,
+    async (url) => {
+      const id = Number(String(url).split('/').at(-1));
+      const captured = descriptions.find((item) => item.id === id);
+      return new Response(JSON.stringify(captured ?? {}), {
+        status: captured ? 200 : 404,
+      });
+    },
+    async () => {},
+  );
+  adapter.speciesDescription = async (id) => {
+    if (id === 25) return descriptionAdapter.speciesDescription(id);
+    if (id === 4) await new Promise((resolve) => setTimeout(resolve, 1500));
+    if (id === 3 || id === 413)
+      throw new CatalogError(
+        503,
+        'UPSTREAM_UNAVAILABLE',
+        'Fonte indisponível.',
+      );
+    if (id === 2)
+      throw new CatalogError(
+        404,
+        'SPECIES_NOT_FOUND',
+        'Espécie não encontrada.',
+      );
+    const item = catalog.find((value) => value.species.id === id);
+    return {
+      species: {
+        speciesId: id,
+        name: id === 5 ? 'identity-mismatch' : item.species.name,
+      },
+      description: null,
+    };
+  };
+  entries.set('pokeapi-v2:normalized-v1:species-description/413', {
+    payload: await descriptionAdapter.speciesDescription(413),
+    fetchedAt: new Date('2026-10-20T12:00:00Z'),
+    expiresAt: new Date(0),
+  });
   adapter.get = async (identifier) => {
     if (identifier === '413' || identifier === wormadam.name)
       throw new CatalogError(
