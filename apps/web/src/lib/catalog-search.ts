@@ -97,3 +97,25 @@ export function catalogReturnHref(
       ? catalogHref(query.page, query.type)
       : catalogHref(1);
 }
+
+export function catalogEntryHref(id: number, returnHref: string): string {
+  const params = returnHref.startsWith('/pokedex?')
+    ? new URLSearchParams(returnHref.slice('/pokedex?'.length))
+    : new URLSearchParams();
+  const query = parseCatalogSearchParams(params);
+  const origin = new URLSearchParams();
+  if (query.kind === 'search') origin.set('fromSearch', query.term);
+  else {
+    origin.set(
+      'fromPage',
+      query.kind === 'browse' || query.kind === 'generation'
+        ? String(query.page)
+        : '1',
+    );
+    if (query.kind === 'generation')
+      origin.set('fromGeneration', String(query.generation));
+    if (query.kind === 'browse' && query.type)
+      origin.set('fromType', query.type);
+  }
+  return `/pokemon/${id}?${origin}`;
+}

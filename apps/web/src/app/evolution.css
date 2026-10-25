@@ -1,0 +1,174 @@
+.evolution-panel {
+  margin-top: 24px;
+  overflow-wrap: anywhere;
+  scroll-margin-top: 24px;
+}
+.evolution-tree,
+.evolution-children,
+.evolution-records {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.evolution-tree {
+  margin-top: 24px;
+}
+.evolution-children {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 20px;
+  margin-top: 20px;
+  padding: 0 0 0 16px;
+  border-left: 2px solid var(--pl-border);
+}
+.evolution-children > li {
+  min-width: 0;
+}
+.evolution-node {
+  padding: 20px;
+  border: 1px solid var(--pl-border);
+  border-radius: var(--pl-radius-lg);
+  background: var(--pl-surface-warm);
+  min-width: 0;
+}
+.evolution-current {
+  border-color: var(--pl-brand-deep);
+  box-shadow: 0 0 0 2px var(--pl-canvas);
+}
+.evolution-node-heading {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.evolution-node h3 {
+  margin: 4px 0;
+  font-size: 20px;
+}
+.evolution-symbol {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-canvas);
+  flex-shrink: 0;
+}
+.evolution-parent {
+  font-size: 14px;
+  margin: 12px 0;
+  color: var(--pl-body);
+}
+.evolution-current-label {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--pl-radius-sm);
+  background: var(--pl-canvas);
+  color: var(--pl-ink);
+  font-size: 12px;
+  font-weight: 800;
+}
+.evolution-conditions {
+  border-top: 1px solid var(--pl-border);
+  margin: 16px 0;
+  padding-top: 8px;
+}
+.evolution-panel summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 10px 0;
+  color: var(--pl-ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+.evolution-records > li {
+  border-top: 1px solid var(--pl-border);
+}
+.evolution-condition-data {
+  margin: 0 0 16px;
+}
+.evolution-condition-data > div {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--pl-border);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.evolution-condition-data dt {
+  color: var(--pl-body);
+}
+.evolution-condition-data dd {
+  margin: 4px 0 0;
+  color: var(--pl-ink);
+  font-weight: 700;
+  white-space: pre-wrap;
+}
+.evolution-resolve {
+  margin-top: 12px;
+  min-height: 44px;
+  text-align: left;
+  white-space: normal;
+}
+.evolution-variety {
+  max-width: 520px;
+}
+.evolution-variety:empty {
+  display: none;
+}
+.evolution-variety > [role='status'] {
+  font-size: 14px;
+  color: var(--pl-body);
+  margin: 16px 0;
+}
+.evolution-variety .pokemon-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  position: relative;
+  gap: 8px;
+  padding: 16px;
+  min-height: 160px;
+  height: auto;
+}
+.evolution-variety .pokemon-card h3 {
+  font-size: 18px;
+}
+.evolution-variety .pokemon-card .artwork {
+  min-width: 0;
+  width: 72px;
+  height: 100px;
+}
+.evolution-variety .pokemon-card > svg {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 16px;
+  height: 16px;
+}
+.evolution-disclaimer {
+  margin-top: 24px;
+}
+@media (min-width: 1024px) {
+  .evolution-tree > li {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+  .evolution-tree > li > .evolution-children {
+    margin-top: 0;
+  }
+  .evolution-tree > li > .evolution-node:only-child {
+    grid-column: 1 / -1;
+    max-width: 440px;
+  }
+}
+@media (max-width: 639px) {
+  .evolution-node {
+    padding: 16px;
+  }
+  .evolution-children {
+    padding-left: 8px;
+    gap: 16px;
+  }
+  .evolution-node-heading {
+    gap: 8px;
+  }
+}
