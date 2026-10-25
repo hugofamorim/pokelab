@@ -90,6 +90,8 @@ bounded candidate scans combining current entry type and species-introduction ge
 It preserves explicit form/species identity, partial outcomes, keyset progress and independent
 source freshness while reusing the existing resource caches/admission. See
 [`docs/PL-015_VALIDATION.md`](docs/PL-015_VALIDATION.md) for actual validation/review status.
+Published for review in [PR #18](https://github.com/hugofamorim/pokelab/pull/18),
+targeting integrated `main` without pending dependencies.
 Next issue: PL-016, combined filter controls and progressive candidate consumption,
 with explicit labels, query/return state, partial failures, source-change resets and native
 accessible navigation. Candidate scans are not conventional pages of all filtered matches.

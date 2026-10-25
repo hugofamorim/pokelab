@@ -65,7 +65,9 @@ are explicitly synthetic and never production application data.
   exhausted cursor and duplicate-query rejection were verified. No bulk scan was performed.
 - Local production API/web run from F: at ports 3001/3000. The source-measurement/test fixtures
   and smoke code remain independent from application data. Original generated difference
-  is preserved. Publication/Linux CI are pending at this checkpoint; M1 is not marked complete.
+  is preserved. Published in [PR #18](https://github.com/hugofamorim/pokelab/pull/18),
+  targeting integrated `main` without pending dependencies. Linux CI is pending at publication;
+  the PR checks/description record the final head's result. M1 is not marked complete.
 
 ## Next work and limits
 
