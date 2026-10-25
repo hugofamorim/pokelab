@@ -161,6 +161,32 @@ test('keyboard focus, browser history and text zoom preserve search usability', 
     page.getByRole('link', { name: 'Voltar à Pokédex' }),
   ).toHaveAttribute('href', '/pokedex?page=1');
 });
+test('initial pageshow preserves a typed draft while persisted restoration follows the URL', async ({
+  page,
+}) => {
+  await page.goto('/pokedex?search=25');
+  const input = page.getByRole('searchbox');
+  await expect(
+    page.getByRole('button', { name: 'Limpar busca' }),
+  ).toBeVisible();
+  await input.fill('pikachu');
+  await page.evaluate(() =>
+    window.dispatchEvent(
+      new PageTransitionEvent('pageshow', { persisted: false }),
+    ),
+  );
+  await expect(input).toHaveValue('pikachu');
+  await input.press('Enter');
+  await expect(page).toHaveURL(/search=pikachu$/);
+  await input.fill('unsubmitted-draft');
+  await page.evaluate(() =>
+    window.dispatchEvent(
+      new PageTransitionEvent('pageshow', { persisted: true }),
+    ),
+  );
+  await expect(input).toHaveValue('pikachu');
+});
+
 test('HTML search submission works before JavaScript hydration', async ({
   page,
 }) => {

@@ -35,6 +35,10 @@
   snapshot, or the generation in which every variety/form appeared. Species references
   expose `speciesId`; resolve a default variety from validated species data before using
   a Pokémon entry/detail/summary ID. Never infer that mapping from equal numeric IDs.
+- Default-variety mappings select exactly one validated upstream `is_default` flag,
+  independent of array position or matching names. Their freshness belongs to the species
+  resource. A later card consumer must separately validate the Pokémon summary's entry
+  ID, owning species and default status before displaying it as that mapped variety.
 
 ## Unit test matrix
 
