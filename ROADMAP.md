@@ -53,8 +53,14 @@ detail panel, explicit source language/version, fallback, empty/error/retry/stal
 Published in [PR #13](https://github.com/hugofamorim/pokelab/pull/13).
 See [`docs/PL-010_VALIDATION.md`](docs/PL-010_VALIDATION.md) for actual checks and review status.
 M1 as a whole is not complete: combined filters and evolution/move detail enrichment remain.
-Next issue: PL-011, a bounded evolution-chain contract and adapter preserving branches
-and evolution conditions, before adding evolution UI.
+PL-011 (`feat/pl-011-evolution-chain-api`) builds on PL-010 head `e133952`,
+resolving species to bounded cached evolution trees with independent resource freshness,
+explicit parent relationships and complete source version/form conditions. PR #13 was
+open at audit time; this increment retains that dependency and does not merge it.
+Published in [PR #14](https://github.com/hugofamorim/pokelab/pull/14).
+See [`docs/PL-011_VALIDATION.md`](docs/PL-011_VALIDATION.md) for actual checks and review status.
+Next issue: PL-012, an accessible evolution panel consuming these species references
+and scoped source conditions without inferred Pokémon IDs or universal game-availability claims.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)

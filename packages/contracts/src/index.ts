@@ -4,6 +4,7 @@ import { identifierSchema } from './identifiers.js';
 import { pokemonPageSchema, pokemonReferenceSchema } from './pagination.js';
 import { pokemonTypeSchema } from './type-filter.js';
 import { speciesDescriptionSchema } from './species-description.js';
+import { speciesEvolutionDataSchema } from './evolution.js';
 import {
   generationSpeciesPageSchema,
   speciesReferenceSchema,
@@ -215,4 +216,20 @@ export const speciesDescriptionResponseSchema = z.object({
 });
 export type SpeciesDescriptionResponse = z.infer<
   typeof speciesDescriptionResponseSchema
+>;
+
+export * from './evolution.js';
+export const speciesEvolutionResponseSchema = z
+  .object({
+    data: speciesEvolutionDataSchema,
+    meta: z.object({
+      species: sourceMetadataSchema,
+      chain: sourceMetadataSchema.nullable(),
+    }),
+  })
+  .refine(
+    (value) => (value.data.chain === null) === (value.meta.chain === null),
+  );
+export type SpeciesEvolutionResponse = z.infer<
+  typeof speciesEvolutionResponseSchema
 >;

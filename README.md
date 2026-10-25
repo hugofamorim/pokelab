@@ -22,6 +22,8 @@ An independent, open-source Pokémon discovery and strategy studio. M0 implement
 
 **PL-010** adds [species descriptions](http://localhost:3000/pokemon/25#sobre-especie) through a [bounded species endpoint](http://127.0.0.1:3001/v1/pokemon-species/25/description). The panel loads independently from attributes, using the entry's explicit owning species ID. It prefers original `pt-br` text and falls back to `en` with a visible language label and source game version. Missing translations, outages, retry and stale descriptions have distinct states. Descriptions use their own persistent cache/freshness, reusing existing request limits; catalog browsing does not request this extra metadata.
 
+**PL-011** adds the [species evolution API](http://127.0.0.1:3001/v1/pokemon-species/133/evolution). Explicit species-to-chain references and parent relationships preserve branching, version/form conditions and independent freshness. The adapter validates bounded trees iteratively, caches shared chains once per TTL and never fetches Pokémon details for their nodes. Opaque source expressions are retained without execution or simulated eligibility. Evolution UI is a separate follow-up.
+
 ## Run locally
 
 Requirements: Node **24.20.0**, pnpm **12.6.0**, Docker with Compose. Exact dependencies are committed in `pnpm-lock.yaml`. Ports: web 3000, API 3001, PostgreSQL 5432.
@@ -92,7 +94,7 @@ Environment files are ignored; only harmless examples are tracked. API validatio
 - [Domain rules](docs/DOMAIN_RULES.md), [design system](docs/POKELAB_DESIGN_SYSTEM.md), [agent instructions](AGENTS.md)
 - [Initial audit](docs/M0_AUDIT.md), [ADR-001](docs/adr/001-foundation.md), [API/cache policy](docs/API.md)
 
-PL-008/009 were integrated into `main` through [PR #11](https://github.com/hugofamorim/pokelab/pull/11) and [PR #12](https://github.com/hugofamorim/pokelab/pull/12). PL-010 starts from that integrated base. Next smallest issue: **PL-011 — bounded evolution-chain contract and adapter**, preserving branches and conditions before UI work. Combined filters and move enrichment remain separate M1 work. No PR is merged automatically.
+PL-008/009 were integrated into `main` through [PR #11](https://github.com/hugofamorim/pokelab/pull/11) and [PR #12](https://github.com/hugofamorim/pokelab/pull/12). PL-011 builds on PL-010 [PR #13](https://github.com/hugofamorim/pokelab/pull/13), which was open at audit time. Next smallest issue: **PL-012 — accessible evolution panel**, consuming explicit species references and scoped conditions. Combined filters and move enrichment remain separate M1 work. No PR is merged automatically.
 
 ## Attribution
 
@@ -125,3 +127,8 @@ failure cases are test-only. Game text remains attributed to its original rights
 PL-010 acceptance evidence is in [its validation record](docs/PL-010_VALIDATION.md).
 Streamed detail HTML works before client hydration but needs React's inline scripts;
 fully disabling JavaScript is not supported by that streamed route.
+
+PL-011 retains the real Eevee/Dunsparce evolution chains and projected species references,
+captured on 2026-10-24 (America/Sao_Paulo). They exercise branching and modern version,
+form and expression metadata. Controlled invalid/boundary cases stay test-only. See
+[PL-011 acceptance evidence](docs/PL-011_VALIDATION.md). No evolution UI is introduced.

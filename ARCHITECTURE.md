@@ -112,6 +112,39 @@ The panel is rendered before application hydration, but streamed HTML requires R
 inline scripts to apply. Fully disabled JavaScript is not supported by this streamed detail.
 No dependency, environment, infrastructure or domain-framework coupling is added.
 
+## Evolution resource composition — PL-011
+
+`GET /v1/pokemon-species/:speciesId/evolution` first loads a validated species-to-chain
+reference, then constructs an evolution-chain path from its explicit numeric chain ID.
+Species, Pokémon entry, Pokémon form and evolution-chain IDs are distinct. No resource
+URL is followed and no Pokémon detail/artwork/type enrichment occurs.
+
+The source tree is normalized iteratively into a bounded parent-before-child node list,
+preserving sibling order, species identity, baby flags, all condition alternatives and
+the separate breeding `babyTriggerItem`. Maximums: 1 MiB per resource, 64 species nodes,
+8 levels including root, 64 alternatives per edge, 25 allowed natures, 32 expression
+variables and 512 expression characters. Nodes have unique species IDs/names, one root,
+connected preceding parents and no cycles. Modern source fields retain version-group,
+default flag, region, required/result Pokémon **form** references, steps/move/damage
+requirements and expressions. Expressions are opaque metadata and are never evaluated;
+source percentages are not battle probabilities. Unknown condition fields fail validation
+rather than disappearing. Empty child conditions mean unspecified requirements.
+
+`species-evolution-reference/{speciesId}` and `evolution-chain/{chainId}` under the
+existing normalized-v1 namespace have separate caches, in-flight maps and source metadata.
+The reference's global resource slot is released before chain admission. Different species
+join one chain operation; all operations share the existing four slots with other catalog
+resources, without a new queue or nested admission. Existing TTL, one retry and per-attempt
+timeout apply to each resource. Two sequential uncached resources mean up to four upstream
+attempts; future web consumers must budget for the composed request rather than reuse a
+single-resource deadline. Duplicate species projections may fetch species once per projection/TTL.
+
+Membership ID **and name** are cross-checked after source composition. Only an explicit
+null species reference returns a null chain; a one-node family is a valid nonnull chain.
+Source/cache failures remain errors, with independent stale metadata on successful cached
+rescue. Species/chain 404 never retries or rescues expired data. No UI, environment,
+dependency, migration or framework coupling in the pure domain package is introduced.
+
 ## Domain module model
 
 - Entities/value objects: `PokemonRef`, `PokemonType`, `Ruleset`, `TeamSlot`, `Team`, `TypeEffectiveness`, `CoverageReport`.

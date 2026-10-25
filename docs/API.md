@@ -3,6 +3,65 @@
 Development origin: `http://localhost:3001`. OpenAPI UI: `/docs`, JSON: `/docs-json`.
 `GET /v1/pokemon`, `GET /v1/pokemon/summaries` and `GET /v1/pokemon/:idOrName` are public and read-only.
 
+## Species evolution — PL-011
+
+`GET /v1/pokemon-species/133/evolution` accepts one canonical numeric species ID
+1–999999 and **no query parameters**. Invalid/extra/repeated query input returns 400
+`INVALID_SPECIES_QUERY` before cache/upstream access. The response is:
+
+```text
+{
+  data: { species: { speciesId, name }, chain: { chainId, babyTriggerItem, nodes } | null },
+  meta: { species: SourceMetadata, chain: SourceMetadata | null }
+}
+```
+
+Each node is `{ species: { speciesId, name }, parentSpeciesId, isBaby, conditions }`.
+Nodes are in parent-before-child breadth-first order, retaining source sibling order.
+The first node is the sole root (`parentSpeciesId: null`, no incoming conditions).
+Other parents must precede their children; species IDs/names are unique. The requested
+species ID **and name** must occur in the chain. No Pokémon ID, artwork or current type
+is inferred from a species reference or a condition's Pokémon-form reference.
+
+`conditions` retains all source alternatives, scoped by `versionGroup`, `isDefault`,
+`region`, `requiredPokemonForm` and `evolvedPokemonForm`. The fields are shared inferred
+contracts: `trigger`, `item`, `gender`, `heldItem`, `knownMove`, `knownMoveType`, `location`,
+`minLevel`, `minHappiness`, `minBeauty`, `minAffection`, `nearSpecialRock`, `needsMultiplayer`,
+`needsOverworldRain`, `partySpecies`, `partyType`, `relativePhysicalStats`, `timeOfDay`,
+`tradeSpecies`, `turnUpsideDown`, `usedMove`, `minMoveCount`, `minSteps`, `minDamageTaken`,
+`allowedNatures` and `conditionExpression`. Named references are `{ id, name }` within
+their field's explicit resource kind; URLs are validated, projected and never followed.
+`conditionExpression` retains `expression`, nullable `percentageChance` and `variables`.
+Expressions are never evaluated and percentages are never inferred battle outcomes.
+False/zero/null values are retained. Empty child conditions explicitly mean unspecified
+requirements. Records from different versions/forms must not be combined into one rule.
+
+- Species resource: constructed `/pokemon-species/{id}`, matching species ID and canonical
+  `/evolution-chain/{id}/` reference. Explicit null yields `data.chain: null` and
+  `meta.chain: null`; a valid one-node family remains a nonnull tree. A source outage,
+  invalid chain or missing resource is an error, never an invented no-evolution result.
+- Chain resource: constructed numeric path, matching chain ID; iterative normalization
+  avoids untrusted recursive schema traversal. Per-resource streamed/decompressed cap
+  is 1 MiB. Maximum 64 nodes, depth 8 (root depth 1), 64 alternatives per edge, 25 natures,
+  32 expression variables and 512 expression characters. Unknown condition fields,
+  missing required fields, invalid URLs, duplicate species and disconnected/excessive
+  trees fail validation. No branch or requirement is silently truncated.
+- Cache keys: `pokeapi-v2:normalized-v1:species-evolution-reference/{speciesId}` and
+  `pokeapi-v2:normalized-v1:evolution-chain/{chainId}`. Independent freshness, existing
+  TTL/stale-if-error and same-resource deduplication. Species sharing a chain reuse one
+  cached/in-flight chain. A reference slot is released before chain admission; both
+  stages share the four global resource slots without nested admission or a new pool.
+- Each resource retains one retry and configured timeout. A cold composed success can
+  need two resource requests (up to four attempts during transient failures). No detail
+  fan-out, bulk index, public arbitrary-chain URL, dependency, migration or env change.
+- Species 404 is `SPECIES_NOT_FOUND`; chain 404 is `EVOLUTION_CHAIN_NOT_FOUND`. Neither
+  retries nor serves expired stale data. Invalid/unsupported metadata returns 502
+  `INVALID_UPSTREAM`; upstream/cache/admission failure returns sanitized 503. A failed
+  refresh may serve a previously valid cached resource with its own `stale: true` metadata.
+
+The future evolution UI and Pokémon-entry evolution convenience route are not implemented.
+OpenAPI documents this species-based route and the complete normalized schema.
+
 ## Species description — PL-010
 
 `GET /v1/pokemon-species/25/description` returns
