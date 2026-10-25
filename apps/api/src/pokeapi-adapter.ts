@@ -28,6 +28,12 @@ import type {
 } from '@pokelab/contracts';
 import { POKEMON_TYPES, STAT_NAMES, toMetric } from '@pokelab/pokemon-domain';
 import { CatalogError } from './errors.js';
+import { MOVE_LIMITS } from '@pokelab/contracts';
+import {
+  validateMoveResourceId,
+  learnsetUpstreamSchema,
+  moveUpstreamSchema,
+} from './moves.js';
 import {
   descriptionUpstreamSchema,
   normalizeDescription,
@@ -87,6 +93,26 @@ export class PokeApiAdapter {
     private readonly pause: (ms: number) => Promise<void> = (ms) =>
       new Promise((resolve) => setTimeout(resolve, ms)),
   ) {}
+
+  async pokemonLearnset(input: number) {
+    const id = validateMoveResourceId(input);
+    return this.request(
+      'pokemon/' + id,
+      learnsetUpstreamSchema(id),
+      'pokemon',
+      MOVE_LIMITS.maxResponseBytes,
+    );
+  }
+
+  async moveMetadata(input: number) {
+    const id = validateMoveResourceId(input);
+    return this.request(
+      'move/' + id,
+      moveUpstreamSchema(id),
+      'move',
+      MOVE_LIMITS.maxResponseBytes,
+    );
+  }
 
   async evolutionReference(input: number) {
     const id = validateEvolutionId(input);
@@ -429,7 +455,8 @@ export class PokeApiAdapter {
   private async request<T>(
     path: string,
     schema: z.ZodType<T>,
-    missingResource: 'pokemon' | 'species' | 'evolution-chain' | false = false,
+    missingResource:
+      'pokemon' | 'species' | 'evolution-chain' | 'move' | false = false,
     maxBytes?: number,
   ): Promise<T> {
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -448,6 +475,10 @@ export class PokeApiAdapter {
         if (!response.ok) void response.body?.cancel().catch(() => {});
         if (response.status === 404 && missingResource) {
           const missing = {
+            move: {
+              code: 'MOVE_NOT_FOUND',
+              message: 'Movimento não encontrado.',
+            },
             pokemon: {
               code: 'POKEMON_NOT_FOUND',
               message: 'Pokémon não encontrado.',
