@@ -20,6 +20,9 @@ for (const width of [375, 768, 1280, 1600]) {
     await expect(page.getByRole('meter')).toHaveCount(6);
     await expect(page.locator('#sobre-especie')).toHaveCount(1);
     await expect(page.locator('#sobre')).toHaveCount(1);
+    await page
+      .getByRole('tab', { name: 'Sobre a espécie', exact: true })
+      .click();
     const about = page.getByRole('region', { name: 'Sobre a espécie' });
     await expect(
       about.getByText('When several of', { exact: false }),
@@ -57,6 +60,7 @@ test('unavailable data, retry, loading and image absence', async ({ page }) => {
   ).toHaveAttribute('href', '/pokemon/unavailable');
   await page.goto('/pokemon/no-art');
   await expect(page.getByText('Ilustração indisponível')).toBeVisible();
+  await page.getByRole('tab', { name: 'Habilidades', exact: true }).click();
   await expect(
     page.getByText('Nenhuma habilidade disponível na fonte.'),
   ).toBeVisible();
@@ -82,9 +86,7 @@ test('keyboard skip link and 200 percent text size remain usable', async ({
   await page.evaluate(() => {
     document.documentElement.style.zoom = '2';
   });
-  await page
-    .getByRole('link', { name: 'Sobre a espécie', exact: true })
-    .click();
+  await page.getByRole('tab', { name: 'Sobre a espécie', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Sobre a espécie', exact: true }),
   ).toBeInViewport();
@@ -98,12 +100,13 @@ test('keyboard skip link and 200 percent text size remain usable', async ({
 test('species metadata is optional and retries preserve the catalog return URL', async ({
   page,
 }) => {
-  await page.goto('/pokemon/1');
+  await page.goto('/pokemon/1#sobre-especie');
   await expect(
     page.getByText('A fonte não fornece descrição', { exact: false }),
   ).toBeVisible();
-  await expect(page.getByRole('meter')).toHaveCount(6);
-  await page.goto('/pokemon/2');
+  await expect(page.getByRole('meter')).toHaveCount(0);
+  await expect(page.locator('#atributos meter')).toHaveCount(6);
+  await page.goto('/pokemon/2#sobre-especie');
   await expect(
     page.getByText('A descrição desta espécie não foi encontrada na fonte.'),
   ).toBeVisible();
@@ -123,8 +126,9 @@ test('species metadata is optional and retries preserve the catalog return URL',
   await expect(
     page.getByRole('link', { name: 'Voltar à Pokédex' }),
   ).toHaveAttribute('href', '/pokedex?page=2&generation=1');
-  await expect(page.getByRole('meter')).toHaveCount(6);
-  await page.goto('/pokemon/5');
+  await expect(page.getByRole('meter')).toHaveCount(0);
+  await expect(page.locator('#atributos meter')).toHaveCount(6);
+  await page.goto('/pokemon/5#sobre-especie');
   await expect(
     page.getByText('Não conseguimos carregar a descrição da espécie.'),
   ).toBeVisible();
@@ -136,18 +140,19 @@ test('species metadata is optional and retries preserve the catalog return URL',
 test('description streams independently and stale metadata keeps species identity on a variety', async ({
   page,
 }) => {
-  await page.goto('/pokemon/4', { waitUntil: 'commit' });
+  await page.goto('/pokemon/4#sobre-especie', { waitUntil: 'commit' });
   await expect(
     page.getByRole('heading', { name: 'charmander', exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole('status', { name: 'Carregando descrição' }),
   ).toBeVisible();
-  await expect(page.getByRole('meter')).toHaveCount(6);
+  await expect(page.getByRole('meter')).toHaveCount(0);
+  await expect(page.locator('#atributos meter')).toHaveCount(6);
   await expect(
     page.getByText('A fonte não fornece descrição', { exact: false }),
   ).toBeVisible();
-  await page.goto('/pokemon/413');
+  await page.goto('/pokemon/413#sobre-especie');
   await expect(
     page.getByRole('heading', { name: 'wormadam-plant', exact: true }),
   ).toBeVisible();

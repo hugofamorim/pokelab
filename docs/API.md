@@ -463,6 +463,34 @@ with original freshness; 404 never rescues stale. Errors: 400 `INVALID_MOVE_QUER
 503 `UPSTREAM_UNAVAILABLE`/`CACHE_UNAVAILABLE`/`CATALOG_BUSY`. No negative cache.
 OpenAPI documents both shared response schemas. No new env, migration or dependency.
 
+## Moves web consumption — PL-014
+
+Detail accepts `moveVersion` (canonical group ID 1–999999) and optional `movePage`
+(1–1000, default 1). Page without version, arrays/repeated fields and noncanonical
+values are invalid within the moves panel. Fixed page size is six; no arbitrary API
+query is forwarded. Constructed detail URLs keep validated catalog return parameters
+and `#movimentos`; selecting another group resets the movement page. No prefetch.
+
+The initial panel queries explicit API group 1/page 1 only to discover source group
+choices, discarding its learning items. Users see no automatically selected game or
+move list. Selected responses require matching Pokémon ID/name, species ID/name,
+default status, requested version, page and page size. No guessed species/entry mapping.
+
+Same-origin web gateway `GET /api/moves/:id` accepts a single canonical numeric move
+ID and zero query parameters. It constructs `/v1/moves/{id}` server-side and validates
+the shared response/ID; the browser additionally matches the original move reference's
+name. It never forwards API origin, raw errors or arbitrary URLs. All gateway results,
+including errors, use `Cache-Control: no-store`: 400 `INVALID_MOVE_QUERY`,
+404 `MOVE_NOT_FOUND`, 503 `MOVE_UNAVAILABLE`, or 200 with the shared response.
+
+The browser queries one selected move only, retaining one preview and cancelling old
+work on selection/navigation. Synchronous attempt tokens prevent obsolete commits.
+Current snapshot and historical change fields are separate from selected-version
+learning records; names remain original, nulls/zeroes remain distinct, and each source
+retains its own freshness. No bulk metadata request, automatic enrichment or damage/legality
+calculation. Server/gateway deadline 45s; browser deadline 50s. Nest owns persistent
+caching/admission; admitted upstream work may finish after browser cancellation.
+
 ## Cache and request policy
 
 - PostgreSQL stores normalized validated public DTOs with source/schema version in

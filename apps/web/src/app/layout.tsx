@@ -7,6 +7,8 @@ import '@fontsource/nunito-sans/800.css';
 import './globals.css';
 import './catalog.css';
 import './evolution.css';
+import './moves.css';
+import './detail-tabs.css';
 import { AppShell } from '../components/app-shell';
 export const metadata: Metadata = {
   title: 'PokéLab — Trainer Studio',
