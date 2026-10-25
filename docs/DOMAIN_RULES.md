@@ -46,6 +46,24 @@
   resource. A later card consumer must separately validate the Pokémon summary's entry
   ID, owning species and default status before displaying it as that mapped variety.
 
+## Evolution metadata — PL-011
+
+- Chains contain **species**, with explicit parent relationships and branches; resolve
+  varieties separately before making Pokémon detail links. Form references inside
+  conditions identify `pokemon-form` resources, not assumed Pokémon entry IDs.
+- Each condition record describes one source alternative scoped by its version group,
+  required/result form and region. Requirements inside a record apply together; do not
+  combine records across versions or flatten branches into a linear path. Retain all
+  alternatives, including nondefault records; `isDefault` is source metadata, not a filter.
+- Empty child condition arrays mean unknown/unspecified conditions, not unconditional
+  evolution. A one-node family has no outgoing edges. Null chain reference is a separate
+  source state; upstream failure must never be turned into either absence state.
+- Preserve zero numeric values and false flags, and distinguish breeding baby-trigger
+  items from evolution items. Source expressions and percentages are opaque metadata:
+  do not execute them or present them as simulated odds, battle outcomes or guaranteed
+  evolution eligibility. No availability in a particular game is inferred without
+  implementing and validating its version/form rules.
+
 ## Unit test matrix
 
 - Every chart type combination; dual type multiplier composition and immunities.
