@@ -78,6 +78,8 @@ No unmerged dependency remains; no merge is performed by this task.
 The moves panel adds explicit version-group selection, URL pagination/return context,
 native learning disclosures and single-selection current metadata/history with independent
 failure/freshness. See [`docs/PL-014_VALIDATION.md`](docs/PL-014_VALIDATION.md).
+Published for review in [PR #17](https://github.com/hugofamorim/pokelab/pull/17),
+targeting integrated `main` without pending dependencies.
 Next issue: PL-015, bounded combined type/generation filtering, starting with explicit
 species/entry semantics and API contracts before integrating controls.
 Combined filter UI and final integrated acceptance remain before completing M1.

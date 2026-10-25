@@ -63,7 +63,9 @@ up under ignored `.cache/pl-014-next-env.original` and excluded from commits.
   and `/move/6`, captured on this date. Other test entries intentionally represent controlled
   empty/missing/error/mismatch states. No live PokéAPI in CI. Global browser timeout remains
   180s and retries remain zero. Local production servers use the F: checkout.
-- PR publication and Linux CI pending at this implementation checkpoint.
+- Published in [PR #17](https://github.com/hugofamorim/pokelab/pull/17), targeting
+  integrated `main` without pending dependencies. Linux CI is pending at publication;
+  the PR checks record the final revision's result. No merge is performed by this task.
 
 ## Remaining M1 work
 
