@@ -1,0 +1,17 @@
+{
+  "id": 5,
+  "name": "mega-punch",
+  "type": {
+    "name": "normal",
+    "url": "https://pokeapi.co/api/v2/type/1/"
+  },
+  "damage_class": {
+    "name": "physical",
+    "url": "https://pokeapi.co/api/v2/move-damage-class/2/"
+  },
+  "power": 80,
+  "pp": 20,
+  "accuracy": 85,
+  "priority": 0,
+  "past_values": []
+}

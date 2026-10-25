@@ -17,6 +17,12 @@ import {
   GENERATION_NAMES,
 } from '@pokelab/contracts';
 const fixture = require('./fixtures/pikachu.json');
+const learningFixture = require('./fixtures/pikachu-moves.json');
+const moveFixtures = new Map([
+  [5, require('./fixtures/move-5.json')],
+  [6, require('./fixtures/move-6.json')],
+  [204, require('./fixtures/move-charm.json')],
+]);
 const descriptions = require('./fixtures/species-descriptions.json');
 const electricFixture = require('./fixtures/type-electric.json');
 const generationFixture = require('./fixtures/generation-i.json');
@@ -127,6 +133,72 @@ async function start() {
       return getDetail(identifier);
     throw new CatalogError(404, 'POKEMON_NOT_FOUND', 'Pokémon não encontrado.');
   };
+  // PL-014 offline resources. Other catalog entries intentionally have controlled
+  // empty/missing/error states; only Pikachu's captured learning records are used.
+  const movesAdapter = new PokeApiAdapter(
+    100,
+    async (url) => {
+      const path = String(url);
+      const id = Number(path.split('/').at(-1));
+      const value = path.includes('/pokemon/')
+        ? id === 25
+          ? learningFixture
+          : undefined
+        : moveFixtures.get(id);
+      return new Response(JSON.stringify(value ?? {}), {
+        status: value ? 200 : 404,
+      });
+    },
+    async () => {},
+  );
+  adapter.pokemonLearnset = async (id) => {
+    if (id === 25 || id === 3 || id === 413)
+      throw new CatalogError(
+        503,
+        'UPSTREAM_UNAVAILABLE',
+        'Fonte indisponível.',
+      );
+    if (id === 2)
+      throw new CatalogError(
+        404,
+        'POKEMON_NOT_FOUND',
+        'Entrada não encontrada.',
+      );
+    if (id === 4) await new Promise((resolve) => setTimeout(resolve, 1200));
+    const item = [...catalog, ...evolutionDetails].find(
+      (entry) => entry.id === id,
+    );
+    return {
+      pokemon: { id, name: id === 5 ? 'identity-mismatch' : item.name },
+      species: { speciesId: item.species.id, name: item.species.name },
+      isDefault: item.isDefault,
+      moves: [],
+    };
+  };
+  adapter.moveMetadata = async (id) => {
+    if (id === 204)
+      throw new CatalogError(
+        503,
+        'UPSTREAM_UNAVAILABLE',
+        'Fonte indisponível.',
+      );
+    return movesAdapter.moveMetadata(id);
+  };
+  for (const [key, payload] of [
+    [
+      'pokeapi-v2:normalized-v1:pokemon-learnset/25',
+      await movesAdapter.pokemonLearnset(25),
+    ],
+    [
+      'pokeapi-v2:normalized-v1:move-metadata/204',
+      await movesAdapter.moveMetadata(204),
+    ],
+  ])
+    entries.set(key, {
+      payload,
+      fetchedAt: new Date('2026-10-24T12:00:00Z'),
+      expiresAt: new Date(0),
+    });
   entries.set('pokeapi-v2:normalized-v1:pokemon/venusaur', {
     payload: catalog.find((item) => item.name === 'venusaur'),
     fetchedAt: new Date('2026-10-20T12:00:00Z'),
@@ -357,7 +429,12 @@ async function start() {
     })
     .overrideProvider(RESOURCE_CACHE)
     .useValue({
-      get: async (key) => entries.get(key) ?? null,
+      get: async (key) => {
+        // Deterministic streamed loading even after earlier browser cases warm cache.
+        if (key === 'pokeapi-v2:normalized-v1:pokemon-learnset/7')
+          await new Promise((resolve) => setTimeout(resolve, 1200));
+        return entries.get(key) ?? null;
+      },
       set: async (key, value) => {
         entries.set(key, value);
       },
