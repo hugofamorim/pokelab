@@ -3,7 +3,9 @@
 Date: 2026-10-24 (America/Sao_Paulo); source timestamps are UTC.
 Branch: `feat/pl-012-evolution-panel`, based on PL-011 head `36bbdda`.
 At audit, `main` was `01c8d0f`: PL-010 PR #13 had merged, while PL-011 PR #14
-remained open and is an explicit dependency. No PR is merged by this task.
+was reported open at audit. Before publication, its merge into `main` at `243b81a`
+was verified using GitHub metadata and Git ancestry. No unmerged dependency remains;
+no PR is merged by this task.
 All mandatory documents/assets were present and reviewed. The pre-existing generated
 `next-env.d.ts` difference was copied under ignored `.cache/` for preservation.
 
@@ -54,7 +56,7 @@ All mandatory documents/assets were present and reviewed. The pre-existing gener
   conditions, retry with origin/hash retention, 200% zoom, form-scoped expressions,
   selection cancellation, independent freshness and cross-source name rejection.
   Global timeout remains 180s and retries remain zero. CI never calls live PokéAPI.
-- Final documentation formatting check passed; Linux publication checks are pending.
+- Final documentation formatting check passed; Linux publication checks are tracked below.
 
 The first browser run found ambiguous `pikachu` headings after adding species nodes.
 Species headings were given explicit accessible names; the original detail tests were
@@ -87,7 +89,10 @@ visually inspected for hierarchy, relationship clarity, source metadata, wrappin
 preview artwork and readable conditions. Fixed mobile navigation can appear mid-image
 in long element captures; controls remain scrollable/reachable in the viewport.
 
-Publication and final Linux CI verification are pending.
+Published for review in [PR #15](https://github.com/hugofamorim/pokelab/pull/15),
+targeting integrated `main`. Initial Linux validation is tracked in
+[CI run 68](https://github.com/hugofamorim/pokelab/actions/runs/40152621909).
+Final publication-head verification is recorded in PR checks. No PR was merged by this task.
 
 ## Remaining work
 

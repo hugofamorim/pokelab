@@ -55,14 +55,15 @@ See [`docs/PL-010_VALIDATION.md`](docs/PL-010_VALIDATION.md) for actual checks a
 M1 as a whole is not complete: combined filters and version-aware move enrichment remain.
 PL-011 (`feat/pl-011-evolution-chain-api`) builds on PL-010 head `e133952`,
 resolving species to bounded cached evolution trees with independent resource freshness,
-explicit parent relationships and complete source version/form conditions. PR #13 was
-open at audit time; this increment retains that dependency and does not merge it.
+explicit parent relationships and complete source version/form conditions. PL-011 was
+integrated into `main` through PR #14 after PL-010 PR #13.
 Published in [PR #14](https://github.com/hugofamorim/pokelab/pull/14).
 See [`docs/PL-011_VALIDATION.md`](docs/PL-011_VALIDATION.md) for actual checks and review status.
 PL-012 (`feat/pl-012-evolution-panel`) builds on PL-011 head `36bbdda`, adding the
 independent evolution panel, real species nesting, native scoped-condition disclosures
 and validated on-demand default-variety navigation. Main was `01c8d0f` at audit;
-PR #14 remained open and is an explicit dependency. See
+PR #14 was open at audit and merged before publication. PL-012 is published in
+[PR #15](https://github.com/hugofamorim/pokelab/pull/15), with no unmerged dependency. See
 [`docs/PL-012_VALIDATION.md`](docs/PL-012_VALIDATION.md) for actual checks/review status.
 Next issue: PL-013, bounded move metadata contracts/API with explicit version group,
 learn method and level, before a curated moves UI.

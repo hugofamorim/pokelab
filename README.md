@@ -96,7 +96,7 @@ Environment files are ignored; only harmless examples are tracked. API validatio
 - [Domain rules](docs/DOMAIN_RULES.md), [design system](docs/POKELAB_DESIGN_SYSTEM.md), [agent instructions](AGENTS.md)
 - [Initial audit](docs/M0_AUDIT.md), [ADR-001](docs/adr/001-foundation.md), [API/cache policy](docs/API.md)
 
-PL-008/009/010 were integrated into `main` through [PR #11](https://github.com/hugofamorim/pokelab/pull/11), [PR #12](https://github.com/hugofamorim/pokelab/pull/12) and [PR #13](https://github.com/hugofamorim/pokelab/pull/13). PL-012 builds on PL-011 [PR #14](https://github.com/hugofamorim/pokelab/pull/14), which was open at audit time. Next smallest issue: **PL-013 — bounded version-aware move metadata API**, preserving learn method and level before moves UI. Combined filters remain separate M1 work. No PR is merged automatically.
+PL-008/009/010/011 were integrated into `main` through [PR #11](https://github.com/hugofamorim/pokelab/pull/11), [PR #12](https://github.com/hugofamorim/pokelab/pull/12), [PR #13](https://github.com/hugofamorim/pokelab/pull/13) and [PR #14](https://github.com/hugofamorim/pokelab/pull/14). PL-012 is published in [PR #15](https://github.com/hugofamorim/pokelab/pull/15), targeting that integrated base. Next smallest issue: **PL-013 — bounded version-aware move metadata API**, preserving learn method and level before moves UI. Combined filters remain separate M1 work. No PR is merged automatically.
 
 ## Attribution
 
