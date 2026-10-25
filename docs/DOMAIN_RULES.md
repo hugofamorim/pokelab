@@ -81,6 +81,28 @@
   version-specific battle values are not calculated. Metadata alone is not learnability
   evidence, competitive legality or damage simulation.
 
+## Combined type/generation filtering — PL-015
+
+- Semantics: current type of a specific Pokémon entry AND introduction generation of its
+  owning species. Cross-check entry ID/name against the type index and species ID/name
+  against the generation index. Never intersect equal numeric entry/species IDs or infer
+  species membership from entry-name prefixes.
+- Nondefault variants remain separate entries and can match through their owning species.
+  This is not the variant's own introduction date, historical type, regional Pokédex,
+  game-availability list or competitive legality. Generation-only browsing still resolves
+  species defaults; the combined mode explicitly evaluates current type entries.
+- Evaluate at most the requested candidate window. A nonmatching or failed candidate still
+  consumes its place/cursor position; do not fetch extra entries to fill a match page.
+  Per-item source failure/identity contradiction is unknown (`unavailable`), not exclusion.
+- `totalCandidates` counts all entries in the current type index, including variants, before
+  generation matching. It never represents a global number of combined matches. An empty
+  match subset with `hasMore: true` is not a global empty result. Completion with failures
+  still has unknown outcomes. Resume using the exclusive last evaluated entry ID.
+- Sources have independent timestamps/stale flags and are not a transactional historical
+  snapshot. A future consumer must reset progress if either index timestamp changes and
+  retain uncertainty/freshness per candidate; fully scanned/known results are needed before
+  deriving an aggregate count. Do not automatically drain the whole index in the background.
+
 ## Unit test matrix
 
 - Every chart type combination; dual type multiplier composition and immunities.

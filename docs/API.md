@@ -491,6 +491,66 @@ retains its own freshness. No bulk metadata request, automatic enrichment or dam
 calculation. Server/gateway deadline 45s; browser deadline 50s. Nest owns persistent
 caching/admission; admitted upstream work may finish after browser cancellation.
 
+## Combined type/generation candidate scan — PL-015
+
+`GET /v1/pokemon/filter-scan?type=electric&generation=1&after=0&limit=4`
+
+Required: one canonical supported type and one species-introduction generation I–IX.
+Optional `after`: canonical entry ID 0–999999, default 0; exclusive keyset cursor, not a
+species ID/offset. Optional `limit`: canonical 1–12, default 4; maximum candidates examined,
+not a requested number of matches. Unknown/repeated/array parameters, name search, conventional
+`page`/`pageSize`, multiple types and unsupported generations are rejected before source work.
+
+```ts
+{
+  semantics: 'current-entry-type-and-species-introduction';
+  type: PokemonType;
+  generation: { id: number; name: string };
+  scan: {
+    afterId: number; limit: number; totalCandidates: number; scanned: number;
+    hasMore: boolean; nextAfterId: number | null;
+  };
+  items: (
+    | { reference: PokemonReference; status: 'match'; data: PokemonSummary; meta: SourceMetadata }
+    | { reference: PokemonReference; status: 'excluded'; reason: 'species-not-in-generation'; data: PokemonSummary; meta: SourceMetadata }
+    | { reference: PokemonReference; status: 'unavailable'; code: SummaryUnavailableCode }
+  )[];
+  meta: { type: SourceMetadata; generation: SourceMetadata };
+}
+```
+
+The type index supplies ascending Pokémon entry references. Selected candidates reuse the
+existing summary/detail cache; their owning species ID **and name** are checked against
+generation membership, while entry ID/name and current type must match the type index.
+Nondefault forms remain separate candidates; `raichu-alola` entry 10100 can match generation I
+through species `raichu` 26. This does not assert that Alolan Raichu appeared in generation I,
+that its type was historical, or that it is available in a particular game. Contradictory
+identities/types are `unavailable: INVALID_UPSTREAM`, not generation exclusions.
+
+Every selected reference yields one ordered outcome, including missing/failed details.
+`scanned` equals outcome count; `hasMore` means type candidates remain after this window,
+and `nextAfterId` is its final evaluated entry ID when more remain, otherwise null. A window
+with zero matches can have more candidates. An exhausted cursor returns zero items without
+Pokémon lookups. `totalCandidates` is the type-index size before generation matching; the
+contract intentionally has no global match total. Completion with unavailable items is still
+partially unknown. Retry a failed window using the same input cursor/filters.
+
+Index/detail cache keys, TTL, stale-if-error, one retry and per-attempt timeouts are reused.
+There is no combined-result cache. Two distinct scan operations share four resource slots and
+the existing summary admission (two batches, two workers each); identical scans deduplicate.
+Both index operations settle before releasing scan admission, then summary work begins.
+At most two index reads plus `limit` detail reads per cold operation; no fill-to-match loop,
+startup prefetch or background full-index scan. Index and per-item metadata remain independent.
+Reset client progress when either index timestamp changes; no transactional cross-source snapshot
+is promised. New consumers must budget deadlines for composed resources and use small windows.
+
+Errors: 400 `INVALID_FILTER_QUERY`; 502 incompatible index/composition; 503 upstream/cache/
+scan/summary/resource admission unavailable. Individual detail failures remain a 200 partial
+response with existing summary codes. 404 details do not retry or rescue stale data. The existing
+listing endpoints still reject combined queries; web integration is PL-016. OpenAPI exposes the
+shared response schema. No new env/dependency/migration. Pokémon detail source bodies are now
+bounded to 2 MiB of streamed/decompressed bytes across detail/summary/scan consumers.
+
 ## Cache and request policy
 
 - PostgreSQL stores normalized validated public DTOs with source/schema version in
