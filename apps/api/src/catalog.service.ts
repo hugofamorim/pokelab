@@ -48,9 +48,30 @@ import { RESOURCE_CACHE } from './cache.js';
 import type { ResourceCache } from './cache.js';
 import { PokeApiAdapter } from './pokeapi-adapter.js';
 import { CatalogError } from './errors.js';
+import {
+  moveIdParamSchema,
+  pokemonMovesQuerySchema,
+  pokemonLearnsetSchema,
+  pokemonMovesResponseSchema,
+  moveMetadataSchema,
+  speciesDescriptionQuerySchema as emptyQuerySchema,
+} from '@pokelab/contracts';
+import type {
+  PokemonLearnset,
+  MoveMetadataResponse,
+  PokemonMovesResponse,
+} from '@pokelab/contracts';
 
 @Injectable()
 export class CatalogService {
+  private readonly pendingLearnsets = new Map<
+    string,
+    Promise<{ data: PokemonLearnset; meta: SourceMetadata }>
+  >();
+  private readonly pendingMoves = new Map<
+    string,
+    Promise<MoveMetadataResponse>
+  >();
   private readonly pendingEvolutionReferences = new Map<
     string,
     Promise<{ data: SpeciesEvolutionReference; meta: SourceMetadata }>
@@ -94,6 +115,90 @@ export class CatalogService {
     @Inject(PokeApiAdapter) private readonly adapter: PokeApiAdapter,
     @Inject(CONFIG) private readonly config: Config,
   ) {}
+
+  async pokemonMoves(
+    input: string,
+    query: unknown,
+  ): Promise<PokemonMovesResponse> {
+    const id = moveIdParamSchema.safeParse(input);
+    const parsed = pokemonMovesQuerySchema.safeParse(query);
+    if (!id.success || !parsed.success)
+      throw new CatalogError(
+        400,
+        'INVALID_MOVE_QUERY',
+        'Use um ID de Pokémon, versionGroup obrigatório e paginação válida.',
+      );
+    const pokemonId = id.data;
+    const { versionGroup, page, pageSize } = parsed.data;
+    const key = `pokeapi-v2:normalized-v1:pokemon-learnset/${pokemonId}`;
+    const result = await this.admit(this.pendingLearnsets, key, () =>
+      this.load(
+        key,
+        pokemonLearnsetSchema.refine((value) => value.pokemon.id === pokemonId),
+        () => this.adapter.pokemonLearnset(pokemonId),
+      ),
+    );
+    const groups = new Map<
+      number,
+      PokemonLearnset['moves'][number]['records'][number]['versionGroup']
+    >();
+    for (const move of result.data.moves)
+      for (const record of move.records)
+        groups.set(record.versionGroup.id, record.versionGroup);
+    const availableVersionGroups = [...groups.values()].sort(
+      (a, b) => a.id - b.id,
+    );
+    const matching = result.data.moves
+      .map((move) => ({
+        move: move.move,
+        records: move.records.filter(
+          (record) => record.versionGroup.id === versionGroup,
+        ),
+      }))
+      .filter((move) => move.records.length > 0)
+      .sort((a, b) => a.move.id - b.move.id);
+    const offset = (page - 1) * pageSize;
+    const items = matching.slice(offset, offset + pageSize);
+    // Projection occurs after admission: all pages/groups share one bounded resource load.
+    return pokemonMovesResponseSchema.parse({
+      data: {
+        pokemon: result.data.pokemon,
+        species: result.data.species,
+        isDefault: result.data.isDefault,
+        requestedVersionGroupId: versionGroup,
+        versionGroup: groups.get(versionGroup) ?? null,
+        availableVersionGroups,
+        items,
+        page,
+        pageSize,
+        total: matching.length,
+        hasNext: offset + items.length < matching.length,
+      },
+      meta: result.meta,
+    });
+  }
+
+  async moveMetadata(
+    input: string,
+    query: unknown = {},
+  ): Promise<MoveMetadataResponse> {
+    const parsed = moveIdParamSchema.safeParse(input);
+    if (!parsed.success || !emptyQuerySchema.safeParse(query).success)
+      throw new CatalogError(
+        400,
+        'INVALID_MOVE_QUERY',
+        'Use um ID de movimento, sem parâmetros de consulta.',
+      );
+    const id = parsed.data;
+    const key = `pokeapi-v2:normalized-v1:move-metadata/${id}`;
+    return this.admit(this.pendingMoves, key, () =>
+      this.load(
+        key,
+        moveMetadataSchema.refine((value) => value.move.id === id),
+        () => this.adapter.moveMetadata(id),
+      ),
+    );
+  }
 
   async speciesEvolution(
     input: string,

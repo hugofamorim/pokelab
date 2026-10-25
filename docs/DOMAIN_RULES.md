@@ -64,6 +64,23 @@
   evolution eligibility. No availability in a particular game is inferred without
   implementing and validating its version/form rules.
 
+## Move records — PL-013
+
+- Learning records belong to a specific Pokémon entry and explicit version group;
+  species and generation introductions do not establish move availability. Keep all
+  source methods, levels and nullable learning order within that version. Zero level
+  is a source value; do not invent a required level or infer a particular acquisition
+  rule from it. Multiple records for a move remain separate.
+- Available group choices mean groups present in the entry's captured learning records.
+  No records in a requested group means absence in that dataset, not proof that the
+  entry cannot exist in the game or that no transfer method exists.
+- Move metadata is a current-source snapshot. Historical type/power/PP/accuracy changes
+  are retained separately with their original version-group boundary; null change fields
+  mean no supplied override, not a zero or an effective historical stat. Current null
+  power/accuracy likewise must not become zero. Historical class/effects and complete
+  version-specific battle values are not calculated. Metadata alone is not learnability
+  evidence, competitive legality or damage simulation.
+
 ## Unit test matrix
 
 - Every chart type combination; dual type multiplier composition and immunities.

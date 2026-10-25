@@ -5,6 +5,7 @@ import { pokemonPageSchema, pokemonReferenceSchema } from './pagination.js';
 import { pokemonTypeSchema } from './type-filter.js';
 import { speciesDescriptionSchema } from './species-description.js';
 import { speciesEvolutionDataSchema } from './evolution.js';
+import { pokemonMovesPageSchema, moveMetadataSchema } from './moves.js';
 import {
   generationSpeciesPageSchema,
   speciesReferenceSchema,
@@ -233,3 +234,15 @@ export const speciesEvolutionResponseSchema = z
 export type SpeciesEvolutionResponse = z.infer<
   typeof speciesEvolutionResponseSchema
 >;
+
+export * from './moves.js';
+export const pokemonMovesResponseSchema = z.object({
+  data: pokemonMovesPageSchema,
+  meta: sourceMetadataSchema,
+});
+export type PokemonMovesResponse = z.infer<typeof pokemonMovesResponseSchema>;
+export const moveMetadataResponseSchema = z.object({
+  data: moveMetadataSchema,
+  meta: sourceMetadataSchema,
+});
+export type MoveMetadataResponse = z.infer<typeof moveMetadataResponseSchema>;

@@ -178,6 +178,37 @@ Default previews are explicitly separate from forms named by individual conditio
 
 No new API endpoint, dependency, migration, environment variable or asset is introduced.
 
+## Version-scoped moves — PL-013
+
+`GET /v1/pokemon/:pokemonId/moves?versionGroup=…&page=…&pageSize=…` uses a canonical
+numeric Pokémon entry ID, never an inferred species ID. `versionGroup` is required;
+there is no implicit latest game or generation-to-game mapping. One bounded validated
+Pokémon projection stores all source learning records, with species/default identity,
+move references and version-group/method/level/nullable order. Page/group projections
+happen after resource admission. References are constructed/validated, never followed.
+Groups and moves sort by explicit resource ID; source record order remains intact.
+Only groups with learning records are listed. A requested group absent from that dataset
+returns null identity and no records, not a statement of game availability or impossibility.
+
+`GET /v1/moves/:moveId` independently returns one explicitly marked `current-source`
+snapshot (type, damage class, power, PP, accuracy, priority) and separate selected
+`past_values` change fields (version group, type, power, PP, accuracy). It does not
+resolve historical battle values, class rules, effects, transfer legality or learnability.
+Unknown and nullable values are preserved; a metadata lookup alone cannot establish
+that a Pokémon learns the move. Consumers must label current attributes independently
+from a selected learning version and cross-check requested move ID/name before composition.
+
+Cache keys `pokemon-learnset/{entryId}` and `move-metadata/{moveId}` use normalized-v1;
+independent resource freshness, pending maps and the existing four admission slots,
+TTL, one retry, timeouts and stale-if-error apply. Neither endpoint fans out. There is
+no extra queue, batch endpoint, web change, dependency, env variable or migration.
+The same raw Pokémon may be fetched once per projection/TTL (detail versus learnset).
+Both resources have 1 MiB streamed/decompressed body caps. Limits: 2,000 moves,
+512 learning records/move, 128 version groups and 128 historical records. Contradictory
+version/method identities, duplicate records and mismatched requested IDs are rejected.
+404s do not retry or rescue stale data. Existing operational cache-retention/stale-age
+and per-instance-only throttling limitations remain. API/contract tests are offline.
+
 ## Domain module model
 
 - Entities/value objects: `PokemonRef`, `PokemonType`, `Ruleset`, `TeamSlot`, `Team`, `TypeEffectiveness`, `CoverageReport`.

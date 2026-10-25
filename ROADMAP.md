@@ -65,8 +65,15 @@ and validated on-demand default-variety navigation. Main was `01c8d0f` at audit;
 PR #14 was open at audit and merged before publication. PL-012 is published in
 [PR #15](https://github.com/hugofamorim/pokelab/pull/15), with no unmerged dependency. See
 [`docs/PL-012_VALIDATION.md`](docs/PL-012_VALIDATION.md) for actual checks/review status.
-Next issue: PL-013, bounded move metadata contracts/API with explicit version group,
-learn method and level, before a curated moves UI.
+PL-012 was integrated into `main` through PR #15 at `3633611`.
+PL-013 (`feat/pl-013-versioned-moves`) starts from that integrated main and adds
+bounded version-scoped Pokémon learning records and individual current-source move
+metadata, preserving method/level/order and selected historical change fields.
+See [`docs/PL-013_VALIDATION.md`](docs/PL-013_VALIDATION.md) for actual acceptance status.
+Published for review in [PR #16](https://github.com/hugofamorim/pokelab/pull/16).
+Next issue: PL-014, curated moves UI with explicit version-group selection, independent
+loading/error/absence/stale states and bounded on-demand metadata consumption.
+Combined type/generation filters and final integrated acceptance also remain in M1.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)

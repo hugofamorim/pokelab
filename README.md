@@ -1,6 +1,6 @@
 # PokéLab — Trainer Studio
 
-An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 includes browsing, exact name/ID search, responsive single-type filtering, validated generation browsing, species descriptions and evolution trees. Moves, combined filters, team building, analysis, accounts and cloud saves remain future work.
+An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 includes browsing, exact name/ID search, responsive single-type filtering, validated generation browsing, species descriptions, evolution trees and version-scoped move APIs. The moves UI, combined filters, team building, analysis, accounts and cloud saves remain future work.
 
 **PL-001** provides [paginated entry references](http://127.0.0.1:3001/v1/pokemon?page=1&pageSize=20), with strict query bounds, persistent caching and no detail fan-out.
 
@@ -25,6 +25,8 @@ An independent, open-source Pokémon discovery and strategy studio. M0 implement
 **PL-011** adds the [species evolution API](http://127.0.0.1:3001/v1/pokemon-species/133/evolution). Explicit species-to-chain references and parent relationships preserve branching, version/form conditions and independent freshness. The adapter validates bounded trees iteratively, caches shared chains once per TTL and never fetches Pokémon details for their nodes. Opaque source expressions are retained without execution or simulated eligibility. Evolution UI is a separate follow-up.
 
 **PL-012** adds the [evolution panel](http://localhost:3000/pokemon/133#evolucoes): real parent/child species branches, independent loading/error/absence/stale states and native expandable records for every source condition. Version groups, forms, null/false/zero requirements and opaque expressions remain separate. Pokémon previews load only after an explicit selection, using existing validated mappings and summaries. Ready cards retain the original catalog return context; unresolved species never guess entry IDs. Existing panels, cards, badges, artwork and retry behavior are reused.
+
+**PL-013** adds [version-scoped move records](http://localhost:3001/v1/pokemon/25/moves?versionGroup=1&pageSize=20) and [individual move metadata](http://localhost:3001/v1/moves/204). An explicit Pokémon entry and version group select learning records with method, level and nullable source order. Pages share one bounded persistent learnset cache; no move details are fetched automatically. Metadata is explicitly a current-source snapshot, with separate historical type/power/PP/accuracy change fields. It does not compute historical battle values or imply universal move legality. See [PL-013 validation](docs/PL-013_VALIDATION.md). M1 is still in progress.
 
 ## Run locally
 
