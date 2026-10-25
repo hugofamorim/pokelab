@@ -1,5 +1,11 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Inject, Query, Param } from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+  ApiParam,
+} from '@nestjs/swagger';
 import type { SchemaObject } from '@nestjs/swagger';
 import { z } from 'zod';
 import {
@@ -7,6 +13,7 @@ import {
   GENERATION_NAMES,
   PAGINATION_LIMITS,
   defaultVarietiesResponseSchema,
+  speciesDescriptionResponseSchema,
 } from '@pokelab/contracts';
 import { CatalogService } from './catalog.service.js';
 
@@ -16,6 +23,38 @@ export class SpeciesController {
   constructor(
     @Inject(CatalogService) private readonly catalog: CatalogService,
   ) {}
+
+  @Get(':speciesId/description')
+  @ApiOperation({
+    summary:
+      'One species description: first nonblank pt-br, otherwise en, in upstream order; no game recency claim',
+  })
+  @ApiParam({
+    name: 'speciesId',
+    schema: { type: 'string', pattern: '^[1-9]\\d{0,5}$' },
+    description: 'Explicit owning species ID, not a Pokémon entry ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Source language/version and independent freshness; null description when supported languages are absent',
+    schema: z.toJSONSchema(speciesDescriptionResponseSchema, {
+      target: 'openapi-3.0',
+    }) as SchemaObject,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid species ID or unsupported query',
+  })
+  @ApiResponse({ status: 404, description: 'Species not found' })
+  @ApiResponse({ status: 502, description: 'Invalid upstream metadata' })
+  @ApiResponse({
+    status: 503,
+    description: 'Upstream, cache or admission unavailable',
+  })
+  description(@Param('speciesId') speciesId: string, @Query() query: unknown) {
+    return this.catalog.speciesDescription(speciesId, query);
+  }
 
   @Get('default-varieties')
   @ApiOperation({

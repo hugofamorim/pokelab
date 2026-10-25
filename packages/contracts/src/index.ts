@@ -3,6 +3,7 @@ import { POKEMON_TYPES, STAT_NAMES } from '@pokelab/pokemon-domain';
 import { identifierSchema } from './identifiers.js';
 import { pokemonPageSchema, pokemonReferenceSchema } from './pagination.js';
 import { pokemonTypeSchema } from './type-filter.js';
+import { speciesDescriptionSchema } from './species-description.js';
 import {
   generationSpeciesPageSchema,
   speciesReferenceSchema,
@@ -205,4 +206,13 @@ export const defaultVarietiesResponseSchema = z.object({
 });
 export type DefaultVarietiesResponse = z.infer<
   typeof defaultVarietiesResponseSchema
+>;
+
+export * from './species-description.js';
+export const speciesDescriptionResponseSchema = z.object({
+  data: speciesDescriptionSchema,
+  meta: sourceMetadataSchema,
+});
+export type SpeciesDescriptionResponse = z.infer<
+  typeof speciesDescriptionResponseSchema
 >;
