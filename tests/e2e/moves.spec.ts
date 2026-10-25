@@ -98,7 +98,8 @@ test('source loading error retry missing empty invalid and out-of-range states s
   await expect(
     page.getByRole('status', { name: 'Carregando movimentos' }),
   ).toBeVisible();
-  await expect(page.getByRole('meter')).toHaveCount(6);
+  await expect(page.getByRole('meter')).toHaveCount(0);
+  await expect(page.locator('#atributos meter')).toHaveCount(6);
   await expect(
     page.getByText(
       'A fonte não informou registros de aprendizado para esta entrada Pokémon.',
