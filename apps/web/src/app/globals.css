@@ -1205,6 +1205,25 @@ meter::-moz-meter-bar {
     gap: 10px;
   }
 }
+.species-description {
+  margin-top: 24px;
+  overflow-wrap: anywhere;
+  scroll-margin-top: 24px;
+}
+.species-flavor {
+  font-size: 18px;
+  line-height: 1.7;
+  max-width: 72ch;
+  margin: 0 0 20px;
+  color: var(--pl-ink);
+}
+.description-state {
+  min-height: 64px;
+  line-height: 1.6;
+}
+.description-state .button {
+  margin: 12px 0;
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

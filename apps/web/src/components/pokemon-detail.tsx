@@ -13,6 +13,7 @@ import type { CSSProperties } from 'react';
 import { POKEMON_TYPE_TOKENS } from '../lib/type-tokens';
 import { PokemonArtwork } from './pokemon-artwork';
 import { TypeBadge } from './type-badge';
+import { SpeciesDescription } from './species-description';
 const statLabels: Record<StatName, string> = {
   hp: 'HP',
   attack: 'Ataque',
@@ -126,6 +127,10 @@ export function PokemonDetail({ data: p, meta }: PokemonResponse) {
           <Database size={17} />
           Dados do Pokémon
         </a>
+        <a href="#sobre-especie">
+          <BookIcon />
+          Sobre a espécie
+        </a>
       </div>
       <div className="detail-grid">
         <section className="panel stats-panel" id="atributos">
@@ -235,6 +240,7 @@ export function PokemonDetail({ data: p, meta }: PokemonResponse) {
           </section>
         </div>
       </div>
+      <SpeciesDescription species={p.species} />
       <div className="explore-note">
         <span className="note-icon">
           <FlaskIcon />
@@ -242,8 +248,8 @@ export function PokemonDetail({ data: p, meta }: PokemonResponse) {
         <div>
           <strong>Curiosidade é o começo de toda estratégia.</strong>
           <p>
-            Este é o primeiro experimento do PokéLab. O catálogo completo chega
-            na próxima etapa.
+            Continue explorando espécies na Pokédex. Evoluções e movimentos
+            chegam nas próximas etapas.
           </p>
         </div>
         <span className="outline-chip">EM CONSTRUÇÃO</span>
