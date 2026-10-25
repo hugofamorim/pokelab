@@ -44,11 +44,16 @@ shared cache/admission and offline tests. See [`docs/PL-008_VALIDATION.md`](docs
 PL-009 (`feat/pl-009-generation-controls`) builds on PL-008 with responsive native
 generation links, URL pagination/reset, validated mapped cards in bounded same-origin
 batches, independent source freshness, partial failures/retry and generation-aware detail
-return. [PR #11](https://github.com/hugofamorim/pokelab/pull/11) was still open at audit time;
-the new PR targets `main` with that dependency. See [`docs/PL-009_VALIDATION.md`](docs/PL-009_VALIDATION.md).
-M1 as a whole is not complete: combined filters and species/evolution/move detail enrichment remain.
-Next issue: PL-010, species descriptions in detail with explicit source-language fallback
-and bounded, cached upstream metadata.
+return. PL-008 and PL-009 were integrated into `main` through
+[PR #11](https://github.com/hugofamorim/pokelab/pull/11) and
+[PR #12](https://github.com/hugofamorim/pokelab/pull/12). See [`docs/PL-009_VALIDATION.md`](docs/PL-009_VALIDATION.md).
+PL-010 (`feat/pl-010-species-descriptions`) starts from integrated `main` at `c54f47d`,
+adding a bounded cached species-description endpoint and an independently streamed
+detail panel, explicit source language/version, fallback, empty/error/retry/stale states.
+See [`docs/PL-010_VALIDATION.md`](docs/PL-010_VALIDATION.md) for actual checks and review status.
+M1 as a whole is not complete: combined filters and evolution/move detail enrichment remain.
+Next issue: PL-011, a bounded evolution-chain contract and adapter preserving branches
+and evolution conditions, before adding evolution UI.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)

@@ -3,6 +3,39 @@
 Development origin: `http://localhost:3001`. OpenAPI UI: `/docs`, JSON: `/docs-json`.
 `GET /v1/pokemon`, `GET /v1/pokemon/summaries` and `GET /v1/pokemon/:idOrName` are public and read-only.
 
+## Species description — PL-010
+
+`GET /v1/pokemon-species/25/description` returns
+`{ data: { species: { speciesId, name }, description: { text, language, version } | null }, meta }`.
+`meta` is the existing `pokeapi-v2` source timestamp/stale contract. The source
+`language` is exactly `pt-br` or `en`, and `version` is the original game identifier.
+The adapter selects the first nonblank `pt-br` text in upstream order, falling back
+to the first nonblank `en`. It does not translate, infer recency or apply flavor text
+to a different form's battle attributes. Unsupported/empty descriptions return 200
+with `description: null`, distinct from a missing species or an unavailable source.
+
+- Only canonical numeric species IDs 1–999999; leading zeros, whitespace and every
+  query parameter (including caller-selected language) return 400 `INVALID_SPECIES_QUERY`.
+- One constructed `/api/v2/pokemon-species/{id}` path; no referenced URL is followed.
+  Species identity, canonical language/version URLs, maximum 512 entries, 8192 characters
+  per text and 1 MiB streamed/decompressed bytes are validated. Whitespace and control
+  characters become single spaces; normalized text is bounded and revalidated.
+- Shared four-resource admission, same-description in-flight deduplication, one retry
+  and configured per-attempt timeout. Metadata/body failures return 502 `INVALID_UPSTREAM`
+  without retry. Species 404 returns `SPECIES_NOT_FOUND`, without retry or stale rescue.
+  Upstream/cache/admission failures return sanitized 503 envelopes.
+- Persistent normalized cache key `pokeapi-v2:normalized-v1:species-description/{id}`;
+  existing 24h default TTL and stale-if-error, retaining original timestamp. Null descriptions
+  are cached as legitimate absence. Wrong-species or invalid cache data cannot rescue failures.
+  This projection is separate from PL-008 mappings, so one species can be fetched once
+  per projection/TTL. No catalog fan-out, new migration or environment variable.
+- Detail requests use the Pokémon DTO's owning species ID, then revalidate ID **and name**.
+  A separate Suspense boundary exposes loading/error/retry/absence/stale states while
+  attributes remain visible. English receives `lang="en"` and explicit fallback copy.
+  Retry refreshes the current route and preserves its validated return context and hash.
+  The web server uses no-store and a 15s deadline; browsers never fetch upstream directly.
+  Inline React streaming scripts are required, even before application hydration.
+
 ## Web generation-card gateway — PL-009
 
 `GET /api/catalog/generation-cards?speciesIds=411,412,413,414` belongs to **Next.js**,

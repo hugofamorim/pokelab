@@ -27,7 +27,13 @@
 
 ## External metadata quality
 
-- Not all flavor entries have pt-BR; use en-US fallback with label indicating source language.
+- Not all flavor entries have pt-BR; use English fallback with label indicating source language.
+  PL-010 retains the actual PokéAPI `pt-br`/`en` language code without inventing a
+  regional English locale. Select the first nonblank `pt-br` description, otherwise
+  first `en`, in upstream order; normalize whitespace, retain game-version provenance,
+  and return absence when neither language is provided. Do not translate or claim
+  that upstream array order identifies the latest game version. Descriptions belong
+  to the owning species, independently of form-specific stats or abilities.
 - Some Pokémon artwork URLs are absent; use fallback illustration/icon with descriptive alt text.
 - Some forms and move pools differ by game; show 'unknown' rather than incorrect universal availability.
 - The generation membership index describes the generation in which a species was
