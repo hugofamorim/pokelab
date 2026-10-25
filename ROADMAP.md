@@ -50,17 +50,22 @@ return. PL-008 and PL-009 were integrated into `main` through
 PL-010 (`feat/pl-010-species-descriptions`) starts from integrated `main` at `c54f47d`,
 adding a bounded cached species-description endpoint and an independently streamed
 detail panel, explicit source language/version, fallback, empty/error/retry/stale states.
-Published in [PR #13](https://github.com/hugofamorim/pokelab/pull/13).
+Integrated into `main` in [PR #13](https://github.com/hugofamorim/pokelab/pull/13).
 See [`docs/PL-010_VALIDATION.md`](docs/PL-010_VALIDATION.md) for actual checks and review status.
-M1 as a whole is not complete: combined filters and evolution/move detail enrichment remain.
+M1 as a whole is not complete: combined filters and version-aware move enrichment remain.
 PL-011 (`feat/pl-011-evolution-chain-api`) builds on PL-010 head `e133952`,
 resolving species to bounded cached evolution trees with independent resource freshness,
 explicit parent relationships and complete source version/form conditions. PR #13 was
 open at audit time; this increment retains that dependency and does not merge it.
 Published in [PR #14](https://github.com/hugofamorim/pokelab/pull/14).
 See [`docs/PL-011_VALIDATION.md`](docs/PL-011_VALIDATION.md) for actual checks and review status.
-Next issue: PL-012, an accessible evolution panel consuming these species references
-and scoped source conditions without inferred Pokémon IDs or universal game-availability claims.
+PL-012 (`feat/pl-012-evolution-panel`) builds on PL-011 head `36bbdda`, adding the
+independent evolution panel, real species nesting, native scoped-condition disclosures
+and validated on-demand default-variety navigation. Main was `01c8d0f` at audit;
+PR #14 remained open and is an explicit dependency. See
+[`docs/PL-012_VALIDATION.md`](docs/PL-012_VALIDATION.md) for actual checks/review status.
+Next issue: PL-013, bounded move metadata contracts/API with explicit version group,
+learn method and level, before a curated moves UI.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)

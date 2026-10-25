@@ -145,6 +145,39 @@ Source/cache failures remain errors, with independent stale metadata on successf
 rescue. Species/chain 404 never retries or rescues expired data. No UI, environment,
 dependency, migration or framework coupling in the pure domain package is introduced.
 
+## Evolution detail panel — PL-012
+
+The `#evolucoes` panel has its own Suspense boundary and server-only API usage.
+Its client validates the shared response and owning species ID **and name**, without
+assuming equality with Pokémon entry IDs. The 70s server deadline accommodates the
+two sequential resource stages under the allowed 15s upstream timeout and one retry
+per resource. Metadata/source failures do not replace Pokémon attributes or descriptions.
+Null reference, one-node family, unspecified conditions, missing source and request errors
+remain distinct. Each source has its own timestamp/stale notice. Route retry reuses the
+shared refresh button, retaining query/hash and Nest-owned cache behavior.
+
+The species tree preserves real parent/child nesting and source sibling order. Desktop
+places the root beside wrapped branches; mobile/tablet stack/wrap with explicit parent
+labels and an owning-species marker. Accessible heading names distinguish species from
+entry names. Native nested `details` expose every condition record and every shared
+field, including false/zero/null, version/default/form metadata and opaque expressions.
+Display formatting has exhaustive compile-time field labels; no eligibility is evaluated.
+Native details work before application hydration, retaining the existing inline-streaming
+script requirement for server content. Identifiers remain original source names.
+
+There is no automatic variety/detail fan-out. A user selects one species to resolve through
+the existing same-origin generation-card gateway with a single explicit species ID.
+Existing mapping/summary schema and SSR-name matching are reused. Only validated ready
+results render the existing Pokémon card; failed/unresolved references have no guessed
+link. Selection changes/unmount cancel browser work (140s request deadline against the
+existing 135s gateway bound); already-admitted server work may finish within its bounds.
+Only the selected preview is retained. Mapping and Pokémon freshness remain independent.
+Refreshing the source chain timestamp resets preview state. Card navigation reconstructs
+validated browse/type/generation/search return context and disables speculative prefetch.
+Default previews are explicitly separate from forms named by individual conditions.
+
+No new API endpoint, dependency, migration, environment variable or asset is introduced.
+
 ## Domain module model
 
 - Entities/value objects: `PokemonRef`, `PokemonType`, `Ruleset`, `TeamSlot`, `Team`, `TypeEffectiveness`, `CoverageReport`.
