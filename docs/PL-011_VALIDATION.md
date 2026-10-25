@@ -77,7 +77,10 @@ conditions (`dudunsparce-two-segment`, `dudunsparce-three-segment`). Expressions
 `EC 100 % 0 !=` and `EC 100 % 0 ==` remained source text; the chain was fresh at
 `2026-10-25T01:22:59.601Z`. No expression evaluator or eligibility claim exists.
 
-Publication and final Linux CI verification are pending.
+Published for review in [PR #14](https://github.com/hugofamorim/pokelab/pull/14),
+targeting `main` with explicit dependency on still-open PL-010 PR #13.
+Initial Linux validation is tracked in [CI run 62](https://github.com/hugofamorim/pokelab/actions/runs/40150628837).
+Final publication-head verification is recorded in the PR checks. No PR was merged by this task.
 
 ## Remaining work
 

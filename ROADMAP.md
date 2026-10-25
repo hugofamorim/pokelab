@@ -57,6 +57,7 @@ PL-011 (`feat/pl-011-evolution-chain-api`) builds on PL-010 head `e133952`,
 resolving species to bounded cached evolution trees with independent resource freshness,
 explicit parent relationships and complete source version/form conditions. PR #13 was
 open at audit time; this increment retains that dependency and does not merge it.
+Published in [PR #14](https://github.com/hugofamorim/pokelab/pull/14).
 See [`docs/PL-011_VALIDATION.md`](docs/PL-011_VALIDATION.md) for actual checks and review status.
 Next issue: PL-012, an accessible evolution panel consuming these species references
 and scoped source conditions without inferred Pokémon IDs or universal game-availability claims.
