@@ -24,6 +24,16 @@ const generationFour = require('./fixtures/generation-iv-selection.json');
 const wormadam = pokemonSchema.parse(
   require('./fixtures/wormadam-detail.json'),
 );
+const evolutionDetails =
+  require('./fixtures/evolution-pokemon-details.json').map((item) =>
+    pokemonSchema.parse(item),
+  );
+const evolutionChains = new Map([
+  [1, require('./fixtures/evolution-chain-1.json')],
+  [10, require('./fixtures/evolution-chain-10.json')],
+  [67, require('./fixtures/evolution-chain-eevee.json')],
+  [103, require('./fixtures/evolution-chain-dunsparce.json')],
+]);
 // Captured normalized facts; the thirteen-entry test catalog is intentionally small.
 const catalog = require('./fixtures/catalog-details.json').map((item) =>
   pokemonSchema.parse(item),
@@ -74,7 +84,9 @@ async function start() {
         'SPECIES_NOT_FOUND',
         'Espécie não encontrada.',
       );
-    const item = catalog.find((value) => value.species.id === id);
+    const item = [...catalog, ...evolutionDetails].find(
+      (value) => value.species.id === id,
+    );
     return {
       species: {
         speciesId: id,
@@ -103,7 +115,7 @@ async function start() {
         'UPSTREAM_UNAVAILABLE',
         'Fonte indisponível.',
       );
-    const captured = catalog.find(
+    const captured = [...catalog, ...evolutionDetails].find(
       (item) => String(item.id) === identifier || item.name === identifier,
     );
     if (captured) return captured;
@@ -124,7 +136,91 @@ async function start() {
     ...catalog.map(({ id, name }) => ({ id, name })),
     { id: 25, name: 'pikachu' },
   ];
-  const capturedSpecies = [...catalog, await getDetail('25'), wormadam];
+  const capturedSpecies = [
+    ...catalog,
+    ...evolutionDetails,
+    await getDetail('25'),
+    wormadam,
+  ];
+  const generationSpecies = capturedSpecies.filter(
+    (item) => !evolutionDetails.some((extra) => extra.id === item.id),
+  );
+  const evolutionAdapter = new PokeApiAdapter(
+    100,
+    async (url) => {
+      const id = Number(String(url).split('/').at(-1));
+      return new Response(JSON.stringify(evolutionChains.get(id) ?? {}), {
+        status: evolutionChains.has(id) ? 200 : 404,
+      });
+    },
+    async () => {},
+  );
+  adapter.evolutionChain = async (id) => {
+    // Explicit synthetic one-node boundary; never production data.
+    if (id === 500)
+      return {
+        chainId: 500,
+        babyTriggerItem: null,
+        nodes: [
+          {
+            species: { speciesId: 6, name: 'charizard' },
+            parentSpeciesId: null,
+            isBaby: false,
+            conditions: [],
+          },
+        ],
+      };
+    if (id === 67)
+      throw new CatalogError(
+        503,
+        'UPSTREAM_UNAVAILABLE',
+        'Fonte indisponível.',
+      );
+    const result = await evolutionAdapter.evolutionChain(id);
+    // Controlled omission; the captured fixture remains unchanged.
+    if (id === 1) result.nodes[1].conditions = [];
+    return result;
+  };
+  adapter.evolutionReference = async (id) => {
+    const item = capturedSpecies.find((value) => value.species.id === id);
+    if (id === 2)
+      throw new CatalogError(
+        404,
+        'SPECIES_NOT_FOUND',
+        'Espécie não encontrada.',
+      );
+    if (id === 3 || id === 413)
+      throw new CatalogError(
+        503,
+        'UPSTREAM_UNAVAILABLE',
+        'Fonte indisponível.',
+      );
+    if (id === 4 || id === 7)
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    return {
+      species: {
+        speciesId: id,
+        name: id === 5 ? 'identity-mismatch' : item.species.name,
+      },
+      chainId:
+        id === 6
+          ? 500
+          : id === 1
+            ? 1
+            : id === 25
+              ? 10
+              : id === 133 || id === 134
+                ? 67
+                : id === 206
+                  ? 103
+                  : null,
+    };
+  };
+  entries.set('pokeapi-v2:normalized-v1:evolution-chain/67', {
+    payload: await evolutionAdapter.evolutionChain(67),
+    fetchedAt: new Date('2026-10-22T12:00:00Z'),
+    expiresAt: new Date(0),
+  });
   const generationIndex = (id, source) =>
     generationSpeciesIndexSchema.parse({
       generation: { id, name: GENERATION_NAMES[id - 1] },
@@ -134,7 +230,7 @@ async function start() {
           name: entry.name,
         }))
         .filter((entry) =>
-          capturedSpecies.some((item) => item.species.id === entry.speciesId),
+          generationSpecies.some((item) => item.species.id === entry.speciesId),
         )
         .sort((a, b) => a.speciesId - b.speciesId),
     });

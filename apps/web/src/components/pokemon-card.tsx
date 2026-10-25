@@ -8,18 +8,21 @@ import { POKEMON_TYPE_TOKENS } from '../lib/type-tokens';
 import { catalogDetailHref } from '../lib/catalog';
 import type { PokemonType } from '@pokelab/pokemon-domain';
 import { generationDetailHref } from '../lib/generation-catalog';
+import { catalogEntryHref } from '../lib/catalog-search';
 export function PokemonCard({
   pokemon,
   fromPage,
   fromSearch,
   fromType,
   fromGeneration,
+  fromCatalog,
 }: {
   pokemon: PokemonSummary;
   fromPage?: number;
   fromSearch?: string;
   fromType?: PokemonType;
   fromGeneration?: number;
+  fromCatalog?: string;
 }) {
   const accent = POKEMON_TYPE_TOKENS[pokemon.types[0] ?? 'normal'];
   return (
@@ -27,13 +30,15 @@ export function PokemonCard({
       className="pokemon-card"
       style={{ '--type-soft': accent.soft } as CSSProperties}
       href={
-        fromSearch
-          ? `/pokemon/${pokemon.id}?${new URLSearchParams({ fromSearch })}`
-          : fromGeneration
-            ? generationDetailHref(pokemon.id, fromPage ?? 1, fromGeneration)
-            : fromPage
-              ? catalogDetailHref(pokemon.id, fromPage, fromType)
-              : `/pokemon/${pokemon.id}`
+        fromCatalog
+          ? catalogEntryHref(pokemon.id, fromCatalog)
+          : fromSearch
+            ? `/pokemon/${pokemon.id}?${new URLSearchParams({ fromSearch })}`
+            : fromGeneration
+              ? generationDetailHref(pokemon.id, fromPage ?? 1, fromGeneration)
+              : fromPage
+                ? catalogDetailHref(pokemon.id, fromPage, fromType)
+                : `/pokemon/${pokemon.id}`
       }
       prefetch={false}
     >

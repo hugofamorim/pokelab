@@ -20,7 +20,7 @@ async function Detail({ params, searchParams }: PageProps) {
         Voltar à Pokédex
       </Link>
       {result.kind === 'ready' ? (
-        <PokemonDetail {...result.value} />
+        <PokemonDetail {...result.value} catalogReturn={back} />
       ) : (
         <DataState kind={result.kind} identifier={id} />
       )}

@@ -1,0 +1,157 @@
+[
+  {
+    "id": 133,
+    "name": "eevee",
+    "species": {
+      "id": 133,
+      "name": "eevee"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png",
+    "types": ["normal"],
+    "heightMeters": 0.3,
+    "weightKg": 6.5,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 55
+      },
+      {
+        "name": "attack",
+        "value": 55
+      },
+      {
+        "name": "defense",
+        "value": 50
+      },
+      {
+        "name": "special-attack",
+        "value": 45
+      },
+      {
+        "name": "special-defense",
+        "value": 65
+      },
+      {
+        "name": "speed",
+        "value": 55
+      }
+    ],
+    "abilities": [
+      {
+        "name": "run-away",
+        "hidden": false
+      },
+      {
+        "name": "adaptability",
+        "hidden": false
+      },
+      {
+        "name": "anticipation",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 134,
+    "name": "vaporeon",
+    "species": {
+      "id": 134,
+      "name": "vaporeon"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/134.png",
+    "types": ["water"],
+    "heightMeters": 1,
+    "weightKg": 29,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 130
+      },
+      {
+        "name": "attack",
+        "value": 65
+      },
+      {
+        "name": "defense",
+        "value": 60
+      },
+      {
+        "name": "special-attack",
+        "value": 110
+      },
+      {
+        "name": "special-defense",
+        "value": 95
+      },
+      {
+        "name": "speed",
+        "value": 65
+      }
+    ],
+    "abilities": [
+      {
+        "name": "water-absorb",
+        "hidden": false
+      },
+      {
+        "name": "hydration",
+        "hidden": true
+      }
+    ]
+  },
+  {
+    "id": 206,
+    "name": "dunsparce",
+    "species": {
+      "id": 206,
+      "name": "dunsparce"
+    },
+    "isDefault": true,
+    "artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/206.png",
+    "types": ["normal"],
+    "heightMeters": 1.5,
+    "weightKg": 14,
+    "stats": [
+      {
+        "name": "hp",
+        "value": 100
+      },
+      {
+        "name": "attack",
+        "value": 70
+      },
+      {
+        "name": "defense",
+        "value": 70
+      },
+      {
+        "name": "special-attack",
+        "value": 65
+      },
+      {
+        "name": "special-defense",
+        "value": 65
+      },
+      {
+        "name": "speed",
+        "value": 45
+      }
+    ],
+    "abilities": [
+      {
+        "name": "serene-grace",
+        "hidden": false
+      },
+      {
+        "name": "run-away",
+        "hidden": false
+      },
+      {
+        "name": "rattled",
+        "hidden": true
+      }
+    ]
+  }
+]

@@ -1,6 +1,6 @@
 # PokéLab — Trainer Studio
 
-An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 includes browsing, exact name/ID search, responsive single-type filtering, validated generation browsing and species descriptions. Evolutions, moves, combined filters, team building, analysis, accounts and cloud saves remain future work.
+An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 includes browsing, exact name/ID search, responsive single-type filtering, validated generation browsing, species descriptions and evolution trees. Moves, combined filters, team building, analysis, accounts and cloud saves remain future work.
 
 **PL-001** provides [paginated entry references](http://127.0.0.1:3001/v1/pokemon?page=1&pageSize=20), with strict query bounds, persistent caching and no detail fan-out.
 
@@ -23,6 +23,8 @@ An independent, open-source Pokémon discovery and strategy studio. M0 implement
 **PL-010** adds [species descriptions](http://localhost:3000/pokemon/25#sobre-especie) through a [bounded species endpoint](http://127.0.0.1:3001/v1/pokemon-species/25/description). The panel loads independently from attributes, using the entry's explicit owning species ID. It prefers original `pt-br` text and falls back to `en` with a visible language label and source game version. Missing translations, outages, retry and stale descriptions have distinct states. Descriptions use their own persistent cache/freshness, reusing existing request limits; catalog browsing does not request this extra metadata.
 
 **PL-011** adds the [species evolution API](http://127.0.0.1:3001/v1/pokemon-species/133/evolution). Explicit species-to-chain references and parent relationships preserve branching, version/form conditions and independent freshness. The adapter validates bounded trees iteratively, caches shared chains once per TTL and never fetches Pokémon details for their nodes. Opaque source expressions are retained without execution or simulated eligibility. Evolution UI is a separate follow-up.
+
+**PL-012** adds the [evolution panel](http://localhost:3000/pokemon/133#evolucoes): real parent/child species branches, independent loading/error/absence/stale states and native expandable records for every source condition. Version groups, forms, null/false/zero requirements and opaque expressions remain separate. Pokémon previews load only after an explicit selection, using existing validated mappings and summaries. Ready cards retain the original catalog return context; unresolved species never guess entry IDs. Existing panels, cards, badges, artwork and retry behavior are reused.
 
 ## Run locally
 
@@ -94,7 +96,7 @@ Environment files are ignored; only harmless examples are tracked. API validatio
 - [Domain rules](docs/DOMAIN_RULES.md), [design system](docs/POKELAB_DESIGN_SYSTEM.md), [agent instructions](AGENTS.md)
 - [Initial audit](docs/M0_AUDIT.md), [ADR-001](docs/adr/001-foundation.md), [API/cache policy](docs/API.md)
 
-PL-008/009 were integrated into `main` through [PR #11](https://github.com/hugofamorim/pokelab/pull/11) and [PR #12](https://github.com/hugofamorim/pokelab/pull/12). PL-011 builds on PL-010 [PR #13](https://github.com/hugofamorim/pokelab/pull/13), which was open at audit time. Next smallest issue: **PL-012 — accessible evolution panel**, consuming explicit species references and scoped conditions. Combined filters and move enrichment remain separate M1 work. No PR is merged automatically.
+PL-008/009/010/011 were integrated into `main` through [PR #11](https://github.com/hugofamorim/pokelab/pull/11), [PR #12](https://github.com/hugofamorim/pokelab/pull/12), [PR #13](https://github.com/hugofamorim/pokelab/pull/13) and [PR #14](https://github.com/hugofamorim/pokelab/pull/14). PL-012 is published in [PR #15](https://github.com/hugofamorim/pokelab/pull/15), targeting that integrated base. Next smallest issue: **PL-013 — bounded version-aware move metadata API**, preserving learn method and level before moves UI. Combined filters remain separate M1 work. No PR is merged automatically.
 
 ## Attribution
 
@@ -131,4 +133,11 @@ fully disabling JavaScript is not supported by that streamed route.
 PL-011 retains the real Eevee/Dunsparce evolution chains and projected species references,
 captured on 2026-10-24 (America/Sao_Paulo). They exercise branching and modern version,
 form and expression metadata. Controlled invalid/boundary cases stay test-only. See
-[PL-011 acceptance evidence](docs/PL-011_VALIDATION.md). No evolution UI is introduced.
+[PL-011 acceptance evidence](docs/PL-011_VALIDATION.md). That API increment adds no UI;
+PL-012 supplies the panel.
+
+PL-012 adds captured source chains 1/10 and normalized Eevee/Vaporeon/Dunsparce entries,
+captured on 2026-10-24 (America/Sao_Paulo). Browser fixtures keep the original limited
+catalog/generation totals; controlled null/single-node/missing-condition/outage/stale
+cases are test-only, never production facts. Real UI captures use the actual Nest API.
+See [PL-012 acceptance evidence](docs/PL-012_VALIDATION.md).

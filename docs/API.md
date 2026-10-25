@@ -3,6 +3,25 @@
 Development origin: `http://localhost:3001`. OpenAPI UI: `/docs`, JSON: `/docs-json`.
 `GET /v1/pokemon`, `GET /v1/pokemon/summaries` and `GET /v1/pokemon/:idOrName` are public and read-only.
 
+## Evolution panel consumer — PL-012
+
+The web detail's `#evolucoes` panel consumes the PL-011 species-based endpoint server-side
+with shared schema validation, owning species ID/name matching, no-store and a 70s
+deadline. It renders species references and scoped condition metadata without making
+default-variety, summary, form or arbitrary referenced-URL requests automatically.
+The original inline React streaming requirement remains; full JavaScript-disabled
+support is not claimed for this streamed detail.
+
+Selecting “Ver Pokémon padrão” calls the existing **Next.js**
+`/api/catalog/generation-cards?speciesIds={id}` with exactly one validated species ID.
+Both source mappings and summaries are checked again, including species names against
+the displayed tree. Only ready validated entries become detail links. Mapping and
+summary stale notices remain separate from species-reference/chain freshness. A failed
+preview can be retried; changing selection/navigation aborts obsolete browser work.
+The existing 135s gateway and 140s browser deadlines remain, without a new endpoint/pool.
+The selected default Pokémon does not imply that the form or game conditions are met.
+Validated original catalog search/type/generation/page context is reconstructed on links.
+
 ## Species evolution — PL-011
 
 `GET /v1/pokemon-species/133/evolution` accepts one canonical numeric species ID
@@ -59,7 +78,7 @@ requirements. Records from different versions/forms must not be combined into on
   `INVALID_UPSTREAM`; upstream/cache/admission failure returns sanitized 503. A failed
   refresh may serve a previously valid cached resource with its own `stale: true` metadata.
 
-The future evolution UI and Pokémon-entry evolution convenience route are not implemented.
+PL-012 supplies the evolution UI. The Pokémon-entry evolution convenience route is not implemented.
 OpenAPI documents this species-based route and the complete normalized schema.
 
 ## Species description — PL-010
