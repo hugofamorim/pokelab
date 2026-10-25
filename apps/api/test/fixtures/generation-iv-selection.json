@@ -1,0 +1,10 @@
+{
+  "id": 4,
+  "name": "generation-iv",
+  "pokemon_species": [
+    {
+      "name": "wormadam",
+      "url": "https://pokeapi.co/api/v2/pokemon-species/413/"
+    }
+  ]
+}
