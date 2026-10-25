@@ -61,7 +61,9 @@ All CI tests use these fixtures or explicitly labeled synthetic boundary mutatio
   with no records in requested group 1; no game-availability inference was made.
 - Local API/web production servers were restarted from F: on ports 3001/3000. No secrets,
   dependency updates, migrations or user-generated files were added to commits.
-- Pull request publication and Linux CI are pending at this checkpoint.
+- Published in [PR #16](https://github.com/hugofamorim/pokelab/pull/16), targeting
+  integrated `main` with no unmerged dependency. Linux CI is pending at publication;
+  the PR checks record the final revision's result. No merge is performed by this task.
 
 ## Remaining work and limitations
 

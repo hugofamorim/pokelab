@@ -70,6 +70,7 @@ PL-013 (`feat/pl-013-versioned-moves`) starts from that integrated main and adds
 bounded version-scoped Pokémon learning records and individual current-source move
 metadata, preserving method/level/order and selected historical change fields.
 See [`docs/PL-013_VALIDATION.md`](docs/PL-013_VALIDATION.md) for actual acceptance status.
+Published for review in [PR #16](https://github.com/hugofamorim/pokelab/pull/16).
 Next issue: PL-014, curated moves UI with explicit version-group selection, independent
 loading/error/absence/stale states and bounded on-demand metadata consumption.
 Combined type/generation filters and final integrated acceptance also remain in M1.
