@@ -61,6 +61,38 @@
   margin-bottom: 32px;
   min-height: 144px;
 }
+.generation-filter {
+  min-height: 100px;
+}
+.generation-filter .type-filter-chip {
+  min-width: 48px;
+}
+.generation-filter .type-filter-chip[aria-current] {
+  background: var(--pl-brand);
+}
+.generation-description {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--pl-body);
+  max-width: 760px;
+}
+.generation-grid > li {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.generation-grid .pokemon-card {
+  flex: 1;
+  height: auto;
+}
+.generation-species-name,
+.generation-freshness {
+  font-size: 12px;
+  padding: 0 8px;
+}
+.generation-freshness {
+  color: var(--pl-warning);
+}
 .type-filter-heading {
   display: flex;
   flex-wrap: wrap;

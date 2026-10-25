@@ -7,16 +7,19 @@ import type { CSSProperties } from 'react';
 import { POKEMON_TYPE_TOKENS } from '../lib/type-tokens';
 import { catalogDetailHref } from '../lib/catalog';
 import type { PokemonType } from '@pokelab/pokemon-domain';
+import { generationDetailHref } from '../lib/generation-catalog';
 export function PokemonCard({
   pokemon,
   fromPage,
   fromSearch,
   fromType,
+  fromGeneration,
 }: {
   pokemon: PokemonSummary;
   fromPage?: number;
   fromSearch?: string;
   fromType?: PokemonType;
+  fromGeneration?: number;
 }) {
   const accent = POKEMON_TYPE_TOKENS[pokemon.types[0] ?? 'normal'];
   return (
@@ -26,9 +29,11 @@ export function PokemonCard({
       href={
         fromSearch
           ? `/pokemon/${pokemon.id}?${new URLSearchParams({ fromSearch })}`
-          : fromPage
-            ? catalogDetailHref(pokemon.id, fromPage, fromType)
-            : `/pokemon/${pokemon.id}`
+          : fromGeneration
+            ? generationDetailHref(pokemon.id, fromPage ?? 1, fromGeneration)
+            : fromPage
+              ? catalogDetailHref(pokemon.id, fromPage, fromType)
+              : `/pokemon/${pokemon.id}`
       }
       prefetch={false}
     >

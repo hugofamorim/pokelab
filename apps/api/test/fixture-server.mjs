@@ -13,9 +13,16 @@ import {
   pokemonSchema,
   pokemonPageSchema,
   pokemonTypeIndexSchema,
+  generationSpeciesIndexSchema,
+  GENERATION_NAMES,
 } from '@pokelab/contracts';
 const fixture = require('./fixtures/pikachu.json');
 const electricFixture = require('./fixtures/type-electric.json');
+const generationFixture = require('./fixtures/generation-i.json');
+const generationFour = require('./fixtures/generation-iv-selection.json');
+const wormadam = pokemonSchema.parse(
+  require('./fixtures/wormadam-detail.json'),
+);
 // Captured normalized facts; the thirteen-entry test catalog is intentionally small.
 const catalog = require('./fixtures/catalog-details.json').map((item) =>
   pokemonSchema.parse(item),
@@ -41,6 +48,12 @@ async function start() {
   );
   const getDetail = adapter.get.bind(adapter);
   adapter.get = async (identifier) => {
+    if (identifier === '413' || identifier === wormadam.name)
+      throw new CatalogError(
+        503,
+        'UPSTREAM_UNAVAILABLE',
+        'Fonte indisponível.',
+      );
     if (identifier === 'ivysaur')
       await new Promise((resolve) => setTimeout(resolve, 1200));
     if (identifier === 'venusaur')
@@ -70,6 +83,69 @@ async function start() {
     ...catalog.map(({ id, name }) => ({ id, name })),
     { id: 25, name: 'pikachu' },
   ];
+  const capturedSpecies = [...catalog, await getDetail('25'), wormadam];
+  const generationIndex = (id, source) =>
+    generationSpeciesIndexSchema.parse({
+      generation: { id, name: GENERATION_NAMES[id - 1] },
+      items: source.pokemon_species
+        .map((entry) => ({
+          speciesId: Number(entry.url.split('/').at(-2)),
+          name: entry.name,
+        }))
+        .filter((entry) =>
+          capturedSpecies.some((item) => item.species.id === entry.speciesId),
+        )
+        .sort((a, b) => a.speciesId - b.speciesId),
+    });
+  adapter.generationIndex = async (id) => {
+    if (id === 1 || id === 3)
+      throw new CatalogError(
+        503,
+        'UPSTREAM_UNAVAILABLE',
+        'Fonte indisponível.',
+      );
+    if (id === 2) await new Promise((resolve) => setTimeout(resolve, 1200));
+    return generationIndex(
+      id,
+      id === 4 ? generationFour : { pokemon_species: [] },
+    );
+  };
+  const mappingFor = (item) => ({
+    species: { speciesId: item.species.id, name: item.species.name },
+    pokemon: { id: item.id, name: item.name },
+  });
+  adapter.defaultVariety = async (id) => {
+    if (id === 413)
+      throw new CatalogError(
+        503,
+        'UPSTREAM_UNAVAILABLE',
+        'Fonte indisponível.',
+      );
+    const item = capturedSpecies.find(
+      (value) => value.species.id === id && value.isDefault,
+    );
+    if (!item)
+      throw new CatalogError(
+        404,
+        'SPECIES_NOT_FOUND',
+        'Espécie não encontrada.',
+      );
+    return mappingFor(item);
+  };
+  const expired = (payload) => ({
+    payload,
+    fetchedAt: new Date('2026-10-22T12:00:00Z'),
+    expiresAt: new Date(0),
+  });
+  entries.set(
+    'pokeapi-v2:normalized-v1:generation-species-index/1',
+    expired(generationIndex(1, generationFixture)),
+  );
+  entries.set(
+    'pokeapi-v2:normalized-v1:species-default-variety/413',
+    expired(mappingFor(wormadam)),
+  );
+  entries.set('pokeapi-v2:normalized-v1:pokemon/413', expired(wormadam));
   const indexFor = (type) =>
     pokemonTypeIndexSchema.parse({
       type,
