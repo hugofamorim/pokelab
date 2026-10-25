@@ -71,9 +71,16 @@ bounded version-scoped Pokémon learning records and individual current-source m
 metadata, preserving method/level/order and selected historical change fields.
 See [`docs/PL-013_VALIDATION.md`](docs/PL-013_VALIDATION.md) for actual acceptance status.
 Published for review in [PR #16](https://github.com/hugofamorim/pokelab/pull/16).
-Next issue: PL-014, curated moves UI with explicit version-group selection, independent
-loading/error/absence/stale states and bounded on-demand metadata consumption.
-Combined type/generation filters and final integrated acceptance also remain in M1.
+PL-013 was integrated into `main` through PR #16 at `bdb395a`.
+PL-014 (`feat/pl-014-moves-panel`) builds on PL-013 head `131722f`. PR #16 was open
+at audit and was merged before publication, verified against `main` at `bdb395a`.
+No unmerged dependency remains; no merge is performed by this task.
+The moves panel adds explicit version-group selection, URL pagination/return context,
+native learning disclosures and single-selection current metadata/history with independent
+failure/freshness. See [`docs/PL-014_VALIDATION.md`](docs/PL-014_VALIDATION.md).
+Next issue: PL-015, bounded combined type/generation filtering, starting with explicit
+species/entry semantics and API contracts before integrating controls.
+Combined filter UI and final integrated acceptance remain before completing M1.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)

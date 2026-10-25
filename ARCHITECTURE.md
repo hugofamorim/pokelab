@@ -209,6 +209,52 @@ version/method identities, duplicate records and mismatched requested IDs are re
 404s do not retry or rescue stale data. Existing operational cache-retention/stale-age
 and per-instance-only throttling limitations remain. API/contract tests are offline.
 
+## Moves detail panel — PL-014
+
+The independent `#movimentos` Suspense panel validates entry ID/name, owning species
+ID/name and default status against the detail before displaying learning records.
+`moveVersion` is an explicit numeric source version group; `movePage` is bounded to
+1–1000 and requires a version. Repeated, array or invalid movement values give a
+panel-local invalid state, leaving other detail sections usable. Return context is
+reconstructed using the existing validated catalog helpers, including type/generation/search.
+
+Without a selection, the server probes explicit group 1/page 1 to discover available
+source groups through the existing PL-013 API. Its learning items are discarded; the
+UI presents a required placeholder and displays no moves until a user selects a group.
+No latest game or automatic game selection is inferred. A native GET form retains only
+constructed catalog return fields and the selected version, resetting movement pagination.
+Native pagination links keep version/page/return context and `#movimentos`, with prefetch
+disabled. The UI renders at most six distinct moves and every matching learning record,
+using native details. Group IDs sort as the API supplies; they do not establish chronology.
+
+Attributes remain separate from learning records. Selecting one card calls same-origin
+`GET /api/moves/:id`, which accepts only a canonical numeric ID and no query parameters,
+uses the fixed Nest path and revalidates response identity. The browser repeats shared
+schema validation and matches both move ID/name against the selected learning reference.
+Only one preview is retained; changing selection/unmount aborts work, and synchronous
+attempt invalidation rejects obsolete results even before effect cleanup. Source timestamp,
+entry, version and page changes reset preview state. No eager metadata fan-out occurs.
+
+The metadata view explicitly labels a current-source snapshot, preserves null/zero values,
+reuses known type badges (original source label for unsupported type names), and keeps
+selected historical changes behind a native disclosure. Historical null overrides remain
+distinct from current unknown values. Learning and metadata freshness are independent;
+the selected learning game is never used to label current attributes as historical stats.
+No effects, class changes, transfer/competitive legality or damage simulation is inferred.
+
+Single-resource server/gateway deadlines are 45s (allowing two 15s attempts plus jitter and
+cache work); the browser deadline is 50s. Requests/responses/errors are no-store at the
+web layer, with cancellation propagated; already-admitted Nest work can still finish.
+Loading/error/missing/no-record/out-of-range/stale states are local to the panel or preview.
+Responsive cards use two columns on tablet/desktop and one on mobile; a selected card spans
+the grid with two-column current fields on wider screens. Native form/disclosures work
+before application hydration; streamed HTML still needs React inline scripts and attribute
+queries need hydration. No full JavaScript-disabled detail support is claimed.
+
+No new Nest endpoint, shared contract, domain-framework coupling, dependency, migration,
+environment variable or asset is introduced. Existing logo, shell, buttons, panels, retry,
+artwork and typed palette are reused. Offline fixtures never call live PokéAPI in CI.
+
 ## Domain module model
 
 - Entities/value objects: `PokemonRef`, `PokemonType`, `Ruleset`, `TeamSlot`, `Team`, `TypeEffectiveness`, `CoverageReport`.
