@@ -72,7 +72,7 @@ export function SpeciesDescription({ species }: Props) {
         </div>
       </div>
       <p className="panel-description">
-        Registro da espécie {species.name} · #{species.id}. Os atributos acima
+        Registro da espécie {species.name} · #{species.id}. Os atributos base
         pertencem à entrada Pokémon selecionada.
       </p>
       <Suspense

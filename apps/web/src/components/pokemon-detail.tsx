@@ -17,6 +17,7 @@ import { SpeciesDescription } from './species-description';
 import { EvolutionPanel } from './evolution-panel';
 import { MovesPanel } from './moves-panel';
 import type { MovesQuery } from '../lib/moves';
+import { DetailTabs } from './detail-tabs';
 const statLabels: Record<StatName, string> = {
   hp: 'HP',
   attack: 'Ataque',
@@ -122,143 +123,131 @@ export function PokemonDetail({
           <span className="art-caption">Ilustração oficial · PokéAPI</span>
         </div>
       </section>
-      <div className="section-nav">
-        <a href="#atributos" className="selected">
-          <Activity size={17} />
-          Atributos
-        </a>
-        <a href="#habilidades">
-          <Sparkles size={17} />
-          Habilidades
-        </a>
-        <a href="#dados">
-          <Database size={17} />
-          Dados do Pokémon
-        </a>
-        <a href="#sobre-especie">
-          <BookIcon />
-          Sobre a espécie
-        </a>
-        <a href="#evolucoes">
-          <BookIcon />
-          Evoluções
-        </a>
-        <a href="#movimentos">
-          <BookIcon />
-          Movimentos
-        </a>
-      </div>
-      <div className="detail-grid">
-        <section className="panel stats-panel" id="atributos">
-          <div className="panel-heading">
-            <div>
-              <span className="section-icon">
-                <Activity size={20} />
-              </span>
-              <h2>Atributos base</h2>
-            </div>
-            <span className="subtle-label">BASE STATS</span>
-          </div>
-          <p className="panel-description">
-            Os números que compõem este Pokémon.
-          </p>
-          <div className="stat-list">
-            {p.stats.map((stat) => (
-              <div className="stat-row" key={stat.name}>
-                <span>{statLabels[stat.name]}</span>
-                <strong>{stat.value}</strong>
-                <meter
-                  min={0}
-                  max={255}
-                  value={stat.value}
-                  aria-label={`${statLabels[stat.name]}: ${stat.value} de 255`}
-                />
+      <DetailTabs
+        panels={{
+          atributos: (
+            <section className="panel stats-panel" id="atributos">
+              <div className="panel-heading">
+                <div>
+                  <span className="section-icon">
+                    <Activity size={20} />
+                  </span>
+                  <h2>Atributos base</h2>
+                </div>
+                <span className="subtle-label">BASE STATS</span>
               </div>
-            ))}
-          </div>
-          <div className="stat-total">
-            <span>Total dos atributos</span>
-            <strong>{total}</strong>
-          </div>
-          <p className="footnote">
-            Barras na escala de 0 a 255 por atributo. Não representam dano ou
-            probabilidade de vitória.
-          </p>
-        </section>
-        <div className="right-panels">
-          <section className="panel" id="habilidades">
-            <div className="panel-heading">
-              <div>
-                <span className="section-icon lavender">
-                  <Sparkles size={20} />
-                </span>
-                <h2>Habilidades</h2>
-              </div>
-            </div>
-            <p className="panel-description">
-              Habilidades listadas para este Pokémon.
-            </p>
-            <div className="ability-list">
-              {p.abilities.length ? (
-                p.abilities.map((ability) => (
-                  <div className="ability" key={ability.name}>
-                    <span className="ability-symbol">
-                      <Feather size={18} />
-                    </span>
-                    <strong>{ability.name.replaceAll('-', ' ')}</strong>
-                    {ability.hidden && (
-                      <span className="hidden-label">Oculta</span>
-                    )}
+              <p className="panel-description">
+                Os números que compõem este Pokémon.
+              </p>
+              <div className="stat-list">
+                {p.stats.map((stat) => (
+                  <div className="stat-row" key={stat.name}>
+                    <span>{statLabels[stat.name]}</span>
+                    <strong>{stat.value}</strong>
+                    <meter
+                      min={0}
+                      max={255}
+                      value={stat.value}
+                      aria-label={`${statLabels[stat.name]}: ${stat.value} de 255`}
+                    />
                   </div>
-                ))
-              ) : (
-                <p>Nenhuma habilidade disponível na fonte.</p>
-              )}
-            </div>
-            <p className="footnote">
-              Nomes originais da fonte, em inglês. Efeitos em batalha não são
-              calculados.
-            </p>
-          </section>
-          <section className="panel data-panel" id="dados">
-            <div className="panel-heading">
-              <div>
-                <span className="section-icon cream">
-                  <Database size={20} />
-                </span>
-                <h2>Identidade & origem</h2>
+                ))}
               </div>
-            </div>
-            <dl>
-              <div>
-                <dt>Espécie</dt>
-                <dd>
-                  {p.species.name} <span>#{p.species.id}</span>
-                </dd>
+              <div className="stat-total">
+                <span>Total dos atributos</span>
+                <strong>{total}</strong>
               </div>
-              <div>
-                <dt>Entrada Pokémon</dt>
-                <dd>#{p.id}</dd>
+              <p className="footnote">
+                Barras na escala de 0 a 255 por atributo. Não representam dano
+                ou probabilidade de vitória.
+              </p>
+            </section>
+          ),
+          habilidades: (
+            <section className="panel" id="habilidades">
+              <div className="panel-heading">
+                <div>
+                  <span className="section-icon lavender">
+                    <Sparkles size={20} />
+                  </span>
+                  <h2>Habilidades</h2>
+                </div>
               </div>
-              <div>
-                <dt>Forma padrão</dt>
-                <dd>{p.isDefault ? 'Sim' : 'Não · variante'}</dd>
+              <p className="panel-description">
+                Habilidades listadas para este Pokémon.
+              </p>
+              <div className="ability-list">
+                {p.abilities.length ? (
+                  p.abilities.map((ability) => (
+                    <div className="ability" key={ability.name}>
+                      <span className="ability-symbol">
+                        <Feather size={18} />
+                      </span>
+                      <strong>{ability.name.replaceAll('-', ' ')}</strong>
+                      {ability.hidden && (
+                        <span className="hidden-label">Oculta</span>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p>Nenhuma habilidade disponível na fonte.</p>
+                )}
               </div>
-              <div>
-                <dt>Fonte</dt>
-                <dd>PokéAPI v2</dd>
+              <p className="footnote">
+                Nomes originais da fonte, em inglês. Efeitos em batalha não são
+                calculados.
+              </p>
+            </section>
+          ),
+          dados: (
+            <section className="panel data-panel" id="dados">
+              <div className="panel-heading">
+                <div>
+                  <span className="section-icon cream">
+                    <Database size={20} />
+                  </span>
+                  <h2>Identidade & origem</h2>
+                </div>
               </div>
-            </dl>
-            <p className="footnote">
-              Espécie e forma são conceitos distintos. Os atributos acima
-              pertencem a esta entrada Pokémon.
-            </p>
-          </section>
-        </div>
-      </div>
-      <SpeciesDescription species={p.species} />
-      <EvolutionPanel species={p.species} returnHref={catalogReturn} />
-      <MovesPanel pokemon={p} query={movesQuery} returnHref={catalogReturn} />
+              <dl>
+                <div>
+                  <dt>Espécie</dt>
+                  <dd>
+                    {p.species.name} <span>#{p.species.id}</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Entrada Pokémon</dt>
+                  <dd>#{p.id}</dd>
+                </div>
+                <div>
+                  <dt>Forma padrão</dt>
+                  <dd>{p.isDefault ? 'Sim' : 'Não · variante'}</dd>
+                </div>
+                <div>
+                  <dt>Fonte</dt>
+                  <dd>PokéAPI v2</dd>
+                </div>
+              </dl>
+              <p className="footnote">
+                Espécie e forma são conceitos distintos. Os atributos base
+                pertencem a esta entrada Pokémon.
+              </p>
+            </section>
+          ),
+          'sobre-especie': <SpeciesDescription species={p.species} />,
+          evolucoes: (
+            <EvolutionPanel species={p.species} returnHref={catalogReturn} />
+          ),
+          movimentos: (
+            <MovesPanel
+              pokemon={p}
+              query={movesQuery}
+              returnHref={catalogReturn}
+            />
+          ),
+        }}
+      />
       <div className="explore-note">
         <span className="note-icon">
           <FlaskIcon />

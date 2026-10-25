@@ -1,0 +1,34 @@
+.detail-tab-panel {
+  display: none;
+  min-width: 0;
+}
+.detail-tabs[data-active-tab] > .detail-tab-panel[data-visible='true'],
+.detail-tabs:not([data-active-tab]) > .detail-tab-panel:has(> :target),
+.detail-tabs:not([data-active-tab]):not(:has(> .detail-tab-panel > :target))
+  > [data-tab='atributos'] {
+  display: block;
+}
+.detail-tabs[data-active-tab] [role='tab'][aria-selected='true'],
+.detail-tabs:not([data-active-tab]):not(:has(> .detail-tab-panel > :target))
+  [href='#atributos'],
+.detail-tabs:not([data-active-tab]):has([data-tab='atributos'] > :target)
+  [href='#atributos'],
+.detail-tabs:not([data-active-tab]):has([data-tab='habilidades'] > :target)
+  [href='#habilidades'],
+.detail-tabs:not([data-active-tab]):has([data-tab='dados'] > :target)
+  [href='#dados'],
+.detail-tabs:not([data-active-tab]):has([data-tab='sobre-especie'] > :target)
+  [href='#sobre-especie'],
+.detail-tabs:not([data-active-tab]):has([data-tab='evolucoes'] > :target)
+  [href='#evolucoes'],
+.detail-tabs:not([data-active-tab]):has([data-tab='movimentos'] > :target)
+  [href='#movimentos'] {
+  color: var(--pl-ink);
+  border-color: var(--pl-brand);
+}
+.detail-tab-panel > .panel {
+  margin-top: 0;
+}
+.detail-tabs .section-nav {
+  scroll-padding-inline: 8px;
+}
