@@ -1,8 +1,10 @@
 import { Suspense } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, ArrowRight, BookOpen, Sparkles } from 'lucide-react';
+import { BookOpen, Sparkles } from 'lucide-react';
 import { CatalogGrid } from '../../components/catalog-grid';
-import { catalogHref } from '../../lib/catalog';
+import { CatalogState } from '../../components/catalog-state';
+import { CatalogPagination } from '../../components/catalog-pagination';
+import { GenerationBrowse } from '../../components/generation-browse';
+import { GenerationFilter } from '../../components/generation-filter';
 import { getCatalogPage } from '../../lib/catalog-server';
 import { parseCatalogQuery } from '../../lib/catalog-search';
 import {
@@ -17,51 +19,6 @@ import { POKEMON_TYPE_TOKENS } from '../../lib/type-tokens';
 import { TypeFilter, TypeFilterFallback } from '../../components/type-filter';
 
 type Query = Promise<Record<string, string | string[] | undefined>>;
-function CatalogState({
-  kind,
-  page = 1,
-  type,
-}: {
-  kind: 'invalid' | 'invalidSearch' | 'error' | 'empty';
-  page?: number;
-  type?: PokemonType;
-}) {
-  return (
-    <section className="catalog-state" role="status">
-      <BookOpen size={40} aria-hidden="true" />
-      <h2>
-        {kind === 'invalidSearch'
-          ? 'Busca inválida'
-          : kind === 'invalid'
-            ? 'Página inválida'
-            : kind === 'empty'
-              ? 'Nenhum Pokémon nesta página'
-              : 'Não conseguimos abrir o catálogo'}
-      </h2>
-      <p>
-        {kind === 'invalidSearch'
-          ? 'Use um nome completo ou ID com até 64 caracteres, sem filtros ou paginação na mesma consulta.'
-          : kind === 'invalid'
-            ? 'Use uma página de 1 a 1000 e um dos 18 tipos disponíveis, ou busque por nome completo/ID separadamente.'
-            : kind === 'empty'
-              ? 'Você chegou além das entradas disponíveis. Volte para continuar explorando.'
-              : 'O serviço está indisponível no momento. Aguarde um pouco e tente novamente.'}
-      </p>
-      {kind === 'error' && (
-        <a className="button button-primary" href={catalogHref(page, type)}>
-          Tentar novamente
-        </a>
-      )}
-      <Link
-        className="button button-secondary"
-        href={catalogHref(1, type)}
-        prefetch={false}
-      >
-        Ir para a primeira página
-      </Link>
-    </section>
-  );
-}
 async function Catalog({ searchParams }: { searchParams: Query }) {
   const raw = await searchParams;
   const query = parseCatalogQuery(raw);
@@ -77,6 +34,13 @@ async function Catalog({ searchParams }: { searchParams: Query }) {
       ) : query.kind === 'search' ? (
         <Suspense key={query.term} fallback={<SearchSkeleton />}>
           <CatalogSearchResult term={query.term} />
+        </Suspense>
+      ) : query.kind === 'generation' ? (
+        <Suspense
+          key={`generation:${query.generation}:${query.page}`}
+          fallback={<CatalogSkeleton />}
+        >
+          <GenerationBrowse page={query.page} generation={query.generation} />
         </Suspense>
       ) : (
         <Suspense
@@ -125,37 +89,7 @@ async function Browse({ page, type }: { page: number; type?: PokemonType }) {
         page={page}
         type={type}
       />
-      <nav className="pagination" aria-label="Paginação do catálogo">
-        {page > 1 ? (
-          <Link
-            className="button button-secondary"
-            href={catalogHref(page - 1, type)}
-            prefetch={false}
-          >
-            <ArrowLeft size={18} aria-hidden="true" />
-            Anterior
-          </Link>
-        ) : (
-          <span className="button button-secondary" aria-disabled="true">
-            Anterior
-          </span>
-        )}
-        <span aria-current="page">Página {page}</span>
-        {result.hasNext && page < 1000 ? (
-          <Link
-            className="button button-primary"
-            href={catalogHref(page + 1, type)}
-            prefetch={false}
-          >
-            Próxima
-            <ArrowRight size={18} aria-hidden="true" />
-          </Link>
-        ) : (
-          <span className="button button-secondary" aria-disabled="true">
-            Próxima
-          </span>
-        )}
-      </nav>
+      <CatalogPagination page={page} hasNext={result.hasNext} type={type} />
     </>
   );
 }
@@ -210,6 +144,7 @@ export default function Page({ searchParams }: { searchParams: Query }) {
       </Suspense>
       <Suspense fallback={<TypeFilterFallback />}>
         <TypeFilter />
+        <GenerationFilter />
       </Suspense>
       <Suspense fallback={<CatalogSkeleton />}>
         <Catalog searchParams={searchParams} />

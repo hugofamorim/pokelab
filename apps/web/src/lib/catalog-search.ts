@@ -1,17 +1,36 @@
 import { z } from 'zod';
-import { identifierSchema, pokemonTypeSchema } from '@pokelab/contracts';
+import {
+  identifierSchema,
+  pokemonTypeSchema,
+  generationSpeciesQuerySchema,
+} from '@pokelab/contracts';
 import type { PokemonType } from '@pokelab/pokemon-domain';
 import { catalogHref, parseCatalogPage } from './catalog';
+import { generationHref } from './generation-catalog';
 
 const querySchema = z.strictObject({
   page: z.string().optional(),
   search: z.string().max(64).optional(),
   type: pokemonTypeSchema.optional(),
+  generation: z.string().optional(),
 });
 export type CatalogQuery =
   | { kind: 'browse'; page: number; type?: PokemonType }
   | { kind: 'search'; term: string }
+  | { kind: 'generation'; page: number; generation: number }
   | { kind: 'invalid' };
+export function parseCatalogSearchParams(
+  params: Pick<URLSearchParams, 'keys' | 'getAll'>,
+): CatalogQuery {
+  return parseCatalogQuery(
+    Object.fromEntries(
+      [...new Set(params.keys())].map((key) => {
+        const values = params.getAll(key);
+        return [key, values.length === 1 ? values[0] : values];
+      }),
+    ),
+  );
+}
 export function normalizeSearch(value: unknown): string | null {
   if (typeof value !== 'string' || value.length > 64) return null;
   if (!value.trim()) return '';
@@ -21,15 +40,30 @@ export function normalizeSearch(value: unknown): string | null {
 export function parseCatalogQuery(input: unknown): CatalogQuery {
   const parsed = querySchema.safeParse(input);
   if (!parsed.success) return { kind: 'invalid' };
-  const { page, search, type } = parsed.data;
+  const { page, search, type, generation } = parsed.data;
   if (search !== undefined) {
-    if (page !== undefined || type !== undefined) return { kind: 'invalid' };
+    if (page !== undefined || type !== undefined || generation !== undefined)
+      return { kind: 'invalid' };
     const term = normalizeSearch(search);
     return term === null
       ? { kind: 'invalid' }
       : term
         ? { kind: 'search', term }
         : { kind: 'browse', page: 1 };
+  }
+  if (generation !== undefined) {
+    if (type !== undefined) return { kind: 'invalid' };
+    const result = generationSpeciesQuerySchema.safeParse({
+      generation,
+      ...(page === undefined ? {} : { page }),
+    });
+    return result.success
+      ? {
+          kind: 'generation',
+          generation: result.data.generation,
+          page: result.data.page,
+        }
+      : { kind: 'invalid' };
   }
   const value = parseCatalogPage(page === undefined ? {} : { page });
   return value === null
@@ -43,15 +77,23 @@ export function catalogReturnHref(
 ): string {
   if (input.fromSearch !== undefined) {
     const term = normalizeSearch(input.fromSearch);
-    return term && input.fromPage === undefined && input.fromType === undefined
+    return term &&
+      input.fromPage === undefined &&
+      input.fromType === undefined &&
+      input.fromGeneration === undefined
       ? searchHref(term)
       : catalogHref(1);
   }
   const query = parseCatalogQuery({
     ...(input.fromPage === undefined ? {} : { page: input.fromPage }),
     ...(input.fromType === undefined ? {} : { type: input.fromType }),
+    ...(input.fromGeneration === undefined
+      ? {}
+      : { generation: input.fromGeneration }),
   });
-  return query.kind === 'browse'
-    ? catalogHref(query.page, query.type)
-    : catalogHref(1);
+  return query.kind === 'generation'
+    ? generationHref(query.page, query.generation)
+    : query.kind === 'browse'
+      ? catalogHref(query.page, query.type)
+      : catalogHref(1);
 }
