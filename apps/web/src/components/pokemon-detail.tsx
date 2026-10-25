@@ -15,6 +15,8 @@ import { PokemonArtwork } from './pokemon-artwork';
 import { TypeBadge } from './type-badge';
 import { SpeciesDescription } from './species-description';
 import { EvolutionPanel } from './evolution-panel';
+import { MovesPanel } from './moves-panel';
+import type { MovesQuery } from '../lib/moves';
 const statLabels: Record<StatName, string> = {
   hp: 'HP',
   attack: 'Ataque',
@@ -28,7 +30,8 @@ export function PokemonDetail({
   data: p,
   meta,
   catalogReturn = '/pokedex?page=1',
-}: PokemonResponse & { catalogReturn?: string }) {
+  movesQuery = { kind: 'choose' },
+}: PokemonResponse & { catalogReturn?: string; movesQuery?: MovesQuery }) {
   const accent = POKEMON_TYPE_TOKENS[p.types[0] ?? 'normal'];
   const total = p.stats.reduce((sum, stat) => sum + stat.value, 0);
   return (
@@ -139,6 +142,10 @@ export function PokemonDetail({
         <a href="#evolucoes">
           <BookIcon />
           Evoluções
+        </a>
+        <a href="#movimentos">
+          <BookIcon />
+          Movimentos
         </a>
       </div>
       <div className="detail-grid">
@@ -251,6 +258,7 @@ export function PokemonDetail({
       </div>
       <SpeciesDescription species={p.species} />
       <EvolutionPanel species={p.species} returnHref={catalogReturn} />
+      <MovesPanel pokemon={p} query={movesQuery} returnHref={catalogReturn} />
       <div className="explore-note">
         <span className="note-icon">
           <FlaskIcon />
@@ -259,7 +267,7 @@ export function PokemonDetail({
           <strong>Curiosidade é o começo de toda estratégia.</strong>
           <p>
             Continue explorando espécies e suas ramificações na Pokédex.
-            Movimentos chegam nas próximas etapas.
+            Consulte movimentos por versão para continuar suas descobertas.
           </p>
         </div>
         <span className="outline-chip">EM CONSTRUÇÃO</span>

@@ -5,13 +5,15 @@ import { DataState, DetailSkeleton } from '../../../components/states';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { catalogReturnHref } from '../../../lib/catalog-search';
+import { parseMovesQuery } from '../../../lib/moves';
 type PageProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 async function Detail({ params, searchParams }: PageProps) {
   const { id } = await params;
-  const back = catalogReturnHref(await searchParams);
+  const query = await searchParams;
+  const back = catalogReturnHref(query);
   const result = await getPokemon(id);
   return (
     <>
@@ -20,7 +22,11 @@ async function Detail({ params, searchParams }: PageProps) {
         Voltar à Pokédex
       </Link>
       {result.kind === 'ready' ? (
-        <PokemonDetail {...result.value} catalogReturn={back} />
+        <PokemonDetail
+          {...result.value}
+          catalogReturn={back}
+          movesQuery={parseMovesQuery(query)}
+        />
       ) : (
         <DataState kind={result.kind} identifier={id} />
       )}
