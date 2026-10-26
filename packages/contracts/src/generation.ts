@@ -40,13 +40,14 @@ export const speciesReferenceSchema = z.strictObject({
   speciesId: z.number().int().min(1).max(999999),
   name: identifierSchema,
 });
+export const generationQueryValueSchema = z
+  .string()
+  .regex(/^[1-9]$/)
+  .transform(Number)
+  .pipe(generationIdSchema);
 export const generationSpeciesQuerySchema = pokemonPaginationQuerySchema
   .extend({
-    generation: z
-      .string()
-      .regex(/^[1-9]$/)
-      .transform(Number)
-      .pipe(generationIdSchema),
+    generation: generationQueryValueSchema,
   })
   .pipe(pokemonPaginationSchema.extend({ generation: generationIdSchema }));
 

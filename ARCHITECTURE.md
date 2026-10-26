@@ -278,6 +278,54 @@ so moving between tabs retains move choices/previews; admitted requests may fini
 a tab is hidden. Existing cache, validation, deadlines and on-demand enrichment are unchanged.
 No API, domain, environment, dependency, migration or asset changes are introduced.
 
+## Bounded combined-filter composition — PL-015
+
+`GET /v1/pokemon/filter-scan?type=electric&generation=1&after=0&limit=4` combines
+current entry type and owning-species introduction generation. API v2's type members are
+Pokémon references, while generation members are species references; no ID/name equality
+between those resource kinds is assumed. All current type entries, including nondefault
+variants, are eligible candidates. Historical typing, form introduction and game availability
+are deliberately outside these semantics. The existing single-type/species-generation routes
+and current separate web controls are unchanged.
+
+The application service loads the existing type and generation indexes, releases both resource
+operations, selects ascending type-entry IDs strictly greater than `after`, and requests only
+that bounded window through the existing summary service. Default four, maximum twelve
+candidates; two distinct scan operations per instance, in-flight deduplication for identical
+queries, the existing two summary workers/two summary batches and four shared resource slots.
+No queue, new cache model, combined-result cache or eager all-catalog indexing is added.
+Index helpers are shared with the existing routes. Both index operations settle before scan
+admission is removed, including synchronous admission errors, preventing orphaned resources.
+
+Each candidate is matched using normalized entry ID/name, current type and owning species.
+ID/name contradictions in either direction become per-item `INVALID_UPSTREAM`, not exclusions.
+Valid foreign-generation species yield `excluded`; missing/failed details yield `unavailable`.
+Ready/excluded results retain the existing summary projection/freshness. The cursor advances
+across every evaluated reference, including failures; a caller can retry the same input window.
+Index failures/admission failures are sanitized top-level errors, never fabricated empty sets.
+
+This is a keyset candidate scan, not a page containing a fixed number of matches. Responses
+expose ordered outcomes, scanned count, next entry ID, `hasMore` and type-index candidate count;
+there is no global match total. Empty windows and exhausted cursors remain explicit. Type,
+generation and detail freshness are independent, with existing TTL/revalidation/stale-if-error.
+404 details do not retry or rescue stale data. Consumers must reset scan progress if either
+index timestamp changes and account for unknown candidates even at exhaustion. Cross-request
+source updates are not a transactional snapshot; no automatic full-index drain is authorized.
+
+Both indexes retain their existing 1 MiB/10,000-member caps. Reused Pokémon detail reads
+(standalone, summaries and scans) now use the existing streamed/decompressed JSON reader with
+a 2 MiB per-resource cap. Exact-boundary, declared-length and streamed-overflow cases are
+tested; a real Mew sample was 675,204 UTF-8 bytes. Normalized cache DTOs/keys stay compatible.
+Two index resources plus up to twelve detail resources bound a cold scan to fourteen unique
+reads, each with the existing timeout/one retry. A future web consumer must budget for the
+composed work, use small windows and explicit loading/retry rather than a single-resource deadline.
+
+No frontend/domain-package code, dependencies, migrations, env variables or assets change.
+The pure domain package remains framework-independent. OpenAPI and shared Zod contracts
+document the query, scope, progress and partial statuses; deterministic tests use captured
+resources and clearly identified synthetic scheduling/boundary datasets. Existing deployment
+rate limiting, cache retention and unlimited stale-age limitations remain.
+
 ## Domain module model
 
 - Entities/value objects: `PokemonRef`, `PokemonType`, `Ruleset`, `TeamSlot`, `Team`, `TypeEffectiveness`, `CoverageReport`.

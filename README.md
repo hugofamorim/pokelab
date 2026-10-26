@@ -1,6 +1,6 @@
 # PokéLab — Trainer Studio
 
-An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 includes browsing, exact name/ID search, responsive single-type filtering, validated generation browsing, species descriptions, evolution trees and version-scoped move browsing. Combined filters, team building, analysis, accounts and cloud saves remain future work.
+An independent, open-source Pokémon discovery and strategy studio. M0 implements a responsive Pokémon detail screen backed by a separate NestJS API and a persistent, validated PokéAPI cache. M1 includes browsing, exact name/ID search, responsive single-type filtering, validated generation browsing, species descriptions, evolution trees, version-scoped moves and a bounded combined-filter API. Combined filter controls, team building, analysis, accounts and cloud saves remain future work.
 
 **PL-001** provides [paginated entry references](http://127.0.0.1:3001/v1/pokemon?page=1&pageSize=20), with strict query bounds, persistent caching and no detail fan-out.
 
@@ -34,6 +34,8 @@ The detail navigation now uses functional tabs: only the selected section is vis
 Direct hash links, browser history, movement version/page and catalog return context are
 preserved. Arrow keys, Home/End and Enter/Space operate the tab list. See
 [detail tabs validation](docs/PL-014_TABS_VALIDATION.md).
+
+**PL-015** adds [bounded combined filtering](http://localhost:3001/v1/pokemon/filter-scan?type=electric&generation=1): current Pokémon-entry type plus owning-species introduction generation. Each call evaluates four type candidates by default (maximum twelve), returning ordered `match`/`excluded`/`unavailable` outcomes and an exclusive entry-ID cursor. It reuses existing index/detail caches and two summary workers, including explicit variants such as Alolan Raichu whose entry and species IDs differ. `totalCandidates` counts the type index; it is not a global match total. This endpoint does not infer a form's introduction generation, historical typing or game availability. The existing UI still uses separate filters; combined controls are next. See [PL-015 validation](docs/PL-015_VALIDATION.md).
 
 ## Run locally
 

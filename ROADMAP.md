@@ -52,7 +52,7 @@ adding a bounded cached species-description endpoint and an independently stream
 detail panel, explicit source language/version, fallback, empty/error/retry/stale states.
 Integrated into `main` in [PR #13](https://github.com/hugofamorim/pokelab/pull/13).
 See [`docs/PL-010_VALIDATION.md`](docs/PL-010_VALIDATION.md) for actual checks and review status.
-M1 as a whole is not complete: combined filters and version-aware move enrichment remain.
+M1 as a whole is not complete: combined filter controls and final acceptance remain.
 PL-011 (`feat/pl-011-evolution-chain-api`) builds on PL-010 head `e133952`,
 resolving species to bounded cached evolution trees with independent resource freshness,
 explicit parent relationships and complete source version/form conditions. PL-011 was
@@ -83,8 +83,18 @@ targeting integrated `main` without pending dependencies.
 PL-014 visual follow-up, requested before continuing M1: section navigation now shows
 only the selected tab's content, retaining hash/history, keyboard operation and movement
 query state. See [`docs/PL-014_TABS_VALIDATION.md`](docs/PL-014_TABS_VALIDATION.md).
-Next issue: PL-015, bounded combined type/generation filtering, starting with explicit
-species/entry semantics and API contracts before integrating controls.
+PL-014, including its requested tabs revision, was integrated into `main` through
+[PR #17](https://github.com/hugofamorim/pokelab/pull/17) at `815069d`.
+PL-015 (`feat/pl-015-combined-filter-api`) starts from that integrated main, adding
+bounded candidate scans combining current entry type and species-introduction generation.
+It preserves explicit form/species identity, partial outcomes, keyset progress and independent
+source freshness while reusing the existing resource caches/admission. See
+[`docs/PL-015_VALIDATION.md`](docs/PL-015_VALIDATION.md) for actual validation/review status.
+Published for review in [PR #18](https://github.com/hugofamorim/pokelab/pull/18),
+targeting integrated `main` without pending dependencies.
+Next issue: PL-016, combined filter controls and progressive candidate consumption,
+with explicit labels, query/return state, partial failures, source-change resets and native
+accessible navigation. Candidate scans are not conventional pages of all filtered matches.
 Combined filter UI and final integrated acceptance remain before completing M1.
 M2–M5 have not started.
 
