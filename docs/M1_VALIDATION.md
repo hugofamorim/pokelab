@@ -108,6 +108,13 @@ blocked, all passing, and the final 73-case run also passed that original case. 
 root cause was demonstrated; no speculative fix, retry policy or weakened assertion
 was introduced. Retain the observation for later stability monitoring.
 
+The first remote audit ([CI #99](https://github.com/hugofamorim/pokelab/actions/runs/40253858382)) exposed a different deterministic fixture scheduling
+problem: the combined loading case warmed generation II before the individual-generation
+loading test. The adapter-only delay no longer applied on that warm cache. Fixture latency
+now belongs to the shared cache read for generation II, covering cold and warm paths, and
+the generation test explicitly warms it through the combined endpoint before asserting the
+same visible loading state. No application delay, weakened assertion or retry was added.
+
 No blocking gap was found in the defined M1 acceptance scope. The milestone exit gate
 is this committed matrix plus green checks for the reviewed PR head. Review/merge is a
 separate user action. The next milestone is M2; plan its six-slot guest editor only after

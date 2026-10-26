@@ -180,6 +180,11 @@ test('handles empty, unavailable, loading and ambiguous generation queries', asy
   await expect(
     page.getByRole('link', { name: 'Tentar novamente' }),
   ).toHaveAttribute('href', '/pokedex?page=2&generation=3');
+  // Warm the shared generation index through the combined mode first.
+  const warm = await page.request.get(
+    'http://127.0.0.1:3101/v1/pokemon/filter-scan?type=grass&generation=2&limit=4',
+  );
+  expect(warm.ok()).toBe(true);
   await page.goto('/pokedex?generation=2', { waitUntil: 'commit' });
   await expect(
     page.getByRole('status', { name: 'Carregando catálogo' }).first(),
