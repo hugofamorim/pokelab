@@ -52,7 +52,9 @@ M1 remains in progress. No M2–M5 feature is introduced.
 - Local preview restored at port 3000; the existing generated `next-env.d.ts` dev imports
   are preserved outside the commits. Source checkout is `F:\Projetos\pokelab`; the
   configured `G:\Projetos\pokelab` held only `node_modules` during audit.
-- Remote review and CI: pending publication; do not infer remote success from local checks.
+- Published for review in [PR #19](https://github.com/hugofamorim/pokelab/pull/19), targeting
+  integrated `main`. Remote CI is pending final-head verification; local results do not
+  imply remote success.
 
 ## Remaining milestone work
 

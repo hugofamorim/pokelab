@@ -99,6 +99,8 @@ index timestamps and the exclusive entry cursor across detail return/history/rel
 Unknown candidates remain explicit and retryable; source changes require restarting.
 Each group replaces the previous one without automatic traversal or an accumulated total.
 See [`docs/PL-016_VALIDATION.md`](docs/PL-016_VALIDATION.md) for actual acceptance status.
+Published for review in [PR #19](https://github.com/hugofamorim/pokelab/pull/19),
+targeting integrated `main` without pending dependencies.
 Next issue: final integrated M1 acceptance and any gaps revealed by that audit.
 M1 remains in progress until that acceptance is verified.
 M2–M5 have not started.
