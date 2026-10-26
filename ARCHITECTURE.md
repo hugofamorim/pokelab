@@ -86,6 +86,32 @@ target failed species only. No backend endpoint, dependency, migration or env ch
 - Avoid runtime `fetch()` calls outside Suspense when `cacheComponents` is on. Separate cached public data from request-scoped private data. Use framework caching deliberately; do not mix private session data in shared cache.
 - Do not add route segment `dynamic = 'force-dynamic'` while Cache Components is enabled. Run `next build` in CI to catch prerender errors.
 
+## Combined catalog windows — PL-016
+
+The web accepts `/pokedex?type=electric&generation=1` as a distinct entry-based mode.
+A server component inside Suspense calls the existing Nest filter-scan endpoint exactly
+once with `limit=4`, no web cache and a 125s composed deadline (parallel index loads,
+then at most two detail waves under the existing cache/retry bounds). No browser gateway,
+new dependency, database, environment variable or automatic candidate-drain loop is added.
+Shared response validation is followed by requested type/generation/cursor/limit checks.
+
+Native links advance using `after` and both `typeAt`/`generationAt` source timestamps.
+Nonzero cursors require both timestamps; unknown/repeated parameters, conventional pages,
+search combinations and configurable candidate limits are rejected. If either timestamp
+changes, no cards or continuation from that response are shown; the user restarts.
+Groups replace previous content. History can revisit a prior snapshot; a new server request
+checks source versions again. There is no cross-window aggregation or global match count.
+Both index sources and every resolved candidate retain independent freshness; unavailable
+candidates are unknown, not exclusions, and retry refreshes the same route/window.
+
+Type/generation controls preserve each other and reset cursor/version context. Removing
+one filter returns to that filter's existing individual mode. Exact search clears both.
+Validated `fromType`, `fromGeneration`, `fromAfter`, `fromTypeAt`, `fromGenerationAt`
+construct internal return URLs, also through existing moves/evolution navigation. Source
+timestamps describe public upstream snapshots, not private state or trusted authorization.
+Generation-only species/default resolution and combined entry/variant semantics stay distinct.
+An abandoned server navigation may finish its single bounded request under Nest admission.
+
 ## Species descriptions — PL-010
 
 `GET /v1/pokemon-species/:speciesId/description` uses explicit owning species IDs;

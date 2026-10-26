@@ -92,10 +92,15 @@ source freshness while reusing the existing resource caches/admission. See
 [`docs/PL-015_VALIDATION.md`](docs/PL-015_VALIDATION.md) for actual validation/review status.
 Published for review in [PR #18](https://github.com/hugofamorim/pokelab/pull/18),
 targeting integrated `main` without pending dependencies.
-Next issue: PL-016, combined filter controls and progressive candidate consumption,
-with explicit labels, query/return state, partial failures, source-change resets and native
-accessible navigation. Candidate scans are not conventional pages of all filtered matches.
-Combined filter UI and final integrated acceptance remain before completing M1.
+PL-015 was integrated into `main` through PR #18 at `5539ccc`.
+PL-016 (`feat/pl-016-combined-filter-ui`) starts from that integrated main. It adds
+combined controls and native navigation through four-candidate windows, preserving both
+index timestamps and the exclusive entry cursor across detail return/history/reload.
+Unknown candidates remain explicit and retryable; source changes require restarting.
+Each group replaces the previous one without automatic traversal or an accumulated total.
+See [`docs/PL-016_VALIDATION.md`](docs/PL-016_VALIDATION.md) for actual acceptance status.
+Next issue: final integrated M1 acceptance and any gaps revealed by that audit.
+M1 remains in progress until that acceptance is verified.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)
