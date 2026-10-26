@@ -9,7 +9,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         Pular para o conteúdo
       </a>
       <aside className="sidebar">
-        <Link href="/" className="brand" aria-label="PokéLab — início">
+        <Link
+          href="/"
+          className="brand"
+          aria-label="PokéLab Trainer Studio — início"
+        >
           <Image
             src="/assets/brand/pokelab-logo.png"
             width={200}
