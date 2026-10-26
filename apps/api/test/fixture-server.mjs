@@ -313,7 +313,6 @@ async function start() {
         'UPSTREAM_UNAVAILABLE',
         'Fonte indisponível.',
       );
-    if (id === 2) await new Promise((resolve) => setTimeout(resolve, 1200));
     return generationIndex(
       id,
       id === 4 ? generationFour : { pokemon_species: [] },
@@ -431,7 +430,10 @@ async function start() {
     .useValue({
       get: async (key) => {
         // Deterministic streamed loading even after earlier browser cases warm cache.
-        if (key === 'pokeapi-v2:normalized-v1:pokemon-learnset/7')
+        if (
+          key === 'pokeapi-v2:normalized-v1:pokemon-learnset/7' ||
+          key === 'pokeapi-v2:normalized-v1:generation-species-index/2'
+        )
           await new Promise((resolve) => setTimeout(resolve, 1200));
         return entries.get(key) ?? null;
       },

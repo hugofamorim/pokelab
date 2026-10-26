@@ -53,8 +53,9 @@ M1 remains in progress. No M2–M5 feature is introduced.
   are preserved outside the commits. Source checkout is `F:\Projetos\pokelab`; the
   configured `G:\Projetos\pokelab` held only `node_modules` during audit.
 - Published for review in [PR #19](https://github.com/hugofamorim/pokelab/pull/19), targeting
-  integrated `main`. Remote CI is pending final-head verification; local results do not
-  imply remote success.
+  integrated `main`. [CI run #94](https://github.com/hugofamorim/pokelab/actions/runs/40251358449)
+  subsequently passed on head `d4b1a42`, including upload and teardown. PR #19 was merged
+  at `19d4485`; PL-017 records integrated milestone acceptance.
 
 ## Remaining milestone work
 

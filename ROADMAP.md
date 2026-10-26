@@ -7,7 +7,11 @@ Never claim a milestone done until acceptance tests pass, reviewable changes are
 M0 / PL-000 passed local and Linux CI acceptance and was merged in [PR #1](https://github.com/hugofamorim/pokelab/pull/1).
 See [`docs/M0_VALIDATION.md`](docs/M0_VALIDATION.md) for the recorded acceptance evidence.
 
-M1 is in progress. PL-001 (`feat/pl-001-paginated-catalog`) implements the bounded
+M1 implementation and integrated local acceptance are delivered through PL-017.
+See [`docs/M1_VALIDATION.md`](docs/M1_VALIDATION.md) for the exit matrix and review gate.
+The historical increments follow.
+
+PL-001 (`feat/pl-001-paginated-catalog`) implements the bounded
 reference-list API, shared contracts, persistent page cache, and offline tests.
 See [`docs/PL-001_VALIDATION.md`](docs/PL-001_VALIDATION.md) for checks and review status.
 PL-001 was merged into `main` in [PR #2](https://github.com/hugofamorim/pokelab/pull/2).
@@ -52,7 +56,7 @@ adding a bounded cached species-description endpoint and an independently stream
 detail panel, explicit source language/version, fallback, empty/error/retry/stale states.
 Integrated into `main` in [PR #13](https://github.com/hugofamorim/pokelab/pull/13).
 See [`docs/PL-010_VALIDATION.md`](docs/PL-010_VALIDATION.md) for actual checks and review status.
-M1 as a whole is not complete: combined filter controls and final acceptance remain.
+At PL-010 completion, combined controls and integrated acceptance remained; PL-015–017 deliver them.
 PL-011 (`feat/pl-011-evolution-chain-api`) builds on PL-010 head `e133952`,
 resolving species to bounded cached evolution trees with independent resource freshness,
 explicit parent relationships and complete source version/form conditions. PL-011 was
@@ -101,8 +105,17 @@ Each group replaces the previous one without automatic traversal or an accumulat
 See [`docs/PL-016_VALIDATION.md`](docs/PL-016_VALIDATION.md) for actual acceptance status.
 Published for review in [PR #19](https://github.com/hugofamorim/pokelab/pull/19),
 targeting integrated `main` without pending dependencies.
-Next issue: final integrated M1 acceptance and any gaps revealed by that audit.
-M1 remains in progress until that acceptance is verified.
+PL-016 was integrated into `main` through PR #19 at `19d4485`.
+PL-017 (`feat/pl-017-m1-acceptance`) audits that integrated base, corrects the desktop
+brand's accessible name, adds cross-feature journeys and a mandatory independent axe
+CI audit, and records measured local cache latency. No application API/schema changes.
+Local acceptance: 833 unit/integration tests, 73 functional browser cases and two
+accessibility audits (sixteen states). See [`docs/M1_VALIDATION.md`](docs/M1_VALIDATION.md).
+The M1 exit gate requires green checks for the reviewed PR head; local results alone
+are not a remote acceptance claim. Review/merge remains a separate user action.
+Published for review in [PR #20](https://github.com/hugofamorim/pokelab/pull/20),
+targeting integrated `main` without pending dependencies.
+Next milestone: M2 guest Team Builder, after review of this M1 delivery.
 M2–M5 have not started.
 
 ## M0 — Foundation and external API (priority P0)

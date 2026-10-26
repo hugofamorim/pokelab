@@ -48,7 +48,10 @@ export function PokemonDetail({
       <div className="page-heading">
         <div>
           <span className="eyebrow">
-            <span className="tiny-spark">✦</span> UM MUNDO PARA DESCOBRIR
+            <span className="tiny-spark" aria-hidden="true">
+              ✦
+            </span>{' '}
+            UM MUNDO PARA DESCOBRIR
           </span>
           <h1>Todo Pokémon tem uma história.</h1>
           <p>O primeiro passo é conhecer seus detalhes.</p>
