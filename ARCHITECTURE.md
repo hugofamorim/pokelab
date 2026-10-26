@@ -448,3 +448,18 @@ are 502 without retry; transport/HTTP failures retain one bounded retry and 503 
 ## Architecture decision records to author
 
 ADR-001 Monorepo and independent NestJS API; ADR-002 guest-first and auth deferral; ADR-003 PokéAPI adapter and caching policy; ADR-004 ruleset pinning and scope limits; ADR-005 private-team authorization and share snapshots; ADR-006 error-handling and observability.
+
+## M1 acceptance tooling — PL-017
+
+The independent Playwright accessibility configuration reuses the same offline Nest fixture
+server and production Next build. Axe is a development-only pinned dependency; WCAG rules
+run without exclusions, incomplete findings remain in reports, and computed gradient
+contrast bounds complement the automated checks. Separate output preserves functional
+traces; the audit's 90s budget does not alter functional E2E's 180s limit or zero retries.
+CI must pass both commands. No live PokéAPI call is introduced into CI.
+
+The explicit `scripts/measure-cache.mjs` command uses three fixed local normalized API
+routes with one warm-up and twenty sequential samples each. It verifies fresh stable source
+metadata, rejects unavailable outcomes and reports P50/P95/max. It is not a production load
+test and does not measure deployed Core Web Vitals. See `docs/M1_VALIDATION.md` for scope,
+measurements, the cross-feature acceptance matrix and the retained fragment observation.
