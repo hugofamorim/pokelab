@@ -37,7 +37,7 @@ describe('single-type catalog navigation', () => {
     { type: 'grass', search: '' },
     { type: 'grass', search: '25' },
     { type: 'grass', page: '01' },
-    { type: 'grass', generation: '1' },
+    { type: 'grass', generation: '1', page: '1' },
   ])('rejects ambiguous or unsupported filters %j', (query) => {
     expect(parseCatalogQuery(query)).toEqual({ kind: 'invalid' });
   });
