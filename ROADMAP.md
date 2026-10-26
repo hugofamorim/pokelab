@@ -113,6 +113,8 @@ Local acceptance: 833 unit/integration tests, 73 functional browser cases and tw
 accessibility audits (sixteen states). See [`docs/M1_VALIDATION.md`](docs/M1_VALIDATION.md).
 The M1 exit gate requires green checks for the reviewed PR head; local results alone
 are not a remote acceptance claim. Review/merge remains a separate user action.
+Published for review in [PR #20](https://github.com/hugofamorim/pokelab/pull/20),
+targeting integrated `main` without pending dependencies.
 Next milestone: M2 guest Team Builder, after review of this M1 delivery.
 M2–M5 have not started.
 

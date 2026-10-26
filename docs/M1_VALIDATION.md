@@ -5,6 +5,9 @@ Audit: PL-017, branch `feat/pl-017-m1-acceptance`, based on integrated `main`
 (2026-10-26 UTC). Reviewed-head remote results belong to the pull request checks;
 local results alone do not close the milestone. No M2–M5 feature was started.
 
+Published in [PR #20](https://github.com/hugofamorim/pokelab/pull/20). Its checks record
+the remote result for the reviewed head; the PR description links the verified CI run.
+
 ## Acceptance matrix
 
 | M1 criterion                                                             | Evidence                                                                                      | Result                                      |
