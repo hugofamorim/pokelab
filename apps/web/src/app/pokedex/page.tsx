@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { BookOpen, Sparkles } from 'lucide-react';
+import { CombinedBrowse } from '../../components/combined-browse';
 import { CatalogGrid } from '../../components/catalog-grid';
 import { CatalogState } from '../../components/catalog-state';
 import { CatalogPagination } from '../../components/catalog-pagination';
@@ -34,6 +35,13 @@ async function Catalog({ searchParams }: { searchParams: Query }) {
       ) : query.kind === 'search' ? (
         <Suspense key={query.term} fallback={<SearchSkeleton />}>
           <CatalogSearchResult term={query.term} />
+        </Suspense>
+      ) : query.kind === 'combined' ? (
+        <Suspense
+          key={JSON.stringify(query.input)}
+          fallback={<CatalogSkeleton count={4} />}
+        >
+          <CombinedBrowse input={query.input} />
         </Suspense>
       ) : query.kind === 'generation' ? (
         <Suspense
@@ -103,12 +111,12 @@ function SearchSkeleton() {
     </div>
   );
 }
-function CatalogSkeleton() {
+function CatalogSkeleton({ count = 12 }: { count?: number }) {
   return (
     <div role="status" aria-label="Carregando catálogo">
       <p>Consultando o catálogo…</p>
       <div className="catalog-grid" aria-hidden="true">
-        {Array.from({ length: 12 }, (_, i) => (
+        {Array.from({ length: count }, (_, i) => (
           <div key={i} className="skeleton catalog-card-skeleton" />
         ))}
       </div>

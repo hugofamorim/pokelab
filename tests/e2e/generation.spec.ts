@@ -12,7 +12,7 @@ for (const width of [375, 768, 1280, 1600]) {
     page,
   }) => {
     await page.setViewportSize({ width, height: 1000 });
-    await page.goto('/pokedex?page=2&type=electric');
+    await page.goto('/pokedex?page=2');
     const generations = page.getByRole('navigation', {
       name: 'Gerações de Pokémon',
     });
@@ -109,7 +109,7 @@ test('generation, type and search replace modes and history restores the committ
     .getByRole('navigation', { name: 'Tipos de Pokémon' })
     .getByRole('link', { name: 'Planta', exact: true })
     .click();
-  await expect(page).toHaveURL(/page=1&type=grass$/);
+  await expect(page).toHaveURL(/type=grass&generation=1$/);
   await page.goBack();
   await expect(
     generations.getByRole('link', { name: 'Geração I', exact: true }),
@@ -191,7 +191,7 @@ test('handles empty, unavailable, loading and ambiguous generation queries', asy
     'generation=10',
     'generation=01',
     'generation=1&generation=2',
-    'generation=1&type=grass',
+    'generation=1&type=grass&page=1',
     'generation=1&search=25',
   ]) {
     await page.goto('/pokedex?' + query);

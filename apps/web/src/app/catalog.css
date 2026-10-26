@@ -474,3 +474,45 @@
     font-size: 14px;
   }
 }
+
+.combined-results {
+  min-width: 0;
+}
+.combined-sources,
+.combined-empty,
+.combined-unknown {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid var(--pl-border);
+  border-radius: var(--pl-radius-lg);
+  background: var(--pl-surface-warm);
+  overflow-wrap: anywhere;
+}
+.combined-sources summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: list-item;
+  align-content: center;
+  font-weight: 700;
+}
+.combined-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+}
+.combined-actions .button {
+  white-space: normal;
+  text-align: center;
+}
+.combined-unknown ul,
+.combined-sources ul {
+  padding-left: 20px;
+}
+
+.combined-freshness {
+  font-size: 12px;
+  padding: 0 8px;
+  color: var(--pl-body);
+}

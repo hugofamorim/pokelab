@@ -35,7 +35,7 @@ export function CatalogState({
         {kind === 'invalidSearch'
           ? 'Use um nome completo ou ID com até 64 caracteres, sem filtros ou paginação na mesma consulta.'
           : kind === 'invalid'
-            ? 'Use uma página de 1 a 1000 com um tipo ou geração de I a IX, ou busque por nome completo/ID separadamente.'
+            ? 'Use um tipo e/ou geração de I a IX. Consultas combinadas avançam por candidatos; páginas de 1 a 1000 servem para filtros individuais. Busque por nome/ID separadamente.'
             : kind === 'empty'
               ? 'Você chegou além das entradas disponíveis. Volte para continuar explorando.'
               : 'O serviço está indisponível no momento. Aguarde um pouco e tente novamente.'}

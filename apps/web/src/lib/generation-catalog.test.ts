@@ -89,7 +89,7 @@ describe('generation URL semantics', () => {
     { generation: '1\n' },
     { generation: ['1', '2'] },
     { generation: 'generation-i' },
-    { generation: '1', type: 'grass' },
+    { generation: '1', type: 'grass', page: '1' },
     { generation: '1', search: '' },
     { generation: '1', page: '01' },
     { generation: '1', pageSize: '12' },
@@ -104,7 +104,7 @@ describe('generation URL semantics', () => {
     for (const input of [
       { fromGeneration: 'https://evil.test', fromPage: '2' },
       { fromGeneration: ['1', '2'] },
-      { fromGeneration: '1', fromType: 'grass' },
+      { fromGeneration: '1', fromType: 'grass', fromPage: '1' },
       { fromGeneration: '1', fromSearch: '25' },
       { fromGeneration: '1', fromPage: '1001' },
     ])
