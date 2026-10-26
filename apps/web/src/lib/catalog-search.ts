@@ -7,17 +7,23 @@ import {
 import type { PokemonType } from '@pokelab/pokemon-domain';
 import { catalogHref, parseCatalogPage } from './catalog';
 import { generationHref } from './generation-catalog';
+import { combinedCatalogQuerySchema, combinedHref } from './combined-catalog';
+import type { CombinedCatalogInput } from './combined-catalog';
 
 const querySchema = z.strictObject({
   page: z.string().optional(),
   search: z.string().max(64).optional(),
   type: pokemonTypeSchema.optional(),
   generation: z.string().optional(),
+  after: z.string().optional(),
+  typeAt: z.string().optional(),
+  generationAt: z.string().optional(),
 });
 export type CatalogQuery =
   | { kind: 'browse'; page: number; type?: PokemonType }
   | { kind: 'search'; term: string }
   | { kind: 'generation'; page: number; generation: number }
+  | { kind: 'combined'; input: CombinedCatalogInput }
   | { kind: 'invalid' };
 export function parseCatalogSearchParams(
   params: Pick<URLSearchParams, 'keys' | 'getAll'>,
@@ -40,7 +46,27 @@ export function normalizeSearch(value: unknown): string | null {
 export function parseCatalogQuery(input: unknown): CatalogQuery {
   const parsed = querySchema.safeParse(input);
   if (!parsed.success) return { kind: 'invalid' };
-  const { page, search, type, generation } = parsed.data;
+  const { page, search, type, generation, after, typeAt, generationAt } =
+    parsed.data;
+  if (
+    type !== undefined &&
+    generation !== undefined &&
+    page === undefined &&
+    search === undefined
+  ) {
+    const result = combinedCatalogQuerySchema.safeParse({
+      type,
+      generation,
+      after,
+      typeAt,
+      generationAt,
+    });
+    return result.success
+      ? { kind: 'combined', input: result.data }
+      : { kind: 'invalid' };
+  }
+  if (after !== undefined || typeAt !== undefined || generationAt !== undefined)
+    return { kind: 'invalid' };
   if (search !== undefined) {
     if (page !== undefined || type !== undefined || generation !== undefined)
       return { kind: 'invalid' };
@@ -80,22 +106,32 @@ export function catalogReturnHref(
     return term &&
       input.fromPage === undefined &&
       input.fromType === undefined &&
-      input.fromGeneration === undefined
+      input.fromGeneration === undefined &&
+      input.fromAfter === undefined &&
+      input.fromTypeAt === undefined &&
+      input.fromGenerationAt === undefined
       ? searchHref(term)
       : catalogHref(1);
   }
   const query = parseCatalogQuery({
+    ...(input.fromAfter === undefined ? {} : { after: input.fromAfter }),
+    ...(input.fromTypeAt === undefined ? {} : { typeAt: input.fromTypeAt }),
+    ...(input.fromGenerationAt === undefined
+      ? {}
+      : { generationAt: input.fromGenerationAt }),
     ...(input.fromPage === undefined ? {} : { page: input.fromPage }),
     ...(input.fromType === undefined ? {} : { type: input.fromType }),
     ...(input.fromGeneration === undefined
       ? {}
       : { generation: input.fromGeneration }),
   });
-  return query.kind === 'generation'
-    ? generationHref(query.page, query.generation)
-    : query.kind === 'browse'
-      ? catalogHref(query.page, query.type)
-      : catalogHref(1);
+  return query.kind === 'combined'
+    ? combinedHref(query.input)
+    : query.kind === 'generation'
+      ? generationHref(query.page, query.generation)
+      : query.kind === 'browse'
+        ? catalogHref(query.page, query.type)
+        : catalogHref(1);
 }
 
 export function catalogEntryHref(id: number, returnHref: string): string {
@@ -105,7 +141,12 @@ export function catalogEntryHref(id: number, returnHref: string): string {
   const query = parseCatalogSearchParams(params);
   const origin = new URLSearchParams();
   if (query.kind === 'search') origin.set('fromSearch', query.term);
-  else {
+  else if (query.kind === 'combined') {
+    for (const [key, value] of Object.entries(query.input)) {
+      if (value !== undefined)
+        origin.set(`from${key[0]!.toUpperCase()}${key.slice(1)}`, value);
+    }
+  } else {
     origin.set(
       'fromPage',
       query.kind === 'browse' || query.kind === 'generation'

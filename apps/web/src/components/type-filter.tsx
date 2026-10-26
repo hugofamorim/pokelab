@@ -8,6 +8,8 @@ import type { CSSProperties } from 'react';
 import { useRef } from 'react';
 import { POKEMON_TYPES } from '@pokelab/pokemon-domain';
 import { parseCatalogSearchParams } from '../lib/catalog-search';
+import { combinedHref } from '../lib/combined-catalog';
+import { generationHref } from '../lib/generation-catalog';
 import { catalogHref } from '../lib/catalog';
 import { POKEMON_TYPE_TOKENS } from '../lib/type-tokens';
 
@@ -15,13 +17,24 @@ export function TypeFilter() {
   const params = useSearchParams();
   const optionsRef = useRef<HTMLElement>(null);
   const query = parseCatalogSearchParams(params);
-  const selected = query.kind === 'browse' ? query.type : undefined;
+  const selected =
+    query.kind === 'combined'
+      ? query.input.type
+      : query.kind === 'browse'
+        ? query.type
+        : undefined;
+  const generation =
+    query.kind === 'combined'
+      ? Number(query.input.generation)
+      : query.kind === 'generation'
+        ? query.generation
+        : undefined;
   useRevealSelection(optionsRef, selected);
   return (
     <section className="type-filter" aria-label="Filtro por tipo">
       <div className="type-filter-heading">
         <h2>Explore por tipo</h2>
-        <p>Escolha um tipo ou busque por nome/ID acima.</p>
+        <p>Combine um tipo com a geração de introdução da espécie.</p>
       </div>
       <nav
         ref={optionsRef}
@@ -30,10 +43,13 @@ export function TypeFilter() {
       >
         <Link
           className="type-filter-chip"
-          href="/pokedex"
+          href={generation ? generationHref(1, generation) : '/pokedex'}
           prefetch={false}
           aria-current={
-            query.kind === 'browse' && !selected ? 'true' : undefined
+            (query.kind === 'browse' || query.kind === 'generation') &&
+            !selected
+              ? 'true'
+              : undefined
           }
         >
           Todos
@@ -45,7 +61,11 @@ export function TypeFilter() {
             <Link
               key={type}
               className="type-filter-chip"
-              href={catalogHref(1, type)}
+              href={
+                generation
+                  ? combinedHref({ type, generation: String(generation) })
+                  : catalogHref(1, type)
+              }
               prefetch={false}
               aria-current={active ? 'true' : undefined}
               style={
